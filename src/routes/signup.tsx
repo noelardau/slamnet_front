@@ -1,7 +1,7 @@
 export default function SignupPage() {
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-md p-8">
+      <div className="w-full max-w-md p-20">
         <h1 
           className="text-center mb-8"
           style={{
