@@ -1,4 +1,26 @@
-export default function DashboardPage() {
+import { useAuth } from '../contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
+import { ProtectedRoute } from '../components/ProtectedRoute';
+
+function DashboardContent() {
+  const { user, loading, isAuthenticated, logout } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="animate-spin text-primary" size={48} />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <p className="text-muted-foreground">Chargement du profil...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="mb-12">
@@ -21,16 +43,19 @@ export default function DashboardPage() {
         >
           MON
           <br />
-          <span style={{ color: "#ff4d00" }}>COLLECTIF.</span>
+          <span style={{ color: "#ff4d00" }}>{user.nomCollectif.toUpperCase()}.</span>
         </h1>
+        <p className="mt-4 text-muted-foreground" style={{ fontSize: "1rem" }}>
+          {user.ville} • {user.email}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { label: "Membres", value: "12", color: "#ff4d00" },
-          { label: "Tournois", value: "23", color: "#f2ede6" },
-          { label: "Performances", value: "156", color: "#f2ede6" },
-          { label: "Prochains événements", value: "3", color: "#f2ede6" },
+          { label: "Membres", value: "0", color: "#ff4d00" },
+          { label: "Tournois", value: "0", color: "#f2ede6" },
+          { label: "Performances", value: "0", color: "#f2ede6" },
+          { label: "Prochains événements", value: "0", color: "#f2ede6" },
         ].map((stat) => (
           <div key={stat.label} className="border border-border p-6 bg-card">
             <div
@@ -79,33 +104,22 @@ export default function DashboardPage() {
             Tournois en cours
           </h2>
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <a
-                key={i}
-                href={`/tournois/${i}`}
-                className="block p-4 border border-border bg-background hover:border-primary/60 transition-all duration-300"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-foreground">Tournoi {i}</div>
-                    <div className="text-muted-foreground text-sm">Round 2 • 8 participants</div>
-                  </div>
-                  <div
-                    className="px-3 py-1 text-xs font-bold"
-                    style={{
-                      fontFamily: "JetBrains Mono, monospace",
-                      background: "#ff4d00",
-                      color: "#0c0a09",
-                    }}
-                  >
-                    EN COURS
-                  </div>
-                </div>
-              </a>
-            ))}
+            <div className="p-4 border border-border bg-background">
+              <div className="text-muted-foreground text-center py-8">
+                Aucun tournoi en cours
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   );
 }

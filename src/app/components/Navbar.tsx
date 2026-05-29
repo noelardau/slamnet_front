@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import { Menu, X, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    setOpen(false);
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/90 backdrop-blur-sm">
@@ -31,37 +38,72 @@ export function Navbar() {
           className="hidden md:flex items-center gap-8"
           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
         >
-          {[
-            { label: "FONCTIONNALITÉS", to: "/#features" },
-            { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-            { label: "COLLECTIFS", to: "/collectifs" },
-          ].map((link) => (
-            <Link
-              key={link.label}
-              to={link.to}
-              className="text-muted-foreground hover:text-foreground transition-colors duration-200"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {isAuthenticated ? (
+            <>
+              {[
+                { label: "FONCTIONNALITÉS", to: "/#features" },
+                { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
+                { label: "DASHBOARD", to: "/dashboard" },
+              ].map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.to}
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
+          ) : (
+            [
+              { label: "FONCTIONNALITÉS", to: "/#features" },
+              { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
+              { label: "COLLECTIFS", to: "/collectifs" },
+            ].map((link) => (
+              <Link
+                key={link.label}
+                to={link.to}
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+              >
+                {link.label}
+              </Link>
+            ))
+          )}
         </div>
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Link
-            to="/login"
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
-          >
-            Connexion
-          </Link>
-          <Link
-            to="/signup"
-            className="bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95"
-            style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.04em" }}
-          >
-            CRÉER UN COMPTE
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <span className="text-sm text-muted-foreground">
+                {user?.nomCollectif}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 border border-border hover:border-primary/60 transition-all duration-300 text-sm"
+              >
+                <LogOut size={16} />
+                Déconnexion
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="text-muted-foreground hover:text-foreground transition-colors"
+                style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
+              >
+                Connexion
+              </Link>
+              <Link
+                to="/signup"
+                className="bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95"
+                style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.04em" }}
+              >
+                CRÉER UN COMPTE
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -83,23 +125,52 @@ export function Navbar() {
                 exit={{ opacity: 0, height: 0 }}
                 className="md:hidden border-t border-border bg-background px-6 pb-6 flex flex-col gap-4 pt-4"
               >
-                {[
-                  { label: "FONCTIONNALITÉS", to: "/#features" },
-                  { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-                  { label: "COLLECTIFS", to: "/collectifs" },
-                ].map((link) => (
-                  <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
-                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                    {link.label}
-                  </Link>
-                ))}
-                <Link
-                  to="/signup"
-                  className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
-                  style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
-                >
-                  CRÉER UN COMPTE
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    {[
+                      { label: "FONCTIONNALITÉS", to: "/#features" },
+                      { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
+                      { label: "DASHBOARD", to: "/dashboard" },
+                    ].map((link) => (
+                      <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
+                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
+                        {link.label}
+                      </Link>
+                    ))}
+                    <div className="pt-4 border-t border-border flex items-center gap-3 text-muted-foreground py-1"
+                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
+                      <span>{user?.nomCollectif}</span>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 text-muted-foreground hover:text-foreground py-1"
+                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                    >
+                      <LogOut size={16} />
+                      Déconnexion
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {[
+                      { label: "FONCTIONNALITÉS", to: "/#features" },
+                      { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
+                      { label: "COLLECTIFS", to: "/collectifs" },
+                    ].map((link) => (
+                      <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
+                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
+                        {link.label}
+                      </Link>
+                    ))}
+                    <Link
+                      to="/signup"
+                      className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
+                      style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
+                    >
+                      CRÉER UN COMPTE
+                    </Link>
+                  </>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
