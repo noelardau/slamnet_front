@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
 export function CTA() {
@@ -54,14 +55,14 @@ export function CTA() {
           </p>
 
           <div className="mt-12 flex flex-wrap justify-center gap-4">
-            <a
-              href="#"
+            <Link
+              to="/signup"
               className="group flex items-center gap-3 bg-primary text-primary-foreground px-10 py-5 hover:bg-primary/90 transition-all duration-200 hover:gap-5"
               style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.06em", fontSize: "0.875rem" }}
             >
               CRÉER MON COMPTE GRATUIT
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </a>
+            </Link>
           </div>
 
           <p

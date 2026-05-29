@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { ArrowRight, Mic } from "lucide-react";
 
 export function Hero() {
@@ -94,21 +95,21 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.45 }}
             className="mt-10 flex flex-wrap gap-4"
           >
-            <a
-              href="#"
+            <Link
+              to="/signup"
               className="group flex items-center gap-3 bg-primary text-primary-foreground px-8 py-4 hover:bg-primary/90 transition-all duration-200 hover:gap-4"
               style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.06em", fontSize: "0.875rem" }}
             >
               CRÉER MON COLLECTIF
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              to="/collectifs"
               className="flex items-center gap-3 border border-border text-foreground px-8 py-4 hover:border-foreground/30 transition-all duration-200"
               style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 500, fontSize: "0.875rem" }}
             >
               VOIR UNE DÉMO
-            </a>
+            </Link>
           </motion.div>
 
           <motion.div
