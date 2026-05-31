@@ -75,7 +75,6 @@ class AuthService {
     } finally {
       apiService.clearToken();
       localStorage.removeItem('user');
-      window.location.href = '/login';
     }
   }
 

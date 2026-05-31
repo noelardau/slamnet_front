@@ -39,7 +39,6 @@ class ApiService {
     if (response.status === 401) {
       this.clearToken();
       localStorage.removeItem('user');
-      window.location.href = '/login';
       throw new Error('Session expirée');
     }
 
@@ -67,6 +66,10 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(data),
     });
+  }
+
+  async delete<T>(endpoint: string): Promise<T> {
+    return this.request<T>(endpoint, { method: 'DELETE' });
   }
 
   async delete<T>(endpoint: string): Promise<T> {
