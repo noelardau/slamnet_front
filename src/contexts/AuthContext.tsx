@@ -29,21 +29,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const currentUser = authService.getCurrentUser();
         if (currentUser) {
           setUser(currentUser);
+          try {
+            const profile = await authService.getProfile();
+            setUser(profile);
+          } catch (profileError) {
+            console.error('Erreur lors de la récupération du profil depuis l\'API:', profileError);
+          }
         } else {
-          const profile = await authService.getProfile();
-          setUser(profile);
+          try {
+            const profile = await authService.getProfile();
+            setUser(profile);
+          } catch (error) {
+            console.error('Erreur lors du chargement de l\'utilisateur:', error);
+            authService.logout();
+          }
         }
+      } else {
+        setUser(null);
       }
     } catch (error) {
       console.error('Erreur lors du chargement de l\'utilisateur:', error);
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
   const login = async (email: string, password: string) => {
-    const response = await authService.login(email, password);
-    setUser(response.collectif);
+    setLoading(true);
+    try {
+      const response = await authService.login(email, password);
+      setUser(response.collectif);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {

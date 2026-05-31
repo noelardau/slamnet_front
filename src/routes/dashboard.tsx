@@ -1,22 +1,32 @@
 import { useAuth } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
+import { useEffect } from 'react';
 
 function DashboardContent() {
-  const { user, loading, isAuthenticated, logout } = useAuth();
+  const { user, loading, isAuthenticated, logout, refreshProfile } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && !user) {
+      refreshProfile();
+    }
+  }, [isAuthenticated, user, refreshProfile]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="animate-spin text-primary" size={48} />
+        <div className="text-center">
+          <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
+          <p className="text-muted-foreground">Chargement du profil...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Chargement du profil...</p>
+        <p className="text-muted-foreground">Vous devez être connecté pour accéder à cette page</p>
       </div>
     );
   }
@@ -41,8 +51,6 @@ function DashboardContent() {
             color: "#f2ede6",
           }}
         >
-          MON
-          <br />
           <span style={{ color: "#ff4d00" }}>{user.nomCollectif.toUpperCase()}.</span>
         </h1>
         <p className="mt-4 text-muted-foreground" style={{ fontSize: "1rem" }}>
