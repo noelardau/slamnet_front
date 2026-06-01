@@ -6,6 +6,7 @@ import { useCollectifStore } from "../../stores/collectifStore";
 import { Menu, X, LogOut, Loader2, User, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
+import { ThemeToggle } from "../../components/ThemeToggle";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -114,6 +115,7 @@ export function Navbar() {
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeToggle />
             {isAuthenticated ? (
               <div className="relative">
                 <button
@@ -231,12 +233,15 @@ export function Navbar() {
                       </Link>
                     );
                   })}
-                  <div className="pt-4 border-t border-border">
-                    <div className="flex items-center gap-3 text-muted-foreground mb-4 py-1"
-                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                      <User size={16} />
-                      <span>{profile?.nomCollectif}</span>
-                    </div>
+                   <div className="pt-4 border-t border-border">
+                     <div className="flex items-center justify-between mb-4 py-1">
+                       <div className="flex items-center gap-3 text-muted-foreground"
+                         style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
+                         <User size={16} />
+                         <span>{profile?.nomCollectif}</span>
+                       </div>
+                       <ThemeToggle />
+                     </div>
                     <Link
                       to="/profile"
                       className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
