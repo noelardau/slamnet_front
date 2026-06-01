@@ -10,6 +10,7 @@ import MembresPage from './membres';
 import ProfilePage from './profile';
 import TournoisPage from './tournois';
 import TournoiDetailPage from './tournois.$id';
+import TournoiGestionPage from './tournoi-gestion.$id';
 import PrivacyPage from './privacy';
 import TermsPage from './terms';
 import ContactPage from './contact';
@@ -29,6 +30,7 @@ export const routes: RouteObject[] = [
       { path: 'profile', element: <ProfilePage /> },
       { path: 'tournois', element: <TournoisPage /> },
       { path: 'tournois/:id', element: <TournoiDetailPage /> },
+      { path: 'tournoi-gestion/:id', element: <TournoiGestionPage /> },
       { path: 'privacy', element: <PrivacyPage /> },
       { path: 'terms', element: <TermsPage /> },
       { path: 'contact', element: <ContactPage /> },

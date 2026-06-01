@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { useTournoiStore } from '../stores/tournoiStore';
@@ -21,6 +22,7 @@ function TournoisContent() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [tournoiToDelete, setTournoiToDelete] = useState<Tournoi | null>(null);
   const [tournoiToUpdate, setTournoiToUpdate] = useState<Tournoi | null>(null);
+  const navigate = useNavigate();
 
   const handleCreateTournoi = async (data: CreateTournoiData) => {
     try {
@@ -221,8 +223,11 @@ function TournoisContent() {
                     </div>
                   </div>
 
-                  <button className="w-full px-4 py-3 border border-border hover:border-primary/60 hover:bg-primary/10 transition-all duration-300 font-medium text-sm">
-                    Voir les détails
+                  <button 
+                    onClick={() => navigate(`/tournoi-gestion/${tournoi.idTournoi}`)}
+                    className="w-full px-4 py-3 border border-border hover:border-primary/60 hover:bg-primary/10 transition-all duration-300 font-medium text-sm"
+                  >
+                    Gérer le tournoi
                   </button>
                 </div>
               </div>
