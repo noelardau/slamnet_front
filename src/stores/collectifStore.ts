@@ -32,6 +32,7 @@ export const useCollectifStore = create<CollectifStore>((set) => ({
       set({ isLoading: true, error: null });
       const updatedProfile = await authService.updateProfile(data);
       set({ profile: updatedProfile, isLoading: false });
+      localStorage.setItem('user', JSON.stringify(updatedProfile));
       return updatedProfile;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la mise à jour du profil';

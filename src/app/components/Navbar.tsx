@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useCollectifStore } from "../../stores/collectifStore";
-import { Menu, X, LogOut, Loader2 } from "lucide-react";
+import { Menu, X, LogOut, Loader2, User, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 
@@ -11,10 +11,10 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const { profile } = useCollectifStore();
   const navigate = useNavigate();
-  const location = useLocation();
   const { showSuccess, showError } = useToast();
 
   const handleLogoutClick = () => {
@@ -71,7 +71,7 @@ export function Navbar() {
               {[
                 { label: "DASHBOARD", to: "/dashboard" },
                 { label: "MEMBRES", to: "/membres" },
-                { label: "TOURNOIS", to: "/tournois" },
+                { label: "TOURNOIS", to: "/tournois" }
               ].map((link) => {
                 const isActive = location.pathname === link.to;
                 return (
@@ -115,28 +115,52 @@ export function Navbar() {
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
-              <>
-                <span className="text-sm text-muted-foreground">
-                  {profile?.nomCollectif}
-                </span>
+              <div className="relative">
                 <button
-                  onClick={handleLogoutClick}
-                  disabled={isLoggingOut}
-                  className="flex items-center gap-2 px-4 py-2 border border-border hover:border-primary/60 transition-all duration-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 px-3 py-2 border border-border hover:border-primary/60 transition-all duration-300"
                 >
-                  {isLoggingOut ? (
-                    <>
-                      <Loader2 className="animate-spin" size={16} />
-                      Déconnexion...
-                    </>
-                  ) : (
-                    <>
-                      <LogOut size={16} />
-                      Déconnexion
-                    </>
-                  )}
+                  <User size={16} />
+                  <span className="text-sm">
+                    {profile?.nomCollectif?.substring(0, 12) || 'Profil'}
+                    {profile?.nomCollectif && profile.nomCollectif.length > 12 ? '...' : ''}
+                  </span>
+                  <ChevronDown size={14} className={`transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} />
                 </button>
-              </>
+
+                <AnimatePresence>
+                  {showProfileMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 top-full mt-2 w-48 bg-card border border-border shadow-xl z-50"
+                    >
+                      <div className="py-2">
+                        <Link
+                          to="/profile"
+                          className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                          onClick={() => setShowProfileMenu(false)}
+                        >
+                          <User size={16} />
+                          <span className="text-sm">Mon profil</span>
+                        </Link>
+                        <button
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            handleLogoutClick();
+                          }}
+                          disabled={isLoggingOut}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                        >
+                          <LogOut size={16} />
+                          <span className="text-sm">Déconnexion</span>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <>
                 <Link
@@ -182,6 +206,7 @@ export function Navbar() {
                     { label: "DASHBOARD", to: "/dashboard" },
                     { label: "MEMBRES", to: "/membres" },
                     { label: "TOURNOIS", to: "/tournois" },
+                    { label: "PROFIL", to: "/profile" },
                   ].map((link) => {
                     const isActive = location.pathname === link.to;
                     return (
@@ -206,28 +231,42 @@ export function Navbar() {
                       </Link>
                     );
                   })}
-                  <div className="pt-4 border-t border-border flex items-center gap-3 text-muted-foreground py-1"
-                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                    <span>{profile?.nomCollectif}</span>
+                  <div className="pt-4 border-t border-border">
+                    <div className="flex items-center gap-3 text-muted-foreground mb-4 py-1"
+                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
+                      <User size={16} />
+                      <span>{profile?.nomCollectif}</span>
+                    </div>
+                    <Link
+                      to="/profile"
+                      className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                      onClick={() => setOpen(false)}
+                    >
+                      <User size={16} />
+                      <span className="text-sm">Mon profil</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        handleLogoutClick();
+                      }}
+                      disabled={isLoggingOut}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                    >
+                      {isLoggingOut ? (
+                        <>
+                          <Loader2 className="animate-spin" size={16} />
+                          Déconnexion...
+                        </>
+                      ) : (
+                        <>
+                          <LogOut size={16} />
+                          Déconnexion
+                        </>
+                      )}
+                    </button>
                   </div>
-                  <button
-                    onClick={handleLogoutClick}
-                    disabled={isLoggingOut}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground py-1 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-                  >
-                    {isLoggingOut ? (
-                      <>
-                        <Loader2 className="animate-spin" size={16} />
-                        Déconnexion...
-                      </>
-                    ) : (
-                      <>
-                        <LogOut size={16} />
-                        Déconnexion
-                      </>
-                    )}
-                  </button>
                 </>
               ) : (
                 <>
