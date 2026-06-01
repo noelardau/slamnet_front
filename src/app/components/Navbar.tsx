@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
+import { useCollectifStore } from "../../stores/collectifStore";
 import { Menu, X, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -10,8 +11,10 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
+  const { profile } = useCollectifStore();
   const navigate = useNavigate();
+  const location = useLocation();
   const { showSuccess, showError } = useToast();
 
   const handleLogoutClick = () => {
@@ -69,15 +72,28 @@ export function Navbar() {
                 { label: "DASHBOARD", to: "/dashboard" },
                 { label: "MEMBRES", to: "/membres" },
                 { label: "TOURNOIS", to: "/tournois" },
-              ].map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  className="text-muted-foreground hover:text-foreground transition-colors duration-200"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              ].map((link) => {
+                const isActive = location.pathname === link.to;
+                return (
+                  <Link
+                    key={link.label}
+                    to={link.to}
+                    className={`relative text-muted-foreground hover:text-foreground transition-colors duration-200 ${
+                      isActive ? 'text-foreground' : ''
+                    }`}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <motion.div
+                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                        layoutId="activeLink"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </Link>
+                );
+              })}
             </>
           ) : (
             [
@@ -101,7 +117,7 @@ export function Navbar() {
             {isAuthenticated ? (
               <>
                 <span className="text-sm text-muted-foreground">
-                  {user?.nomCollectif}
+                  {profile?.nomCollectif}
                 </span>
                 <button
                   onClick={handleLogoutClick}
@@ -166,15 +182,33 @@ export function Navbar() {
                     { label: "DASHBOARD", to: "/dashboard" },
                     { label: "MEMBRES", to: "/membres" },
                     { label: "TOURNOIS", to: "/tournois" },
-                  ].map((link) => (
-                    <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
-                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                      {link.label}
-                    </Link>
-                  ))}
+                  ].map((link) => {
+                    const isActive = location.pathname === link.to;
+                    return (
+                      <Link 
+                        key={link.label} 
+                        to={link.to} 
+                        className={`relative py-1 ${
+                          isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                        onClick={() => setOpen(false)}
+                      >
+                        {link.label}
+                        {isActive && (
+                          <motion.div
+                            className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                            layoutId="activeLinkMobile"
+                            initial={false}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                          />
+                        )}
+                      </Link>
+                    );
+                  })}
                   <div className="pt-4 border-t border-border flex items-center gap-3 text-muted-foreground py-1"
                     style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                    <span>{user?.nomCollectif}</span>
+                    <span>{profile?.nomCollectif}</span>
                   </div>
                   <button
                     onClick={handleLogoutClick}

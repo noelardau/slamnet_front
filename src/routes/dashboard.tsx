@@ -2,17 +2,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useMembreStore } from '../stores/membreStore';
+import { useCollectifStore } from '../stores/collectifStore';
 import { useEffect } from 'react';
 
 function DashboardContent() {
-  const { user, loading, isAuthenticated, logout, refreshProfile } = useAuth();
+  const { loading, isAuthenticated } = useAuth();
   const { membres } = useMembreStore();
+  const { profile } = useCollectifStore();
 
   useEffect(() => {
-    if (isAuthenticated && !user) {
-      refreshProfile();
+    if (isAuthenticated && !profile) {
+      return;
     }
-  }, [isAuthenticated, user, refreshProfile]);
+  }, [isAuthenticated, profile]);
 
   if (loading) {
     return (
@@ -25,7 +27,7 @@ function DashboardContent() {
     );
   }
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated || !profile) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p className="text-muted-foreground">Vous devez être connecté pour accéder à cette page</p>
@@ -53,10 +55,10 @@ function DashboardContent() {
             color: "#f2ede6",
           }}
         >
-          <span style={{ color: "#ff4d00" }}>{user.nomCollectif.toUpperCase()}.</span>
+          <span style={{ color: "#ff4d00" }}>{profile.nomCollectif.toUpperCase()}.</span>
         </h1>
         <p className="mt-4 text-muted-foreground" style={{ fontSize: "1rem" }}>
-          {user.ville} • {user.email}
+          {profile.ville} • {profile.email}
         </p>
       </div>
 

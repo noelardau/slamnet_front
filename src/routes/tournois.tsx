@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { useTournoiStore } from '../stores/tournoiStore';
+import { useCollectifStore } from '../stores/collectifStore';
 import { Tournoi, CreateTournoiData, UpdateTournoiData } from '../services/tournoiService';
 import { Loader2, Plus, Calendar, MapPin, Clock, Users, Trophy, Trash2, Edit } from 'lucide-react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
@@ -10,21 +11,16 @@ import { CreateTournoiDialog } from '../components/CreateTournoiDialog';
 import { UpdateTournoiDialog } from '../components/UpdateTournoiDialog';
 
 function TournoisContent() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
   const { tournois, isLoading, createTournoi, updateTournoi, deleteTournoi } = useTournoiStore();
+  const { profile, isLoading: isProfileLoading } = useCollectifStore();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [tournoiToDelete, setTournoiToDelete] = useState<Tournoi | null>(null);
   const [tournoiToUpdate, setTournoiToUpdate] = useState<Tournoi | null>(null);
-
-  useEffect(() => {
-    if (isAuthenticated && !user) {
-      return;
-    }
-  }, [isAuthenticated, user]);
 
   const handleCreateTournoi = async (data: CreateTournoiData) => {
     try {
@@ -90,7 +86,7 @@ function TournoisContent() {
     });
   };
 
-  if (loading || isLoading) {
+  if (!isAuthenticated || isProfileLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -101,7 +97,7 @@ function TournoisContent() {
     );
   }
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p className="text-muted-foreground">Vous devez être connecté pour accéder à cette page</p>
@@ -110,10 +106,10 @@ function TournoisContent() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="mb-12 flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-6">
+    <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
             <span className="w-8 h-px bg-primary" />
             <span
               className="text-primary"
@@ -122,27 +118,27 @@ function TournoisContent() {
               TOURNOIS
             </span>
           </div>
-          <h1
-            style={{
-              fontFamily: "Anton, sans-serif",
-              fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
-              lineHeight: 0.95,
-              color: "#f2ede6",
-            }}
+          <button
+            onClick={() => setShowCreateDialog(true)}
+            className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
           >
-            MES
-            <br />
-            <span style={{ color: "#ff4d00" }}>TOURNOIS.</span>
-          </h1>
+            <Plus size={16} />
+            Ajouter un tournoi
+          </button>
         </div>
-        <button
-          onClick={() => setShowCreateDialog(true)}
-          className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider"
-          style={{ letterSpacing: "0.06em" }}
+        <h1
+          style={{
+            fontFamily: "Anton, sans-serif",
+            fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
+            lineHeight: 0.95,
+            color: "#f2ede6",
+          }}
         >
-          <Plus size={20} />
-          Nouveau tournoi
-        </button>
+          <span style={{ color: "#ff4d00" }}>NOS TOURNOIS.</span>
+        </h1>
+        <p className="mt-4 text-muted-foreground" style={{ fontSize: "1rem" }}>
+          Gérez les tournois de votre collectif
+        </p>
       </div>
 
       {tournois.length === 0 ? (

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { useMembreStore } from '../stores/membreStore';
+import { useCollectifStore } from '../stores/collectifStore';
 import { CreateMembreDialog } from '../components/CreateMembreDialog';
 import { UpdateMembreDialog } from '../components/UpdateMembreDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -10,21 +11,16 @@ import { Plus, Search, Edit2, Trash2, User, Loader2, Calendar, MapPin, AtSign } 
 import { ImageWithFallback } from '../app/components/figma/ImageWithFallback';
 
 function MembresContent() {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
   const { membres, isLoading, error, createMembre, updateMembre, deleteMembre, refreshMembres } = useMembreStore();
+  const { profile, isLoading: isProfileLoading } = useCollectifStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedMembreId, setSelectedMembreId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated && !user) {
-      return;
-    }
-  }, [isAuthenticated, user]);
 
   const filteredMembres = membres.filter(
     (membre) =>
@@ -70,7 +66,7 @@ function MembresContent() {
     });
   };
 
-  if (loading) {
+  if (!isAuthenticated || isProfileLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
@@ -81,7 +77,7 @@ function MembresContent() {
     );
   }
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <p className="text-muted-foreground">Vous devez être connecté pour accéder à cette page</p>

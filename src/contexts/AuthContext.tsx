@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { authService, CollectifProfile, LoginData, RegisterData, UpdateProfileData } from '../services/authService';
 import { useMembreStore } from '../stores/membreStore';
 import { useTournoiStore } from '../stores/tournoiStore';
+import { useCollectifStore } from '../stores/collectifStore';
 
 interface AuthContextType {
   user: CollectifProfile | null;
@@ -37,10 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             const membreStore = useMembreStore.getState();
             const tournoiStore = useTournoiStore.getState();
+            const collectifStore = useCollectifStore.getState();
             
             await Promise.all([
               membreStore.hydrateMembres(),
               tournoiStore.hydrateTournois(),
+              collectifStore.hydrateProfile(),
             ]);
           } catch (profileError) {
             console.error('Erreur lors de la récupération du profil depuis l\'API:', profileError);
@@ -52,10 +55,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             const membreStore = useMembreStore.getState();
             const tournoiStore = useTournoiStore.getState();
+            const collectifStore = useCollectifStore.getState();
             
             await Promise.all([
               membreStore.hydrateMembres(),
               tournoiStore.hydrateTournois(),
+              collectifStore.hydrateProfile(),
             ]);
           } catch (error) {
             console.error('Erreur lors du chargement de l\'utilisateur:', error);
@@ -81,10 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       const membreStore = useMembreStore.getState();
       const tournoiStore = useTournoiStore.getState();
+      const collectifStore = useCollectifStore.getState();
       
       await Promise.all([
         membreStore.hydrateMembres(),
         tournoiStore.hydrateTournois(),
+        collectifStore.hydrateProfile(),
       ]);
     } finally {
       setLoading(false);
@@ -97,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     useMembreStore.getState().membres = [];
     useTournoiStore.getState().tournois = [];
+    useCollectifStore.getState().clearProfile();
   };
 
   const refreshProfile = async () => {
