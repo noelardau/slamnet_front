@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { membreService, Membre, UpdateMembreData } from '../services/membreService';
 import { useMembreStore } from '../stores/membreStore';
-import { Edit2, X, Loader2 } from 'lucide-react';
+import { Edit2, X, Loader2, Camera } from 'lucide-react';
 
 interface UpdateMembreDialogProps {
   isOpen: boolean;
@@ -14,9 +14,12 @@ interface UpdateMembreDialogProps {
 export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated }: UpdateMembreDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { showSuccess, showError } = useToast();
   const { updateMembre } = useMembreStore();
   const [membre, setMembre] = useState<Membre | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<UpdateMembreData>({
     nomMembre: '',
     prenomMembre: '',
@@ -49,6 +52,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
         adresse: membreData.adresse,
         photoMembre: membreData.photoMembre || '',
       });
+      setPreviewUrl(membreData.photoMembre || null);
     } catch (error) {
       console.error('Erreur lors du chargement du membre:', error);
       showError('Erreur lors du chargement du membre');
@@ -56,6 +60,46 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_BASE_URL}/collectif/membre/${membreId}/photo`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur lors de l\'upload');
+      }
+
+      const data = await response.json();
+      setFormData({ ...formData, photoMembre: data.url });
+      setPreviewUrl(data.url);
+      showSuccess('Photo uploadée avec succès');
+    } catch (error) {
+      console.error('Erreur upload:', error);
+      showError('Erreur lors de l\'upload de la photo');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,6 +156,28 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
           <>
             <div className="p-6 overflow-y-auto flex-1">
               <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="flex justify-center mb-6">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden bg-border flex items-center justify-center cursor-pointer hover:border-primary/60 transition-all duration-300 border-2 border-dashed" onClick={handleAvatarClick}>
+                    {isUploading ? (
+                      <Loader2 className="animate-spin text-primary" size={32} />
+                    ) : previewUrl ? (
+                      <img src={previewUrl} alt="Prévisualisation" className="w-full h-full object-cover" />
+                    ) : (
+                      <>
+                        <Camera className="text-muted-foreground" size={32} />
+                        <span className="absolute bottom-0 text-xs text-muted-foreground">Ajouter</span>
+                      </>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">Nom</label>
@@ -178,18 +244,6 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                     onChange={(e) => setFormData({ ...formData, adresse: e.target.value })}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     disabled={isSubmitting}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">URL de la photo (optionnel)</label>
-                  <input
-                    type="url"
-                    value={formData.photoMembre}
-                    onChange={(e) => setFormData({ ...formData, photoMembre: e.target.value })}
-                    className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    disabled={isSubmitting}
-                    placeholder="https://..."
                   />
                 </div>
               </form>
