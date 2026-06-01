@@ -4,6 +4,8 @@ export interface Membre {
   idMembre: number;
   nomMembre: string;
   prenomMembre: string;
+  pseudoMembre: string;
+  emailMembre: string;
   photoMembre?: string;
   dateNaissance: string;
   adresse: string;
@@ -14,6 +16,8 @@ export interface Membre {
 export interface CreateMembreData {
   nomMembre: string;
   prenomMembre: string;
+  pseudoMembre: string;
+  emailMembre: string;
   photoMembre?: string;
   dateNaissance: string;
   adresse: string;
@@ -22,6 +26,8 @@ export interface CreateMembreData {
 export interface UpdateMembreData {
   nomMembre?: string;
   prenomMembre?: string;
+  pseudoMembre?: string;
+  emailMembre?: string;
   photoMembre?: string;
   dateNaissance?: string;
   adresse?: string;

@@ -6,7 +6,7 @@ import { membreService, Membre } from '../services/membreService';
 import { CreateMembreDialog } from '../components/CreateMembreDialog';
 import { UpdateMembreDialog } from '../components/UpdateMembreDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
-import { Plus, Search, Edit2, Trash2, User, Loader2, Calendar, MapPin } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, User, Loader2, Calendar, MapPin, AtSign } from 'lucide-react';
 import { ImageWithFallback } from '../app/components/figma/ImageWithFallback';
 
 function MembresContent() {
@@ -47,7 +47,9 @@ function MembresContent() {
   const filteredMembres = membres.filter(
     (membre) =>
       membre.nomMembre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      membre.prenomMembre.toLowerCase().includes(searchQuery.toLowerCase())
+      membre.prenomMembre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      membre.pseudoMembre.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      membre.emailMembre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleUpdateClick = (membreId: number) => {
@@ -199,6 +201,7 @@ function MembresContent() {
                     >
                       {membre.prenomMembre} {membre.nomMembre.toUpperCase()}
                     </h3>
+                    <p className="text-primary text-sm mt-1">@{membre.pseudoMembre}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -220,6 +223,10 @@ function MembresContent() {
               </div>
 
               <div className="space-y-3">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <AtSign size={16} />
+                  <span>{membre.emailMembre}</span>
+                </div>
                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <Calendar size={16} />
                   <span>Né(e) le {formatDate(membre.dateNaissance)}</span>
