@@ -2,30 +2,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useMembreStore } from '../stores/membreStore';
+import { useTournoiStore } from '../stores/tournoiStore';
 import { useCollectifStore } from '../stores/collectifStore';
-import { useEffect } from 'react';
 
 function DashboardContent() {
   const { loading, isAuthenticated } = useAuth();
   const { membres } = useMembreStore();
+  const { tournois } = useTournoiStore();
   const { profile } = useCollectifStore();
-
-  useEffect(() => {
-    if (isAuthenticated && !profile) {
-      return;
-    }
-  }, [isAuthenticated, profile]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
-          <p className="text-muted-foreground">Chargement du profil...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!isAuthenticated || !profile) {
     return (
@@ -62,12 +46,11 @@ function DashboardContent() {
         </p>
       </div>
 
-       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {[
           { label: "Membres", value: membres.length.toString(), color: "#ff4d00" },
-          { label: "Tournois", value: "0", color: "#f2ede6" },
+          { label: "Tournois", value: tournois.length.toString(), color: "#f2ede6" },
           { label: "Performances", value: "0", color: "#f2ede6" },
-          { label: "Prochains événements", value: "0", color: "#f2ede6" },
         ].map((stat) => (
           <div key={stat.label} className="border border-border p-6 bg-card">
             <div
