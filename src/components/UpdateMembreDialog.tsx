@@ -87,8 +87,20 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
       }
 
       const data = await response.json();
-      setFormData({ ...formData, photoMembre: data.url });
+      
+      setFormData(prev => ({ ...prev, photoMembre: data.url }));
       setPreviewUrl(data.url);
+      
+      if (data.membre) {
+        const updatedMembre = data.membre;
+        setMembre(updatedMembre);
+        
+        const store = useMembreStore.getState();
+        store.updateMembre(membreId, {
+          photoMembre: data.url,
+        });
+      }
+      
       showSuccess('Photo uploadée avec succès');
     } catch (error) {
       console.error('Erreur upload:', error);
