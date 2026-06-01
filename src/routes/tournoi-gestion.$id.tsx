@@ -155,32 +155,8 @@ export default function TournoiGestionLayout() {
             </aside>
           )}
 
-          <main className="flex-1 mt-[-150px]">
-            <div className="mb-6 p-6 bg-card border border-border">
-              <h3 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem" }}>
-                Informations du tournoi
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div>
-                  <div className="text-muted-foreground text-sm mb-1">Date</div>
-                  <div className="text-foreground font-medium">{formatDate(tournoi.dateTournoi)}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground text-sm mb-1">Heure</div>
-                  <div className="text-foreground font-medium">{tournoi.heureTournoi}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground text-sm mb-1">Lieu</div>
-                  <div className="text-foreground font-medium">{tournoi.LieuTournoi}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground text-sm mb-1">Jurés</div>
-                  <div className="text-foreground font-medium">{tournoi.nbJury} juré{tournoi.nbJury > 1 ? 's' : ''}</div>
-                </div>
-              </div>
-            </div>
-
-            <Outlet context={{ tournoi }} />
+          <main className="flex-1">
+               <Outlet context={{ tournoi }} />
           </main>
         </div>
       </div>
