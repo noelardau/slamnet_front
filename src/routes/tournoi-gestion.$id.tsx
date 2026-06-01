@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTournoiStore } from '../stores/tournoiStore';
 import { useEffect,useState } from 'react';
-import { Loader2, Users, Mic, Trophy, ArrowLeft, Plus, User, Trash2, Medal, Award } from 'lucide-react';
+import { Loader2, Users, Mic, Trophy, ArrowLeft, Plus, User, Trash2, Medal, Award, Menu, X } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
 export default function TournoiGestionPage() {
@@ -14,20 +14,21 @@ export default function TournoiGestionPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [participantToDelete, setParticipantToDelete] = useState<any>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [participants, setParticipants] = useState<any[]>([
-    { id: 1, nom: 'Koumba Diop', pseudo: 'K. D.', collectif: 'Parole Libre', statut: 'inscrit' },
-    { id: 2, nom: 'Lucas Martin', pseudo: 'L. M.', collectif: 'Le Verbe Urbain', statut: 'inscrit' },
-    { id: 3, nom: 'Amélie Rousseau', pseudo: 'A. R.', collectif: 'Invité', statut: 'invité' },
+    { id: 1, nom: 'Koumba Diop', pseudo: 'K. D.', collectif: 'Parole Libre', statut: 'inscrit', photo: 'https://images.unsplash.com/photo-1535713875002-b1e0f1b4a991?w=150&h=150&fit=crop' },
+    { id: 2, nom: 'Lucas Martin', pseudo: 'L. M.', collectif: 'Le Verbe Urbain', statut: 'inscrit', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2?w=150&h=150&fit=crop' },
+    { id: 3, nom: 'Amélie Rousseau', pseudo: 'A. R.', collectif: 'Invité', statut: 'invité', photo: 'https://images.unsplash.com/photo-1494790108377-e9e69c862f4?w=150&h=150&fit=crop' },
   ]);
   const [performances, setPerformances] = useState<any[]>([
-    { id: 1, participant: 'Koumba Diop', round: 1, ordre: 1, statut: 'terminé' },
-    { id: 2, participant: 'Lucas Martin', round: 1, ordre: 2, statut: 'en_cours' },
-    { id: 3, participant: 'Amélie Rousseau', round: 1, ordre: 3, statut: 'à_venir' },
+    { id: 1, participant: 'Koumba Diop', round: 1, ordre: 1, statut: 'terminé', photo: 'https://images.unsplash.com/photo-1535713875002-b1e0f1b4a991?w=150&h=150&fit=crop' },
+    { id: 2, participant: 'Lucas Martin', round: 1, ordre: 2, statut: 'en_cours', photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2?w=150&h=150&fit=crop' },
+    { id: 3, participant: 'Amélie Rousseau', round: 1, ordre: 3, statut: 'à_venir', photo: 'https://images.unsplash.com/photo-1494790108377-e9e69c862f4?w=150&h=150&fit=crop' },
   ]);
   const [classement, setClassement] = useState<any[]>([
-    { id: 1, nom: 'Koumba Diop', pseudo: 'K. D.', total: 27.6, round1: 9.2, round2: 9.4, round3: 9.0 },
-    { id: 2, nom: 'Lucas Martin', pseudo: 'L. M.', total: 25.8, round1: 8.8, round2: 8.5, round3: 8.5 },
-    { id: 3, nom: 'Amélie Rousseau', pseudo: 'A. R.', total: 24.3, round1: 8.1, round2: 8.2, round3: 8.0 },
+    { id: 1, nom: 'Koumba Diop', pseudo: 'K. D.', total: 27.6, round1: 9.2, round2: 9.4, round3: 9.0, photo: 'https://images.unsplash.com/photo-1535713875002-b1e0f1b4a991?w=150&h=150&fit=crop' },
+    { id: 2, nom: 'Lucas Martin', pseudo: 'L. M.', total: 25.8, round1: 8.8, round2: 8.5, round3: 8.5, photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2?w=150&h=150&fit=crop' },
+    { id: 3, nom: 'Amélie Rousseau', pseudo: 'A. R.', total: 24.3, round1: 8.1, round2: 8.2, round3: 8.0, photo: 'https://images.unsplash.com/photo-1494790108377-e9e69c862f4?w=150&h=150&fit=crop' },
   ]);
 
   useEffect(() => {
@@ -117,48 +118,51 @@ export default function TournoiGestionPage() {
 
   return (
     <div className="bg-background min-h-[calc(100vh-64px)]">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <button
-          onClick={() => navigate('/tournois')}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8 transition-colors"
-        >
-          <ArrowLeft size={20} />
-          Retour aux tournois
-        </button>
+      <div className="max-w-7xl mx-auto px-6 pt-4 pb-8">
+       
 
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <span className="w-8 h-px bg-primary" />
-              <span
-                className="text-primary"
-                style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", letterSpacing: "0.2em" }}
+        <div className="flex items-center justify-between mb-8 mt-16 ">
+          <div className="flex items-center gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-3">
+                <span className="w-8 h-px bg-primary" />
+                <span
+                  className="text-primary"
+                  style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", letterSpacing: "0.2em" }}
+                >
+                  TOURNOI
+                </span>
+              </div>
+              <h1
+                className="text-foreground"
+                style={{
+                  fontFamily: "Anton, sans-serif",
+                  fontSize: "clamp(2rem, 4vw, 3.5rem)",
+                  lineHeight: 0.95,
+                }}
               >
-                GESTION
-              </span>
+                {tournoi.nomTournoi}
+              </h1>
             </div>
-            <h1
-              className="text-foreground"
-              style={{
-                fontFamily: "Anton, sans-serif",
-                fontSize: "clamp(2rem, 4vw, 3.5rem)",
-                lineHeight: 0.95,
-              }}
-            >
-              {tournoi.nomTournoi}
-            </h1>
+            {tournoi.afficheTournoi && (
+              <img
+                src={tournoi.afficheTournoi}
+                alt={tournoi.nomTournoi}
+                className="w-20 h-28 object-cover rounded-lg"
+              />
+            )}
           </div>
-          {tournoi.afficheTournoi && (
-            <img
-              src={tournoi.afficheTournoi}
-              alt={tournoi.nomTournoi}
-              className="w-24 h-36 object-cover rounded-lg"
-            />
-          )}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden text-foreground p-2"
+            aria-label="Menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
 
         <div className="flex gap-6">
-          <aside className="w-64 flex-shrink-0">
+          <aside className="hidden md:block w-64 flex-shrink-0 mt-8">
             <nav className="sticky top-8 space-y-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -180,7 +184,75 @@ export default function TournoiGestionPage() {
             </nav>
           </aside>
 
-          <main className="flex-1">
+          <aside className="md:hidden fixed inset-0 z-50 bg-background lg:hidden">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <span className="text-foreground font-medium">Menu</span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-foreground p-2"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <nav className="p-4 space-y-2">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                      activeTab === tab.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-card hover:text-foreground'
+                    }`}
+                  >
+                    <Icon size={18} />
+                    <span className="font-medium">{tab.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </aside>
+
+           <aside className="md:hidden fixed inset-0 z-50 bg-background lg:hidden">
+             <div className="p-4 border-b border-border flex items-center justify-between">
+               <span className="text-foreground font-medium">Menu</span>
+               <button
+                 onClick={() => setMobileMenuOpen(false)}
+                 className="text-foreground p-2"
+               >
+                 <X size={24} />
+               </button>
+             </div>
+             <nav className="p-4 space-y-2">
+               {tabs.map((tab) => {
+                 const Icon = tab.icon;
+                 return (
+                   <button
+                     key={tab.id}
+                     onClick={() => {
+                       setActiveTab(tab.id);
+                       setMobileMenuOpen(false);
+                     }}
+                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                       activeTab === tab.id
+                         ? 'bg-primary text-primary-foreground'
+                         : 'text-muted-foreground hover:bg-card hover:text-foreground'
+                     }`}
+                   >
+                     <Icon size={18} />
+                     <span className="font-medium">{tab.label}</span>
+                   </button>
+                 );
+               })}
+             </nav>
+           </aside>
+
+           <main className="flex-1 mt-[-80px]">
             {activeTab === 'participants' && (
               <>
                 <div className="flex items-center justify-between mb-6">
@@ -199,7 +271,7 @@ export default function TournoiGestionPage() {
                   </button>
                 </div>
 
-                <div className="space-y-3">
+                 <div className="space-y-3">
                   {participants.length === 0 ? (
                     <div className="text-center py-12 border border-border border-dashed">
                       <User className="mx-auto mb-4 text-muted-foreground" size={48} />
@@ -209,14 +281,20 @@ export default function TournoiGestionPage() {
                     participants.map((participant) => (
                       <div key={participant.id} className="border border-border bg-card p-4 flex items-center justify-between group">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-border flex items-center justify-center">
-                            <User className="text-muted-foreground" size={20} />
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+                            {participant.photo ? (
+                              <img
+                                src={participant.photo}
+                                alt={participant.pseudo}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <User className="text-muted-foreground" size={20} />
+                            )}
                           </div>
                           <div>
-                            <h3 className="text-foreground font-medium">{participant.nom}</h3>
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                              <span>@{participant.pseudo}</span>
-                              <span>·</span>
+                            <h3 className="text-foreground font-medium">@{participant.pseudo}</h3>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               <span>{participant.collectif}</span>
                               <span className={`px-2 py-0.5 rounded text-xs ${
                                 participant.statut === 'inscrit' ? 'bg-primary/20 text-primary' : 'bg-secondary text-secondary-foreground'
@@ -287,15 +365,23 @@ export default function TournoiGestionPage() {
                       <Mic className="mx-auto mb-4 text-muted-foreground" size={48} />
                       <p className="text-muted-foreground">Aucune performance pour le moment</p>
                     </div>
-                  ) : (
+                   ) : (
                     performances.map((performance) => (
                       <div key={performance.id} className="border border-border bg-card p-4 flex items-center justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-border flex items-center justify-center">
-                            <Mic className="text-muted-foreground" size={20} />
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+                            {performance.photo ? (
+                              <img
+                                src={performance.photo}
+                                alt={performance.participant}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <Mic className="text-muted-foreground" size={20} />
+                            )}
                           </div>
                           <div>
-                            <h3 className="text-foreground font-medium">{performance.participant}</h3>
+                            <h3 className="text-foreground font-medium">@{performance.participant}</h3>
                             <div className="flex items-center gap-3 text-sm text-muted-foreground">
                               <span>Round {performance.round}</span>
                               <span>·</span>
@@ -344,16 +430,24 @@ export default function TournoiGestionPage() {
                       <Trophy className="mx-auto mb-4 text-muted-foreground" size={48} />
                       <p className="text-muted-foreground">Aucun classement pour le moment</p>
                     </div>
-                  ) : (
+                   ) : (
                     classement.map((participant) => (
                       <div key={participant.id} className={`border border-border bg-card p-6 flex items-center justify-between ${participant.id <= 3 ? 'border-primary/30' : ''}`}>
                         <div className="flex items-center gap-6">
-                          <div className="w-12 h-12 flex items-center justify-center">
-                            {getMedalIcon(participant.id)}
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+                            {participant.photo ? (
+                              <img
+                                src={participant.photo}
+                                alt={participant.pseudo}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <User className="text-muted-foreground" size={20} />
+                            )}
                           </div>
                           <div>
-                            <h3 className="text-foreground font-medium text-lg">{participant.nom}</h3>
-                            <div className="text-muted-foreground text-sm">@{participant.pseudo}</div>
+                            <h3 className="text-foreground font-medium text-lg">@{participant.pseudo}</h3>
+                            <div className="text-muted-foreground text-sm">{participant.collectif}</div>
                           </div>
                         </div>
                         <div className="text-right">
