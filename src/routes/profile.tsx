@@ -1,25 +1,25 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { PageLoader } from '../components/PageLoader';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { useCollectifStore } from '../stores/collectifStore';
-import { Edit2, Loader2, Mail, MapPin, Camera, Upload } from 'lucide-react';
+import { Edit2, Loader2, Mail, MapPin, Camera } from 'lucide-react';
 
 function ProfileContent() {
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
-  const { profile, isLoading, isProfileLoading, updateProfile } = useCollectifStore();
+  const { profile, isLoading, isProfileLoading, updateProfile, hydrateProfile } = useCollectifStore();
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [formData, setFormData] = useState({
     nomCollectif: '',
     ville: '',
     email: '',
     photoCollectif: '',
   });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleEditClick = () => {
     if (profile) {
@@ -48,13 +48,12 @@ function ProfileContent() {
     if (!file) return;
 
     setIsUploading(true);
-    setUploadProgress(0);
 
     try {
       const formData = new FormData();
       formData.append('photo', file);
 
-      const response = await fetch('http://localhost:3001/api/upload/collectif-photo', {
+      const response = await fetch('http://localhost:3001/collectif/photo', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -68,17 +67,23 @@ function ProfileContent() {
       }
 
       const data = await response.json();
-      setFormData(prev => ({ ...prev, photoCollectif: data.url }));
-      showSuccess('Photo uploadée avec succès');
+      
+      // Recharger le profil depuis le store pour avoir les données à jour
+      await hydrateProfile();
+      
+      showSuccess('Photo mise à jour avec succès');
     } catch (error) {
       console.error('Erreur upload:', error);
       showError('Erreur lors de l\'upload de la photo');
     } finally {
       setIsUploading(false);
-      setUploadProgress(0);
     }
   };
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -147,50 +152,50 @@ function ProfileContent() {
         <div className="border border-border p-8 bg-card">
           <div className="flex items-start justify-between mb-8">
             <div className="flex items-center gap-6">
-              <div className="relative w-32 h-32 rounded-full overflow-hidden bg-border flex items-center justify-center">
-                {isEditing ? (
-                  <>
-                    {formData.photoCollectif ? (
-                      <img
-                        src={formData.photoCollectif}
-                        alt={formData.nomCollectif}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-4xl font-bold text-muted-foreground">
-                        {formData.nomCollectif.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                    <label className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer hover:bg-black/60 transition-colors">
-                      {isUploading ? (
-                        <Loader2 className="animate-spin text-white" size={24} />
-                      ) : (
-                        <Camera className="text-white" size={24} />
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        className="hidden"
-                      />
-                    </label>
-                  </>
-                ) : (
-                  <>
-                    {profile.photoCollectif ? (
-                      <img
-                        src={profile.photoCollectif}
-                        alt={profile.nomCollectif}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-4xl font-bold text-muted-foreground">
-                        {profile.nomCollectif.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </>
-                )}
-              </div>
+               <div className="relative w-32 h-32 rounded-full overflow-hidden bg-border flex items-center justify-center">
+                 {isEditing ? (
+                   <>
+                     {profile.photoCollectif ? (
+                       <img
+                         src={profile.photoCollectif}
+                         alt={profile.nomCollectif}
+                         className="w-full h-full object-cover"
+                       />
+                     ) : (
+                       <span className="text-4xl font-bold text-muted-foreground">
+                         {profile.nomCollectif.charAt(0).toUpperCase()}
+                       </span>
+                     )}
+                     <label className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer hover:bg-black/60 transition-colors">
+                       {isUploading ? (
+                         <Loader2 className="animate-spin text-white" size={24} />
+                       ) : (
+                         <Camera className="text-white" size={24} />
+                       )}
+                       <input
+                         type="file"
+                         accept="image/*"
+                         onChange={handleFileUpload}
+                         className="hidden"
+                       />
+                     </label>
+                   </>
+                 ) : (
+                   <>
+                     {profile.photoCollectif ? (
+                       <img
+                         src={profile.photoCollectif}
+                         alt={profile.nomCollectif}
+                         className="w-full h-full object-cover"
+                       />
+                     ) : (
+                       <span className="text-4xl font-bold text-muted-foreground">
+                         {profile.nomCollectif.charAt(0).toUpperCase()}
+                       </span>
+                     )}
+                   </>
+                 )}
+               </div>
               <div>
                 <h2 
                   className="text-foreground mb-2"
@@ -219,15 +224,9 @@ function ProfileContent() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {isUploading && (
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3">
                     <Loader2 className="animate-spin text-primary" size={16} />
                     <span className="text-sm font-medium">Upload en cours...</span>
-                  </div>
-                  <div className="w-full bg-primary/20 rounded-full h-2">
-                    <div 
-                      className="bg-primary h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
-                    />
                   </div>
                 </div>
               )}
@@ -268,53 +267,9 @@ function ProfileContent() {
                     disabled={isSubmitting}
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Photo du collectif</label>
-                <div className="space-y-4">
-                  <div className="relative">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                      id="photo-upload"
-                      disabled={isSubmitting || isUploading}
-                    />
-                    <label
-                      htmlFor="photo-upload"
-                      className="flex items-center gap-3 px-6 py-4 border border-dashed border-border hover:border-primary/60 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader2 className="animate-spin text-primary" size={20} />
-                          <span className="text-sm">Upload en cours...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Upload size={20} className="text-muted-foreground" />
-                          <span className="text-sm">
-                            {formData.photoCollectif ? 'Changer la photo' : 'Ajouter une photo'}
-                          </span>
-                        </>
-                      )}
-                    </label>
-                  </div>
-                  {formData.photoCollectif && (
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={formData.photoCollectif}
-                        alt="Photo du collectif"
-                        className="w-20 h-20 rounded-lg object-cover border border-border"
-                      />
-                      <span className="text-sm text-muted-foreground">{formData.photoCollectif.substring(0, 50)}...</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-4 pt-4">
+               </div>
+ 
+               <div className="flex gap-4 pt-4">
                 <button
                   type="button"
                   onClick={handleCancel}
@@ -360,54 +315,56 @@ function ProfileContent() {
                 </div>
               </div>
 
-              {profile.createdAt && (
-                <div>
-                  <label className="block text-sm text-muted-foreground mb-2">Membre depuis</label>
-                  <div className="text-foreground font-medium">
-                    {new Date(profile.createdAt).toLocaleDateString('fr-FR', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
+                {profile.createdAt && (
+                  <div>
+                    <label className="block text-sm text-muted-foreground mb-2">Membre depuis</label>
+                    <div className="text-foreground font-medium">
+                      {new Date(profile.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                )}
+              </div>
+            )}
+          </div>
 
-        <div className="border border-border p-8 bg-card">
-          <h3 
-            className="text-foreground mb-4"
-            style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}
-          >
-            Statistiques
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
-                0
+          <div className="border border-border p-8 bg-card">
+            <h3 
+              className="text-foreground mb-4"
+              style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}
+            >
+              Statistiques
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
+                  0
+                </div>
+                <div className="text-muted-foreground text-sm">Tournois créés</div>
               </div>
-              <div className="text-muted-foreground text-sm">Tournois créés</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
-                0
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
+                  0
+                </div>
+                <div className="text-muted-foreground text-sm">Membres actifs</div>
               </div>
-              <div className="text-muted-foreground text-sm">Membres actifs</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
-                0
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
+                  0
+                </div>
+                <div className="text-muted-foreground text-sm">Événements</div>
               </div>
-              <div className="text-muted-foreground text-sm">Événements</div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+   
   );
 }
+
 
 export default function ProfilePage() {
   return (
