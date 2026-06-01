@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useToast } from '../contexts/ToastContext';
-import { membreService, CreateMembreData } from '../services/membreService';
+import { useMembreStore } from '../stores/membreStore';
+import { CreateMembreData } from '../services/membreService';
 import { X, Loader2 } from 'lucide-react';
 
 interface CreateMembreDialogProps {
@@ -12,6 +13,7 @@ interface CreateMembreDialogProps {
 export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateMembreDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showSuccess, showError } = useToast();
+  const { createMembre } = useMembreStore();
   const [formData, setFormData] = useState<CreateMembreData>({
     nomMembre: '',
     prenomMembre: '',
@@ -27,7 +29,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
     setIsSubmitting(true);
 
     try {
-      await membreService.createMembre(formData);
+      await createMembre(formData);
       showSuccess('Membre créé avec succès');
       setFormData({
         nomMembre: '',

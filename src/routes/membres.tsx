@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { membreService, Membre } from '../services/membreService';
+import { useMembreStore } from '../stores/membreStore';
 import { CreateMembreDialog } from '../components/CreateMembreDialog';
 import { UpdateMembreDialog } from '../components/UpdateMembreDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -12,8 +12,7 @@ import { ImageWithFallback } from '../app/components/figma/ImageWithFallback';
 function MembresContent() {
   const { user, loading, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
-  const [membres, setMembres] = useState<Membre[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { membres, isLoading, error, createMembre, updateMembre, deleteMembre, refreshMembres } = useMembreStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
@@ -25,24 +24,7 @@ function MembresContent() {
     if (isAuthenticated && !user) {
       return;
     }
-    
-    if (isAuthenticated) {
-      loadMembres();
-    }
   }, [isAuthenticated, user]);
-
-  const loadMembres = async () => {
-    setIsLoading(true);
-    try {
-      const membresData = await membreService.getMembres();
-      setMembres(membresData);
-    } catch (error) {
-      console.error('Erreur lors du chargement des membres:', error);
-      showError('Erreur lors du chargement des membres');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const filteredMembres = membres.filter(
     (membre) =>
@@ -67,11 +49,10 @@ function MembresContent() {
 
     setIsDeleting(true);
     try {
-      await membreService.deleteMembre(selectedMembreId);
+      await deleteMembre(selectedMembreId);
       showSuccess('Membre supprimé avec succès');
       setShowDeleteDialog(false);
       setSelectedMembreId(null);
-      loadMembres();
     } catch (error) {
       console.error('Erreur lors de la suppression du membre:', error);
       showError('Erreur lors de la suppression du membre');
@@ -244,7 +225,7 @@ function MembresContent() {
       <CreateMembreDialog
         isOpen={showCreateDialog}
         onClose={() => setShowCreateDialog(false)}
-        onMembreCreated={loadMembres}
+        onMembreCreated={() => setShowCreateDialog(false)}
       />
 
       <UpdateMembreDialog
@@ -254,7 +235,7 @@ function MembresContent() {
           setSelectedMembreId(null);
         }}
         membreId={selectedMembreId}
-        onMembreUpdated={loadMembres}
+        onMembreUpdated={() => setShowUpdateDialog(false)}
       />
 
       <ConfirmDialog

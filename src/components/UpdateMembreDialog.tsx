@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { membreService, Membre, UpdateMembreData } from '../services/membreService';
+import { useMembreStore } from '../stores/membreStore';
 import { Edit2, X, Loader2 } from 'lucide-react';
 
 interface UpdateMembreDialogProps {
@@ -14,6 +15,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { showSuccess, showError } = useToast();
+  const { updateMembre } = useMembreStore();
   const [membre, setMembre] = useState<Membre | null>(null);
   const [formData, setFormData] = useState<UpdateMembreData>({
     nomMembre: '',
@@ -63,7 +65,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
     setIsSubmitting(true);
 
     try {
-      await membreService.updateMembre(membreId, formData);
+      await updateMembre(membreId, formData);
       showSuccess('Membre mis à jour avec succès');
       onMembreUpdated();
       onClose();

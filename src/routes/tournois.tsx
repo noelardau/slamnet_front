@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
-import { tournoiService, Tournoi, CreateTournoiData, UpdateTournoiData } from '../services/tournoiService';
+import { useTournoiStore } from '../stores/tournoiStore';
+import { Tournoi, CreateTournoiData, UpdateTournoiData } from '../services/tournoiService';
 import { Loader2, Plus, Calendar, MapPin, Clock, Users, Trophy, Trash2, Edit } from 'lucide-react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -11,8 +12,7 @@ import { UpdateTournoiDialog } from '../components/UpdateTournoiDialog';
 function TournoisContent() {
   const { user, loading, isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
-  const [tournois, setTournois] = useState<Tournoi[]>([]);
-  const [loadingTournois, setLoadingTournois] = useState(true);
+  const { tournois, isLoading, createTournoi, updateTournoi, deleteTournoi } = useTournoiStore();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -24,32 +24,13 @@ function TournoisContent() {
     if (isAuthenticated && !user) {
       return;
     }
-    
-    if (isAuthenticated) {
-      loadTournois();
-    } else {
-      setLoadingTournois(false);
-    }
   }, [isAuthenticated, user]);
-
-  const loadTournois = async () => {
-    try {
-      setLoadingTournois(true);
-      const data = await tournoiService.getTournois();
-      setTournois(data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des tournois:', error);
-      showError('Erreur lors du chargement des tournois');
-    } finally {
-      setLoadingTournois(false);
-    }
-  };
 
   const handleCreateTournoi = async (data: CreateTournoiData) => {
     try {
-      await tournoiService.createTournoi(data);
+      await createTournoi(data);
       showSuccess('Tournoi créé avec succès');
-      await loadTournois();
+      setShowCreateDialog(false);
     } catch (error) {
       console.error('Erreur lors de la création du tournoi:', error);
       throw error;
@@ -63,9 +44,10 @@ function TournoisContent() {
 
   const handleUpdateTournoi = async (id: number, data: UpdateTournoiData) => {
     try {
-      await tournoiService.updateTournoi(id, data);
+      await updateTournoi(id, data);
       showSuccess('Tournoi modifié avec succès');
-      await loadTournois();
+      setShowUpdateDialog(false);
+      setTournoiToUpdate(null);
     } catch (error) {
       console.error('Erreur lors de la modification du tournoi:', error);
       throw error;
@@ -81,9 +63,8 @@ function TournoisContent() {
     if (tournoiToDelete) {
       setIsDeleting(true);
       try {
-        await tournoiService.deleteTournoi(tournoiToDelete.idTournoi);
+        await deleteTournoi(tournoiToDelete.idTournoi);
         showSuccess(`Tournoi "${tournoiToDelete.nomTournoi}" supprimé avec succès`);
-        await loadTournois();
       } catch (error) {
         console.error('Erreur lors de la suppression du tournoi:', error);
         showError('Erreur lors de la suppression du tournoi');
@@ -109,7 +90,7 @@ function TournoisContent() {
     });
   };
 
-  if (loading || loadingTournois) {
+  if (loading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
