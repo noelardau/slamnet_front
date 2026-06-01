@@ -42,6 +42,7 @@ function ProfileContent() {
       photoCollectif: '',
     });
   };
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,7 +54,7 @@ function ProfileContent() {
       const formData = new FormData();
       formData.append('photo', file);
 
-      const response = await fetch('http://localhost:3001/collectif/photo', {
+      const response = await fetch(`${API_BASE_URL}/collectif/photo`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
