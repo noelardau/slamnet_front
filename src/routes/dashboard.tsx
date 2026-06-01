@@ -2,15 +2,30 @@ import { useAuth } from '../contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useEffect } from 'react';
+import { membreService } from '../services/membreService';
+import { useState } from 'react';
 
 function DashboardContent() {
   const { user, loading, isAuthenticated, logout, refreshProfile } = useAuth();
+  const [membresCount, setMembresCount] = useState(0);
 
   useEffect(() => {
     if (isAuthenticated && !user) {
       refreshProfile();
     }
+    if (isAuthenticated) {
+      loadMembresCount();
+    }
   }, [isAuthenticated, user, refreshProfile]);
+
+  const loadMembresCount = async () => {
+    try {
+      const membres = await membreService.getMembres();
+      setMembresCount(membres.length);
+    } catch (error) {
+      console.error('Erreur lors du chargement des membres:', error);
+    }
+  };
 
   if (loading) {
     return (
@@ -58,9 +73,9 @@ function DashboardContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {[
-          { label: "Membres", value: "0", color: "#ff4d00" },
+          { label: "Membres", value: membresCount.toString(), color: "#ff4d00" },
           { label: "Tournois", value: "0", color: "#f2ede6" },
           { label: "Performances", value: "0", color: "#f2ede6" },
           { label: "Prochains événements", value: "0", color: "#f2ede6" },

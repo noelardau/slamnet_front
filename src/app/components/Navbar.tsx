@@ -67,6 +67,7 @@ export function Navbar() {
             <>
               {[
                 { label: "DASHBOARD", to: "/dashboard" },
+                { label: "MEMBRES", to: "/membres" },
                 { label: "TOURNOIS", to: "/tournois" },
               ].map((link) => (
                 <Link
@@ -163,6 +164,7 @@ export function Navbar() {
                 <>
                   {[
                     { label: "DASHBOARD", to: "/dashboard" },
+                    { label: "MEMBRES", to: "/membres" },
                     { label: "TOURNOIS", to: "/tournois" },
                   ].map((link) => (
                     <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"

@@ -6,6 +6,7 @@ import SignupPage from './signup';
 import CollectifsPage from './collectifs';
 import CollectifDetailPage from './collectifs.$id';
 import DashboardPage from './dashboard';
+import MembresPage from './membres';
 import TournoisPage from './tournois';
 import TournoiDetailPage from './tournois.$id';
 import PrivacyPage from './privacy';
@@ -23,6 +24,7 @@ export const routes: RouteObject[] = [
       { path: 'collectifs', element: <CollectifsPage /> },
       { path: 'collectifs/:id', element: <CollectifDetailPage /> },
       { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'membres', element: <MembresPage /> },
       { path: 'tournois', element: <TournoisPage /> },
       { path: 'tournois/:id', element: <TournoiDetailPage /> },
       { path: 'privacy', element: <PrivacyPage /> },
