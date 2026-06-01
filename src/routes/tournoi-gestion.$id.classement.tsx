@@ -1,7 +1,8 @@
 import { useOutletContext } from 'react-router-dom';
 import { Trophy, Medal, Award } from 'lucide-react';
 import { useState } from 'react';
-export function TournoiClassement() {
+
+export default function TournoiClassement() {
   const { tournoi } = useOutletContext<any>();
   const [classement, setClassement] = useState<any[]>([
     { id: 1, nom: 'Koumba Diop', pseudo: 'K. D.', total: 27.6, round1: 9.2, round2: 9.4, round3: 9.0 },

@@ -10,7 +10,10 @@ import MembresPage from './membres';
 import ProfilePage from './profile';
 import TournoisPage from './tournois';
 import TournoiDetailPage from './tournois.$id';
-import TournoiGestionPage from './tournoi-gestion.$id';
+import TournoiGestionLayout from './tournoi-gestion.$id';
+import TournoiParticipantsPage from './tournoi-gestion.$id.participants';
+import TournoiPerformancesPage from './tournoi-gestion.$id.performances';
+import TournoiClassementPage from './tournoi-gestion.$id.classement';
 import PrivacyPage from './privacy';
 import TermsPage from './terms';
 import ContactPage from './contact';
@@ -30,7 +33,16 @@ export const routes: RouteObject[] = [
       { path: 'profile', element: <ProfilePage /> },
       { path: 'tournois', element: <TournoisPage /> },
       { path: 'tournois/:id', element: <TournoiDetailPage /> },
-      { path: 'tournoi-gestion/:id', element: <TournoiGestionPage /> },
+      { 
+        path: 'tournoi-gestion/:id', 
+        element: <TournoiGestionLayout />,
+        children: [
+          { index: true, element: <TournoiParticipantsPage /> },
+          { path: 'participants', element: <TournoiParticipantsPage /> },
+          { path: 'performances', element: <TournoiPerformancesPage /> },
+          { path: 'classement', element: <TournoiClassementPage /> },
+        ]
+      },
       { path: 'privacy', element: <PrivacyPage /> },
       { path: 'terms', element: <TermsPage /> },
       { path: 'contact', element: <ContactPage /> },

@@ -1,9 +1,9 @@
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Mic, X } from 'lucide-react';
+import { Plus, Mic } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
-export function TournoiPerformances() {
+export default function TournoiPerformances() {
   const { tournoi } = useOutletContext<any>();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [performances, setPerformances] = useState<any[]>([
@@ -93,6 +93,16 @@ export function TournoiPerformances() {
           </button>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showAddDialog}
+        title="Ajouter une performance"
+        message="Fonctionnalité à venir"
+        confirmText="OK"
+        cancelText="Annuler"
+        onConfirm={() => setShowAddDialog(false)}
+        onCancel={() => setShowAddDialog(false)}
+      />
     </div>
   );
 }
