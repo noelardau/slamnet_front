@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Loader2, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Loader2, X, Camera } from 'lucide-react';
 import { UpdateTournoiData } from '../services/tournoiService';
 import { Tournoi } from '../services/tournoiService';
 import { useToast } from '../contexts/ToastContext';
+import { useTournoiStore } from '../stores/tournoiStore';
 
 interface UpdateTournoiDialogProps {
   isOpen: boolean;
@@ -22,7 +23,11 @@ export function UpdateTournoiDialog({ isOpen, onClose, onSubmit, tournoi }: Upda
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const { showError } = useToast();
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const { showError, showSuccess } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { updateTournoi } = useTournoiStore();
 
   useEffect(() => {
     if (tournoi && isOpen) {
@@ -34,8 +39,60 @@ export function UpdateTournoiDialog({ isOpen, onClose, onSubmit, tournoi }: Upda
         nbJury: tournoi.nbJury,
         afficheTournoi: tournoi.afficheTournoi || '',
       });
+      setPreviewUrl(tournoi.afficheTournoi || null);
     }
   }, [tournoi, isOpen]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('affiche', file);
+
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_BASE_URL}/collectif/tournoi/${tournoi.idTournoi}/affiche`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Erreur lors de l\'upload');
+      }
+
+      const data = await response.json();
+      
+      setFormData(prev => ({ ...prev, afficheTournoi: data.url }));
+      setPreviewUrl(data.url);
+      
+      if (data.tournoi) {
+        const updatedTournoi = data.tournoi;
+        
+        const store = useTournoiStore.getState();
+        store.updateTournoi(tournoi.idTournoi, {
+          afficheTournoi: data.url,
+        });
+      }
+      
+      showSuccess('Affiche uploadée avec succès');
+    } catch (error) {
+      console.error('Erreur upload:', error);
+      showError('Erreur lors de l\'upload de l\'affiche');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAfficheClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,6 +187,28 @@ export function UpdateTournoiDialog({ isOpen, onClose, onSubmit, tournoi }: Upda
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="flex justify-center mb-6">
+              <div className="relative w-32 h-48 rounded-lg overflow-hidden bg-border flex items-center justify-center cursor-pointer hover:border-primary/60 transition-all duration-300 border-2 border-dashed" onClick={handleAfficheClick}>
+                {isUploading ? (
+                  <Loader2 className="animate-spin text-primary" size={32} />
+                ) : previewUrl ? (
+                  <img src={previewUrl} alt="Affiche du tournoi" className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <Camera className="text-muted-foreground" size={32} />
+                    <span className="absolute bottom-0 text-xs text-muted-foreground">Ajouter</span>
+                  </>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-2">Nom du tournoi *</label>
               <input
@@ -198,19 +277,6 @@ export function UpdateTournoiDialog({ isOpen, onClose, onSubmit, tournoi }: Upda
                   <option key={num} value={num}>{num} juré{num > 1 ? 's' : ''}</option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">URL de l'affiche (optionnel)</label>
-              <input
-                type="url"
-                name="afficheTournoi"
-                value={formData.afficheTournoi}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="https://exemple.com/affiche.jpg"
-                disabled={loading}
-              />
             </div>
           </form>
         </div>

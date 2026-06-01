@@ -162,52 +162,70 @@ function TournoisContent() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tournois.map((tournoi) => (
-            <div key={tournoi.idTournoi} className="border border-border p-6 bg-card hover:border-primary/60 transition-all duration-300 group">
-              <div className="flex items-start justify-between mb-4">
-                <h3 
-                  className="text-foreground group-hover:text-primary transition-colors"
-                  style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem", letterSpacing: "0.02em" }}
-                >
-                  {tournoi.nomTournoi}
-                </h3>
-                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button 
-                    onClick={() => handleUpdateClick(tournoi)}
-                    className="p-2 hover:bg-primary/20 rounded-lg transition-colors"
-                  >
-                    <Edit size={16} className="text-muted-foreground hover:text-primary" />
-                  </button>
-                  <button 
-                    onClick={() => handleDeleteClick(tournoi)}
-                    className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                  >
-                    <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
+            <div key={tournoi.idTournoi} className="border border-border bg-card hover:border-primary/60 transition-all duration-300 group">
+              <div className="flex h-full">
+                <div className="w-1/2 h-full">
+                  {tournoi.afficheTournoi ? (
+                    <img
+                      src={tournoi.afficheTournoi}
+                      alt={tournoi.nomTournoi}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-border">
+                      <Trophy className="text-muted-foreground" size={48} />
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-1/2 p-6 flex flex-col justify-center">
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 
+                      className="text-foreground group-hover:text-primary transition-colors"
+                      style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem", letterSpacing: "0.02em" }}
+                    >
+                      {tournoi.nomTournoi}
+                    </h3>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => handleUpdateClick(tournoi)}
+                        className="p-2 hover:bg-primary/20 rounded-lg transition-colors"
+                      >
+                        <Edit size={16} className="text-muted-foreground hover:text-primary" />
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteClick(tournoi)}
+                        className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                      <Calendar size={16} />
+                      <span>{formatDate(tournoi.dateTournoi)}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                      <Clock size={16} />
+                      <span>{tournoi.heureTournoi}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                      <MapPin size={16} />
+                      <span>{tournoi.LieuTournoi}</span>
+                    </div>
+                    <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                      <Users size={16} />
+                      <span>{tournoi.nbJury} juré{tournoi.nbJury > 1 ? 's' : ''}</span>
+                    </div>
+                  </div>
+
+                  <button className="w-full px-4 py-3 border border-border hover:border-primary/60 hover:bg-primary/10 transition-all duration-300 font-medium text-sm">
+                    Voir les détails
                   </button>
                 </div>
               </div>
-
-              <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 text-muted-foreground text-sm">
-                  <Calendar size={16} />
-                  <span>{formatDate(tournoi.dateTournoi)}</span>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground text-sm">
-                  <Clock size={16} />
-                  <span>{tournoi.heureTournoi}</span>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground text-sm">
-                  <MapPin size={16} />
-                  <span>{tournoi.LieuTournoi}</span>
-                </div>
-                <div className="flex items-center gap-3 text-muted-foreground text-sm">
-                  <Users size={16} />
-                  <span>{tournoi.nbJury} juré{tournoi.nbJury > 1 ? 's' : ''}</span>
-                </div>
-              </div>
-
-              <button className="w-full px-4 py-3 border border-border hover:border-primary/60 hover:bg-primary/10 transition-all duration-300 font-medium">
-                Voir les détails
-              </button>
             </div>
           ))}
         </div>
