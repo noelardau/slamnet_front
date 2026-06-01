@@ -32,18 +32,18 @@ export function CTA() {
           </div>
 
           <h2
+            className="text-foreground"
             style={{
               fontFamily: "Anton, sans-serif",
               fontSize: "clamp(3rem, 7vw, 6rem)",
               lineHeight: 0.92,
-              color: "#f2ede6",
             }}
           >
             VOTRE COLLECTIF
             <br />
             MÉRITE UNE
             <br />
-            <span style={{ color: "#ff4d00" }}>VRAIE SCÈNE.</span>
+            <span className="text-primary">VRAIE SCÈNE.</span>
           </h2>
 
           <p

@@ -48,17 +48,14 @@ function DashboardContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
         {[
-          { label: "Membres", value: membres.length.toString(), color: "#ff4d00" },
-          { label: "Tournois", value: tournois.length.toString(), color: "#f2ede6" },
-          { label: "Performances", value: "0", color: "#f2ede6" },
+          { label: "Membres", value: membres.length.toString(), className: "text-primary" },
+          { label: "Tournois", value: tournois.length.toString(), className: "text-foreground" },
+          { label: "Performances", value: "0", className: "text-foreground" },
         ].map((stat) => (
           <div key={stat.label} className="border border-border p-6 bg-card">
             <div
-              className="text-3xl font-bold mb-2"
-              style={{ 
-                fontFamily: "Anton, sans-serif",
-                color: stat.color 
-              }}
+              className={`text-3xl font-bold mb-2 ${stat.className}`}
+              style={{ fontFamily: "Anton, sans-serif" }}
             >
               {stat.value}
             </div>

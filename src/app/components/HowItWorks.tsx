@@ -48,16 +48,16 @@ export function HowItWorks() {
             </span>
           </div>
           <h2
+            className="text-foreground"
             style={{
               fontFamily: "Anton, sans-serif",
               fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
               lineHeight: 0.95,
-              color: "#f2ede6",
             }}
           >
             DU COLLECTIF
             <br />
-            <span style={{ color: "#ff4d00" }}>AU PODIUM</span>
+            <span className="text-primary">AU PODIUM</span>
             <br />
             EN 6 ÉTAPES.
           </h2>
@@ -80,13 +80,13 @@ export function HowItWorks() {
                 transition={{ duration: 0.5, delay: i * 0.08 }}
                 className="group relative flex gap-8 items-start py-8 border-b border-border last:border-0"
               >
-                {/* Step number bubble */}
-                <div
-                  className="relative z-10 flex-shrink-0 w-[4.2rem] h-[4.2rem] border border-border flex items-center justify-center group-hover:border-primary/60 transition-colors duration-300"
-                  style={{ background: "#0c0a09", fontFamily: "Anton, sans-serif", fontSize: "1.2rem", color: "#ff4d00" }}
-                >
-                  {step.step}
-                </div>
+                 {/* Step number bubble */}
+                 <div
+                   className="relative z-10 flex-shrink-0 w-[4.2rem] h-[4.2rem] border border-border flex items-center justify-center group-hover:border-primary/60 transition-colors duration-300 bg-card text-primary"
+                   style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem" }}
+                 >
+                   {step.step}
+                 </div>
 
                 <div className="flex-1 pt-2">
                   <h3

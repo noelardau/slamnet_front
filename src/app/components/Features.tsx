@@ -53,18 +53,18 @@ export function Features() {
               </span>
             </div>
             <h2
+              className="text-foreground"
               style={{
                 fontFamily: "Anton, sans-serif",
                 fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
                 lineHeight: 0.95,
-                color: "#f2ede6",
               }}
             >
               TOUT CE DONT
               <br />
               VOTRE COLLECTIF
               <br />
-              <span style={{ color: "#ff4d00" }}>A BESOIN.</span>
+              <span className="text-primary">A BESOIN.</span>
             </h2>
           </div>
           <p
@@ -99,8 +99,7 @@ export function Features() {
 
                 <div className="relative">
                   <div
-                    className="w-12 h-12 border border-border flex items-center justify-center mb-6 group-hover:border-primary/50 transition-colors duration-300"
-                    style={{ background: "#141210" }}
+                    className="w-12 h-12 border border-border flex items-center justify-center mb-6 group-hover:border-primary/50 transition-colors duration-300 bg-card"
                   >
                     <Icon size={20} className="text-primary" strokeWidth={1.5} />
                   </div>

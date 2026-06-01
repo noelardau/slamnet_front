@@ -61,17 +61,17 @@ export function Hero() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-foreground"
             style={{
               fontFamily: "Anton, sans-serif",
               fontSize: "clamp(3.5rem, 8vw, 7rem)",
               lineHeight: 0.92,
               letterSpacing: "-0.01em",
-              color: "#f2ede6",
             }}
           >
             GÉREZ VOS
             <br />
-            <span style={{ color: "#ff4d00" }}>MOTS.</span>
+            <span className="text-primary">MOTS.</span>
             <br />
             VOS SCÈNES.
             <br />
@@ -155,19 +155,17 @@ export function Hero() {
               style={{ background: "#ff4d00", transform: "scale(1.2)" }}
             />
             <div
-              className="relative border border-border/50 flex items-center justify-center"
+              className="relative border border-border/50 flex items-center justify-center bg-card"
               style={{
                 width: 320,
                 height: 320,
-                background: "radial-gradient(circle at 40% 40%, #1e1a17, #0c0a09)",
               }}
             >
               <Mic size={100} className="text-primary opacity-90" strokeWidth={1} />
               {/* Score card overlay */}
               <div
-                className="absolute -bottom-6 -right-6 border border-border/60 p-4"
+                className="absolute -bottom-6 -right-6 border border-border/60 p-4 bg-card"
                 style={{
-                  background: "#141210",
                   minWidth: 160,
                   fontFamily: "JetBrains Mono, monospace",
                 }}
@@ -188,9 +186,9 @@ export function Hero() {
                       {i + 1}. {poet.name}
                     </span>
                     <span
+                      className={i === 0 ? "text-primary" : "text-foreground"}
                       style={{
                         fontSize: "0.75rem",
-                        color: i === 0 ? "#ff4d00" : "#f2ede6",
                         fontWeight: 700,
                       }}
                     >
@@ -202,9 +200,8 @@ export function Hero() {
 
               {/* Badge tournoi */}
               <div
-                className="absolute -top-4 -left-4 border border-primary/40 px-3 py-1"
+                className="absolute -top-4 -left-4 border border-primary/40 px-3 py-1 bg-primary"
                 style={{
-                  background: "#ff4d00",
                   fontFamily: "JetBrains Mono, monospace",
                   fontSize: "0.6rem",
                   letterSpacing: "0.15em",

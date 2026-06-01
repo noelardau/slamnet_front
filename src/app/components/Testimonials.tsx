@@ -43,16 +43,16 @@ export function Testimonials() {
             </span>
           </div>
           <h2
+            className="text-foreground"
             style={{
               fontFamily: "Anton, sans-serif",
               fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
               lineHeight: 0.95,
-              color: "#f2ede6",
             }}
           >
             LA VOIX
             <br />
-            <span style={{ color: "#ff4d00" }}>DES COLLECTIFS.</span>
+            <span className="text-primary">DES COLLECTIFS.</span>
           </h2>
         </div>
 
@@ -76,17 +76,15 @@ export function Testimonials() {
               </p>
 
               <div className="flex items-center gap-4 pt-4 border-t border-border">
-                <div
-                  className="w-10 h-10 flex items-center justify-center flex-shrink-0 border border-primary/30"
-                  style={{
-                    background: "#1e1a17",
-                    fontFamily: "Anton, sans-serif",
-                    fontSize: "0.75rem",
-                    color: "#ff4d00",
-                  }}
-                >
-                  {t.avatar}
-                </div>
+                 <div
+                   className="w-10 h-10 flex items-center justify-center flex-shrink-0 border border-primary/30 bg-card text-primary"
+                   style={{
+                     fontFamily: "Anton, sans-serif",
+                     fontSize: "0.75rem",
+                   }}
+                 >
+                   {t.avatar}
+                 </div>
                 <div>
                   <div
                     className="text-foreground"
