@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import { Menu, X, LogOut, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
@@ -11,6 +12,7 @@ export function Navbar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
 
   const handleLogoutClick = () => {
     setShowLogoutDialog(true);
@@ -21,9 +23,11 @@ export function Navbar() {
     setIsLoggingOut(true);
     try {
       await logout();
+      showSuccess('Déconnexion réussie');
       navigate('/login', { replace: true });
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
+      showError('Erreur lors de la déconnexion');
     } finally {
       setIsLoggingOut(false);
     }
@@ -54,32 +58,16 @@ export function Navbar() {
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse ml-1" />
           </Link>
 
-          {/* Desktop links */}
-          <div
-            className="hidden md:flex items-center gap-8"
-            style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-          >
-            {isAuthenticated ? (
-              <>
-                {[
-                  { label: "FONCTIONNALITÉS", to: "/#features" },
-                  { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-                  { label: "DASHBOARD", to: "/dashboard" },
-                ].map((link) => (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className="text-muted-foreground hover:text-foreground transition-colors duration-200"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </>
-            ) : (
-              [
-                { label: "FONCTIONNALITÉS", to: "/#features" },
-                { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-                { label: "COLLECTIFS", to: "/collectifs" },
+        {/* Desktop links */}
+        <div
+          className="hidden md:flex items-center gap-8"
+          style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+        >
+          {isAuthenticated ? (
+            <>
+              {[
+                { label: "DASHBOARD", to: "/dashboard" },
+                { label: "TOURNOIS", to: "/tournois" },
               ].map((link) => (
                 <Link
                   key={link.label}
@@ -88,9 +76,24 @@ export function Navbar() {
                 >
                   {link.label}
                 </Link>
-              ))
-            )}
-          </div>
+              ))}
+            </>
+          ) : (
+            [
+              { label: "FONCTIONNALITÉS", to: "/#features" },
+              { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
+              { label: "COLLECTIFS", to: "/collectifs" },
+            ].map((link) => (
+              <Link
+                key={link.label}
+                to={link.to}
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+              >
+                {link.label}
+              </Link>
+            ))
+          )}
+        </div>
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
@@ -159,9 +162,8 @@ export function Navbar() {
               {isAuthenticated ? (
                 <>
                   {[
-                    { label: "FONCTIONNALITÉS", to: "/#features" },
-                    { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
                     { label: "DASHBOARD", to: "/dashboard" },
+                    { label: "TOURNOIS", to: "/tournois" },
                   ].map((link) => (
                     <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
                       style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
-import { Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useToast } from '../contexts/ToastContext';
+import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToast();
 
   const validateForm = () => {
     if (!formData.nomCollectif || !formData.ville || !formData.email || !formData.password || !formData.confirmPassword) {
@@ -57,9 +59,12 @@ export default function SignupPage() {
         email: formData.email,
         password: formData.password,
       });
+      showSuccess('Compte créé avec succès');
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de l\'inscription');
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }

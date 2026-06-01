@@ -54,7 +54,7 @@ export function ConfirmDialog({
             {loading ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
-                Déconnexion...
+                {confirmText.toLowerCase()}...
               </>
             ) : (
               confirmText

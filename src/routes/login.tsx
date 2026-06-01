@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { showSuccess, showError } = useToast();
 
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
@@ -38,9 +40,12 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
+      showSuccess('Connexion réussie');
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors de la connexion');
+      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la connexion';
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }
