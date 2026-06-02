@@ -128,13 +128,15 @@ export function UpdateTournoiDialog({ isOpen, onClose, onSubmit, tournoi }: Upda
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    let convertedValue: string | number = value;
+    const { name, value, type, checked } = e.target as HTMLInputElement;
+    let convertedValue: string | number | boolean = value;
     
     if (name === 'nbJury') {
       convertedValue = Number(value);
     } else if (type === 'number') {
       convertedValue = value === '' ? 0 : Number(value);
+    } else if (type === 'checkbox') {
+      convertedValue = checked;
     }
     
     setFormData(prev => ({
@@ -285,15 +287,49 @@ export function UpdateTournoiDialog({ isOpen, onClose, onSubmit, tournoi }: Upda
 
             <div>
               <label className="block text-sm font-medium mb-2">Durée par performance (optionnel)</label>
-              <input
-                type="text"
-                name="dureePerfo"
-                value={formData.dureePerfo}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Ex: 3 min, 5 min, etc."
-                disabled={loading}
-              />
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    name="dureePerfoMinutes"
+                    value={formData.dureePerfo?.split(':')[0] || ''}
+                    onChange={(e) => {
+                      const minutes = e.target.value;
+                      const seconds = formData.dureePerfo?.split(':')[1] || '00';
+                      setFormData(prev => ({
+                        ...prev,
+                        dureePerfo: minutes ? `${minutes}:${seconds}` : '',
+                      }));
+                    }}
+                    className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Min"
+                    disabled={loading}
+                    min="0"
+                    max="60"
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="number"
+                    name="dureePerfoSeconds"
+                    value={formData.dureePerfo?.split(':')[1] || ''}
+                    onChange={(e) => {
+                      const minutes = formData.dureePerfo?.split(':')[0] || '00';
+                      const seconds = e.target.value;
+                      setFormData(prev => ({
+                        ...prev,
+                        dureePerfo: seconds ? `${minutes}:${seconds}` : '',
+                      }));
+                    }}
+                    className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Sec"
+                    disabled={loading}
+                    min="0"
+                    max="59"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Format : minutes:secondes (ex: 3:00)</p>
             </div>
 
             <div className="flex items-center gap-3">
