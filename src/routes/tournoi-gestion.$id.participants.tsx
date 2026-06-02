@@ -96,25 +96,29 @@ export default function TournoiParticipants() {
         ) : (
           participants.map((participant) => {
             const isGuest = !!participant.guest;
-            const displayName = isGuest 
-              ? `${participant.guest!.nomGuest} ${participant.guest!.prenomGuest}`
-              : `${participant.membre!.nomMembre} ${participant.membre!.prenomMembre}`;
-            const pseudo = isGuest ? 'Invité' : participant.membre!.pseudoMembre;
-            const collectif = isGuest ? 'Invité' : 'Membre';
+            const pseudo = isGuest 
+              ? participant.guest!.pseudo
+              : participant.membre!.pseudoMembre;
+            const photo = isGuest ? null : participant.membre!.photoMembre;
             
             return (
               <div key={participant.idParticipant} className="border border-border bg-card p-4 flex items-center justify-between group">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-border flex items-center justify-center">
-                    <User className="text-muted-foreground" size={20} />
+                  <div className="w-14 h-14 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+                    {photo ? (
+                      <img
+                        src={photo}
+                        alt={pseudo}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <User className="text-muted-foreground" size={24} />
+                    )}
                   </div>
                   <div>
-                    <h3 className="text-foreground font-medium">{displayName}</h3>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span>@{pseudo}</span>
-                      <span>·</span>
-                      <span>{collectif}</span>
-                      <span className={`px-2 py-0.5 rounded text-xs ${
+                    <h3 className="text-foreground font-medium text-lg">{pseudo}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                         isGuest ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
                       }`}>
                         {isGuest ? 'Invité' : 'Membre'}

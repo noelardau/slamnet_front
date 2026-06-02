@@ -2,24 +2,15 @@ import { apiService } from './api';
 
 export interface Guest {
   idGuest: number;
-  nomGuest: string;
-  prenomGuest: string;
-  emailGuest: string;
-  telephone?: string;
+  pseudo: string;
 }
 
 export interface CreateGuestData {
-  nomGuest: string;
-  prenomGuest: string;
-  emailGuest: string;
-  telephone?: string;
+  pseudo: string;
 }
 
 export interface UpdateGuestData {
-  nomGuest?: string;
-  prenomGuest?: string;
-  emailGuest?: string;
-  telephone?: string;
+  pseudo?: string;
 }
 
 class GuestService {

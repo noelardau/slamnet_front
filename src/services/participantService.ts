@@ -9,26 +9,23 @@ export interface Participant {
     idMembre: number;
     nomMembre: string;
     prenomMembre: string;
+    pseudoMembre: string;
     photoMembre: string | null;
   };
   guest?: {
     idGuest: number;
-    nomGuest: string;
-    prenomGuest: string;
+    pseudo: string;
   };
 }
 
 export interface CreateGuestData {
-  nomGuest: string;
-  prenomGuest: string;
-  emailGuest: string;
-  telephone?: string;
+  pseudo: string;
 }
 
 class ParticipantService {
-  async addParticipantToTournament(tournamentId: number): Promise<Participant> {
+  async addParticipantToTournament(tournamentId: number, membreId: number): Promise<Participant> {
     try {
-      const participant = await apiService.post<Participant>(`/api/tournois/${tournamentId}/participants`, {});
+      const participant = await apiService.post<Participant>(`/api/tournois/${tournamentId}/participants`, { idMembre: membreId });
       return participant;
     } catch (error) {
       console.error('Erreur lors de l\'inscription du participant au tournoi:', error);
@@ -49,6 +46,7 @@ class ParticipantService {
   async getTournamentParticipants(tournamentId: number): Promise<Participant[]> {
     try {
       const participants = await apiService.get<Participant[]>(`/api/tournois/${tournamentId}/participants`);
+      console.log('Participants récupérés:', participants);
       return participants;
     } catch (error) {
       console.error('Erreur lors de la récupération des participants du tournoi:', error);
