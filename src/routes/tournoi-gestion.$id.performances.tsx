@@ -85,6 +85,7 @@ export default function TournoiPerformances() {
     try {
       const createData: any = {
         idTournoi: tournoi.idTournoi,
+        idParticipant: participant.idParticipant,
         etat: 'prêt',
         duree: '00:00',
       };

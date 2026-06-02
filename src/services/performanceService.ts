@@ -32,6 +32,7 @@ export interface CreatePerformanceData {
   idTournoi: number;
   idMembre?: number;
   idGuest?: number;
+  idParticipant: number;
   duree?: string;
   noteFinale?: number;
   etat?: string;
