@@ -188,8 +188,6 @@ export default function TournoiGestionLayout() {
           )}
 
           <main className="flex-1 order-1 md:order-2 min-w-0">
-            
-
             <Outlet context={{ tournoi }} />
           </main>
         </div>
