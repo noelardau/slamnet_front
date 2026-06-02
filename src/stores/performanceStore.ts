@@ -8,6 +8,7 @@ interface PerformanceStore {
   hydratePerformances: (tournamentId: number) => Promise<void>;
   createPerformance: (data: CreatePerformanceData) => Promise<Performance>;
   updatePerformance: (id: number, data: UpdatePerformanceData) => Promise<Performance>;
+  updatePerformanceLocal: (id: number, data: UpdatePerformanceData) => void;
   deletePerformance: (id: number) => Promise<void>;
   refreshPerformances: (tournamentId: number) => Promise<void>;
 }
@@ -43,6 +44,14 @@ export const usePerformanceStore = create<PerformanceStore>((set, get) => ({
       set({ error: errorMessage, isLoading: false });
       throw error;
     }
+  },
+
+  updatePerformanceLocal: (id: number, data: UpdatePerformanceData) => {
+    set((state) => ({
+      performances: state.performances.map((p) =>
+        p.idPerfo === id ? { ...p, ...data } : p
+      ),
+    }));
   },
 
   updatePerformance: async (id: number, data: UpdatePerformanceData) => {

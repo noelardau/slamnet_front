@@ -6,7 +6,7 @@ interface ParticipantStore {
   isLoading: boolean;
   error: string | null;
   hydrateParticipants: (tournamentId: number) => Promise<void>;
-  addParticipant: (tournamentId: number) => Promise<Participant>;
+  addParticipant: (tournamentId: number, membreId: number) => Promise<Participant>;
   addGuest: (tournamentId: number, guestData: CreateGuestData) => Promise<Participant>;
   removeParticipant: (tournamentId: number) => Promise<void>;
   removeGuest: (tournamentId: number, guestId: number) => Promise<void>;
@@ -30,10 +30,10 @@ export const useParticipantStore = create<ParticipantStore>((set, get) => ({
     }
   },
 
-  addParticipant: async (tournamentId: number) => {
+  addParticipant: async (tournamentId: number, membreId: number) => {
     try {
       set({ isLoading: true, error: null });
-      const newParticipant = await participantService.addParticipantToTournament(tournamentId);
+      const newParticipant = await participantService.addParticipantToTournament(tournamentId, membreId);
       set((state) => ({
         participants: [...state.participants, newParticipant],
         isLoading: false,

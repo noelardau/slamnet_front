@@ -2,7 +2,7 @@ import { apiService } from './api';
 
 export interface Performance {
   idPerfo: number;
-  duree: number | null;
+  duree: string | null;
   noteFinale: number | null;
   etat: string | null;
   idTournoi: number;
@@ -32,13 +32,13 @@ export interface CreatePerformanceData {
   idTournoi: number;
   idMembre?: number;
   idGuest?: number;
-  duree?: number;
+  duree?: string;
   noteFinale?: number;
   etat?: string;
 }
 
 export interface UpdatePerformanceData {
-  duree?: number;
+  duree?: string;
   noteFinale?: number;
   etat?: string;
 }

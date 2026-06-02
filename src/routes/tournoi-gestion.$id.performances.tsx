@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Mic, Trash2, Loader2, Play, Pause, CheckCircle, Clock, AlertCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Plus, Mic, Trash2, Loader2, Play, Pause, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { usePerformanceStore } from '../stores/performanceStore';
@@ -8,21 +8,25 @@ import { useParticipantStore } from '../stores/participantStore';
 
 type PerformanceState = 'prêt' | 'en_cours' | 'en_pause' | 'terminée';
 
+type TabType = 'liste' | 'en_cours' | 'note';
+
 export default function TournoiPerformances() {
   const { tournoi } = useOutletContext<any>();
   const { showSuccess, showError } = useToast();
   const { participants, hydrateParticipants } = useParticipantStore();
-  const { performances, isLoading, hydratePerformances, deletePerformance } = usePerformanceStore();
+  const { performances, isLoading, hydratePerformances, deletePerformance, createPerformance, updatePerformanceLocal, updatePerformance } = usePerformanceStore();
   
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [performanceToDelete, setPerformanceToDelete] = useState<any>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [selectedParticipantId, setSelectedParticipantId] = useState<number | null>(null);
-  const [performanceFormData, setPerformanceFormData] = useState({
-    duree: '',
-    noteFinale: '',
-    etat: 'prêt' as PerformanceState,
-  });
+  const [activeTab, setActiveTab] = useState<TabType>('liste');
+  const [currentPerformance, setCurrentPerformance] = useState<any>(null);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [isTerminating, setIsTerminating] = useState(false);
+  const [modalActiveTab, setModalActiveTab] = useState<'participant' | 'tirage'>('participant');
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (tournoi?.idTournoi) {
@@ -30,6 +34,14 @@ export default function TournoiPerformances() {
       loadParticipants();
     }
   }, [tournoi?.idTournoi]);
+
+  useEffect(() => {
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, []);
 
   const loadPerformances = async () => {
     try {
@@ -44,6 +56,106 @@ export default function TournoiPerformances() {
       await hydrateParticipants(tournoi.idTournoi);
     } catch (error) {
       showError('Erreur lors du chargement des participants');
+    }
+  };
+
+  const handleCreatePerformance = async () => {
+    if (!selectedParticipantId) {
+      showError('Veuillez sélectionner un participant');
+      return;
+    }
+
+    const participant = participants.find(p => p.idParticipant === selectedParticipantId);
+    if (!participant) {
+      showError('Participant non trouvé');
+      return;
+    }
+
+    try {
+      const createData: any = {
+        idTournoi: tournoi.idTournoi,
+        etat: 'prêt',
+        duree: '00:00',
+      };
+
+      if (participant.idMembre) {
+        createData.idMembre = participant.idMembre;
+      } else if (participant.idGuest) {
+        createData.idGuest = participant.idGuest;
+      }
+
+      await createPerformance(createData);
+      showSuccess('Performance créée avec succès');
+      setShowAddDialog(false);
+      setSelectedParticipantId(null);
+      await loadPerformances();
+    } catch (error) {
+      showError('Erreur lors de la création de la performance');
+    }
+  };
+
+  const parseDuration = (duration: string | null): number => {
+    if (!duration) return 0;
+    const [mins, secs] = duration.split(':').map(Number);
+    return (mins || 0) * 60 + (secs || 0);
+  };
+
+  const formatDurationSeconds = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleStartPerformance = (performance: any) => {
+    setCurrentPerformance(performance);
+    setActiveTab('en_cours');
+    setTimerSeconds(parseDuration(performance.duree));
+  };
+
+  const handlePlay = () => {
+    setTimerRunning(true);
+    updatePerformanceLocal(currentPerformance.idPerfo, { etat: 'en_cours' });
+    
+    timerIntervalRef.current = setInterval(() => {
+      setTimerSeconds(prev => {
+        const newSeconds = prev + 1;
+        updatePerformanceLocal(currentPerformance.idPerfo, { duree: formatDurationSeconds(newSeconds) });
+        return newSeconds;
+      });
+    }, 1000);
+  };
+
+  const handlePause = () => {
+    setTimerRunning(false);
+    updatePerformanceLocal(currentPerformance.idPerfo, { etat: 'en_pause' });
+    
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+  };
+
+  const handleTerminate = async () => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+
+    setIsTerminating(true);
+    try {
+      await updatePerformance(currentPerformance.idPerfo, {
+        etat: 'terminée',
+        duree: formatDurationSeconds(timerSeconds),
+      });
+      showSuccess('Performance terminée avec succès');
+      setActiveTab('note');
+      setCurrentPerformance(null);
+      setTimerRunning(false);
+      await loadPerformances();
+    } catch (error) {
+      showError('Erreur lors de la terminaison de la performance');
+    } finally {
+      setIsTerminating(false);
     }
   };
 
@@ -66,33 +178,31 @@ export default function TournoiPerformances() {
     }
   };
 
-  const getParticipantName = (performance: any) => {
-    if (performance.membre) {
-      return performance.membre.pseudoMembre;
-    } else if (performance.guest) {
-      return performance.guest.pseudo;
+  const getParticipantName = (item: any) => {
+    if (item.membre) {
+      return item.membre.pseudoMembre;
+    } else if (item.guest) {
+      return item.guest.pseudo;
     }
     return 'Inconnu';
   };
 
-  const getParticipantPhoto = (performance: any) => {
-    if (performance.membre?.photoMembre) {
-      return performance.membre.photoMembre;
+  const getParticipantPhoto = (item: any) => {
+    if (item.membre?.photoMembre) {
+      return item.membre.photoMembre;
     }
     return null;
   };
 
-  const isGuest = (performance: any) => !!performance.guest;
+  const isGuest = (item: any) => !!item.guest;
 
-  const getParticipantType = (performance: any) => {
-    return isGuest(performance) ? 'Invité' : 'Membre';
+  const getParticipantType = (item: any) => {
+    return isGuest(item) ? 'Invité' : 'Membre';
   };
 
-  const formatDuration = (seconds: number | null) => {
-    if (!seconds) return 'Non définie';
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const formatDuration = (duration: string | null): string => {
+    if (!duration) return '00:00';
+    return duration;
   };
 
   const getEtatColor = (etat: string | null) => {
@@ -135,24 +245,14 @@ export default function TournoiPerformances() {
     }
   };
 
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 
-          className="text-foreground"
-          style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
-        >
-          Performances
-        </h2>
-        <button
-          onClick={() => setShowAddDialog(true)}
-          className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
-        >
-          <Plus size={16} />
-          Ajouter une performance
-        </button>
-      </div>
+  const tabs = [
+    { id: 'liste' as TabType, label: 'Liste' },
+    { id: 'en_cours' as TabType, label: 'En cours' },
+    { id: 'note' as TabType, label: 'Note' },
+  ];
 
+  const renderListeTab = () => (
+    <>
       {isLoading && performances.length === 0 ? (
         <div className="text-center py-12">
           <Loader2 className="mx-auto mb-4 text-muted-foreground animate-spin" size={48} />
@@ -209,6 +309,15 @@ export default function TournoiPerformances() {
                   </span>
                 )}
                 <span className="text-sm text-muted-foreground font-medium">#{index + 1}</span>
+                {performance.etat === 'prêt' && (
+                  <button
+                    onClick={() => handleStartPerformance(performance)}
+                    className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-all text-sm flex items-center gap-2"
+                  >
+                    <Play size={14} />
+                    Démarrer
+                  </button>
+                )}
                 <button
                   onClick={() => handleDeleteClick(performance)}
                   className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all"
@@ -220,6 +329,189 @@ export default function TournoiPerformances() {
           ))}
         </div>
       )}
+    </>
+  );
+
+  const renderEnCoursTab = () => {
+    if (!currentPerformance) {
+      return (
+        <div className="text-center py-12 border border-border border-dashed">
+          <Clock className="mx-auto mb-4 text-muted-foreground" size={48} />
+          <p className="text-muted-foreground">Aucune performance en cours</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-card border rounded-xl p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+                {getParticipantPhoto(currentPerformance) ? (
+                  <img
+                    src={getParticipantPhoto(currentPerformance)}
+                    alt={getParticipantName(currentPerformance)}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Mic className="text-muted-foreground" size={28} />
+                )}
+              </div>
+              <div>
+                <h3 className="text-foreground font-medium text-xl">{getParticipantName(currentPerformance)}</h3>
+                <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                  isGuest(currentPerformance) ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
+                }`}>
+                  {getParticipantType(currentPerformance)}
+                </span>
+              </div>
+            </div>
+            <div className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getEtatColor(currentPerformance.etat)}`}>
+              {getEtatIcon(currentPerformance.etat)}
+              {getEtatLabel(currentPerformance.etat)}
+            </div>
+          </div>
+
+          <div className="text-center mb-8">
+                <div className="text-6xl font-mono font-bold text-foreground mb-2" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                {formatDurationSeconds(timerSeconds)}
+              </div>
+            <p className="text-muted-foreground">Chronomètre</p>
+          </div>
+
+          <div className="flex gap-4">
+            {!timerRunning ? (
+              <button
+                onClick={handlePlay}
+                className="bg-primary text-primary-foreground px-8 py-3 rounded-lg hover:bg-primary/90 transition-all text-lg flex items-center gap-2"
+              >
+                <Play size={20} />
+                Play
+              </button>
+            ) : (
+              <button
+                onClick={handlePause}
+                className="bg-secondary text-secondary-foreground px-8 py-3 rounded-lg hover:bg-secondary/90 transition-all text-lg flex items-center gap-2"
+              >
+                <Pause size={20} />
+                Pause
+              </button>
+            )}
+            <button
+              onClick={handleTerminate}
+              disabled={isTerminating}
+              className="bg-destructive text-destructive-foreground px-8 py-3 rounded-lg hover:bg-destructive/90 transition-all text-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isTerminating ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                <CheckCircle size={20} />
+              )}
+              {isTerminating ? 'Enregistrement...' : 'Terminer'}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderNoteTab = () => (
+    <div className="text-center py-12 border border-border border-dashed">
+      <CheckCircle className="mx-auto mb-4 text-muted-foreground" size={48} />
+      <p className="text-muted-foreground">Onglet note - à implémenter</p>
+    </div>
+  );
+
+  const isGuestParticipant = (participant: any) => !!participant.guest;
+
+  const renderParticipantList = () => (
+    <div className="space-y-2 max-h-96 overflow-y-auto">
+      {participants.map((participant) => (
+        <button
+          key={participant.idParticipant}
+          onClick={() => setSelectedParticipantId(participant.idParticipant)}
+          className={`w-full p-3 rounded-lg border transition-all flex items-center gap-3 ${
+            selectedParticipantId === participant.idParticipant
+              ? 'bg-primary/10 border-primary'
+              : 'bg-card border-border hover:border-primary/50'
+          }`}
+        >
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+            {getParticipantPhoto(participant) ? (
+              <img
+                src={getParticipantPhoto(participant)}
+                alt={getParticipantName(participant)}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <Mic className="text-muted-foreground" size={18} />
+            )}
+          </div>
+          <div className="text-left flex-1">
+            <p className="font-medium text-foreground">{getParticipantName(participant)}</p>
+            <span className={`text-xs px-2 py-0.5 rounded ${
+              isGuestParticipant(participant) ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
+            }`}>
+              {isGuestParticipant(participant) ? 'Invité' : 'Membre'}
+            </span>
+          </div>
+          {selectedParticipantId === participant.idParticipant && (
+            <CheckCircle className="text-primary" size={20} />
+          )}
+        </button>
+      ))}
+    </div>
+  );
+
+  const renderTirageTab = () => (
+    <div className="text-center py-8">
+      <p className="text-muted-foreground">Tirage au sort - à implémenter</p>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 
+          className="text-foreground"
+          style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
+        >
+          Performances
+        </h2>
+        {activeTab === 'liste' && (
+          <button
+            onClick={() => setShowAddDialog(true)}
+            className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
+          >
+            <Plus size={16} />
+            Ajouter une performance
+          </button>
+        )}
+      </div>
+
+      <div className="flex gap-2 mb-6 border-b border-border">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+              activeTab === tab.id
+                ? 'text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {tab.label}
+            {activeTab === tab.id && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'liste' && renderListeTab()}
+      {activeTab === 'en_cours' && renderEnCoursTab()}
+      {activeTab === 'note' && renderNoteTab()}
 
       <ConfirmDialog
         isOpen={showDeleteDialog}
@@ -234,6 +526,86 @@ export default function TournoiPerformances() {
           setPerformanceToDelete(null);
         }}
       />
+
+      {showAddDialog && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-card border rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-foreground">Créer une performance</h3>
+              <button
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setSelectedParticipantId(null);
+                  setModalActiveTab('participant');
+                }}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {tournoi?.tirageAuSort && (
+              <div className="flex gap-2 mb-6 border-b border-border">
+                <button
+                  onClick={() => setModalActiveTab('participant')}
+                  className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+                    modalActiveTab === 'participant'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Participant
+                  {modalActiveTab === 'participant' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                  )}
+                </button>
+                <button
+                  onClick={() => setModalActiveTab('tirage')}
+                  className={`px-4 py-2 text-sm font-medium transition-colors relative ${
+                    modalActiveTab === 'tirage'
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Tirage au sort
+                  {modalActiveTab === 'tirage' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                  )}
+                </button>
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {modalActiveTab === 'participant' ? (
+                <>
+                  {renderParticipantList()}
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={() => {
+                        setShowAddDialog(false);
+                        setSelectedParticipantId(null);
+                        setModalActiveTab('participant');
+                      }}
+                      className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors text-foreground"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleCreatePerformance}
+                      disabled={!selectedParticipantId}
+                      className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Créer
+                    </button>
+                  </div>
+                </>
+              ) : (
+                renderTirageTab()
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
