@@ -119,11 +119,14 @@ export default function TournoiPerformances() {
   const handlePlay = () => {
     setTimerRunning(true);
     updatePerformanceLocal(currentPerformance.idPerfo, { etat: 'en_cours' });
+    setCurrentPerformance({ ...currentPerformance, etat: 'en_cours' });
     
     timerIntervalRef.current = setInterval(() => {
       setTimerSeconds(prev => {
         const newSeconds = prev + 1;
-        updatePerformanceLocal(currentPerformance.idPerfo, { duree: formatDurationSeconds(newSeconds) });
+        const formattedDuration = formatDurationSeconds(newSeconds);
+        updatePerformanceLocal(currentPerformance.idPerfo, { duree: formattedDuration });
+        setCurrentPerformance(prev => ({ ...prev, duree: formattedDuration }));
         return newSeconds;
       });
     }, 1000);
@@ -132,6 +135,7 @@ export default function TournoiPerformances() {
   const handlePause = () => {
     setTimerRunning(false);
     updatePerformanceLocal(currentPerformance.idPerfo, { etat: 'en_pause' });
+    setCurrentPerformance({ ...currentPerformance, etat: 'en_pause' });
     
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
