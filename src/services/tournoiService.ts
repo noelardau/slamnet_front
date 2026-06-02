@@ -8,6 +8,8 @@ export interface Tournoi {
   heureTournoi: string;
   nbJury: number;
   afficheTournoi?: string;
+  dureePerfo?: string;
+  tirageAuSort: boolean;
   idCollectif: number;
   createdAt?: string;
 }
@@ -19,6 +21,8 @@ export interface CreateTournoiData {
   heureTournoi: string;
   nbJury: number;
   afficheTournoi?: string;
+  dureePerfo?: string;
+  tirageAuSort?: boolean;
 }
 
 export interface UpdateTournoiData {
@@ -28,6 +32,8 @@ export interface UpdateTournoiData {
   heureTournoi?: string;
   nbJury?: number;
   afficheTournoi?: string;
+  dureePerfo?: string;
+  tirageAuSort?: boolean;
 }
 
 class TournoiService {

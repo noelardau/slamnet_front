@@ -17,6 +17,8 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
     heureTournoi: '',
     nbJury: 3,
     afficheTournoi: '',
+    dureePerfo: '',
+    tirageAuSort: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -179,6 +181,32 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
                   <option key={num} value={num}>{num} juré{num > 1 ? 's' : ''}</option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Durée par performance (optionnel)</label>
+              <input
+                type="text"
+                name="dureePerfo"
+                value={formData.dureePerfo}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="Ex: 3 min, 5 min, etc."
+                disabled={loading}
+              />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                name="tirageAuSort"
+                id="tirageAuSort"
+                checked={formData.tirageAuSort}
+                onChange={handleChange}
+                className="w-5 h-5 rounded border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                disabled={loading}
+              />
+              <label htmlFor="tirageAuSort" className="text-sm font-medium">Activer le tirage au sort des participants</label>
             </div>
 
             <div>

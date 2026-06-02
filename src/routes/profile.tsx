@@ -332,34 +332,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
             )}
           </div>
 
-          <div className="border border-border p-8 bg-card">
-            <h3 
-              className="text-foreground mb-4"
-              style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}
-            >
-              Statistiques
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
-                  0
-                </div>
-                <div className="text-muted-foreground text-sm">Tournois créés</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
-                  0
-                </div>
-                <div className="text-muted-foreground text-sm">Membres actifs</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-2" style={{ fontFamily: "Anton, sans-serif" }}>
-                  0
-                </div>
-                <div className="text-muted-foreground text-sm">Événements</div>
-              </div>
-            </div>
-          </div>
+       
         </div>
       </div>
    
