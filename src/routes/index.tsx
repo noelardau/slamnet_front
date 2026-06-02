@@ -14,6 +14,7 @@ import TournoiGestionLayout from './tournoi-gestion.$id';
 import TournoiParticipantsPage from './tournoi-gestion.$id.participants';
 import TournoiPerformancesPage from './tournoi-gestion.$id.performances';
 import TournoiClassementPage from './tournoi-gestion.$id.classement';
+import TournoiParametresPage from './tournoi-gestion.$id.parametres';
 import PrivacyPage from './privacy';
 import TermsPage from './terms';
 import ContactPage from './contact';
@@ -41,6 +42,7 @@ export const routes: RouteObject[] = [
           { path: 'participants', element: <TournoiParticipantsPage /> },
           { path: 'performances', element: <TournoiPerformancesPage /> },
           { path: 'classement', element: <TournoiClassementPage /> },
+          { path: 'parametres', element: <TournoiParametresPage /> },
         ]
       },
       { path: 'privacy', element: <PrivacyPage /> },

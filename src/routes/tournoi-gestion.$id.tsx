@@ -1,7 +1,7 @@
 import { useParams, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTournoiStore } from '../stores/tournoiStore';
 import { useEffect, useState } from 'react';
-import { Loader2, Users, Mic, Trophy, Menu, X } from 'lucide-react';
+import { Loader2, Users, Mic, Trophy, Menu, X, Settings } from 'lucide-react';
 
 export default function TournoiGestionLayout() {
   const { id } = useParams();
@@ -41,7 +41,8 @@ export default function TournoiGestionLayout() {
     { id: 'classement', label: 'Classement', icon: Trophy, path: `/tournoi-gestion/${id}/classement` },
   ] as const;
 
-  const activeTab = tabs.find(tab => location.pathname === tab.path)?.id || 'participants';
+  const isSettingsActive = location.pathname === `/tournoi-gestion/${id}/parametres`;
+  const activeTab = isSettingsActive ? null : (tabs.find(tab => location.pathname === tab.path)?.id || null);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -137,6 +138,19 @@ export default function TournoiGestionLayout() {
                   </button>
                 );
               })}
+              <div className="pt-4 mt-4 border-t border-border">
+                <button
+                  onClick={() => navigate(`/tournoi-gestion/${id}/parametres`)}
+                  className={`w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base ${
+                    isSettingsActive
+                      ? 'bg-primary text-primary-foreground font-medium'
+                      : 'text-muted-foreground hover:bg-card hover:text-foreground'
+                  }`}
+                >
+                  <Settings size={16} className="sm:size-[18px]" />
+                  <span>Paramètres</span>
+                </button>
+              </div>
             </nav>
           </aside>
 
@@ -182,6 +196,19 @@ export default function TournoiGestionLayout() {
                       </button>
                     );
                   })}
+                  <div className="pt-4 mt-4 border-t border-border">
+                    <button
+                      onClick={() => navigate(`/tournoi-gestion/${id}/parametres`)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base ${
+                        isSettingsActive
+                          ? 'bg-primary text-primary-foreground font-medium'
+                          : 'text-muted-foreground hover:bg-card hover:text-foreground'
+                      }`}
+                    >
+                      <Settings size={18} />
+                      <span>Paramètres</span>
+                    </button>
+                  </div>
                 </nav>
               </aside>
             </>
