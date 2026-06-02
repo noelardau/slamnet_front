@@ -1,10 +1,11 @@
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Mic, Trash2, Loader2, Play, Pause, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
+import { Plus, Mic, Trash2, Loader2, Play, Pause, CheckCircle, Clock, AlertCircle, X, Send } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { usePerformanceStore } from '../stores/performanceStore';
 import { useParticipantStore } from '../stores/participantStore';
+import { useNoteStore } from '../stores/noteStore';
 
 type PerformanceState = 'prêt' | 'en_cours' | 'en_pause' | 'terminée';
 
@@ -15,6 +16,7 @@ export default function TournoiPerformances() {
   const { showSuccess, showError } = useToast();
   const { participants, hydrateParticipants } = useParticipantStore();
   const { performances, isLoading, hydratePerformances, deletePerformance, createPerformance, updatePerformanceLocal, updatePerformance } = usePerformanceStore();
+  const { notes, hydrateNotes, createBulkNotes, updateNote, clearNotes, isLoading: notesLoading } = useNoteStore();
   
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [performanceToDelete, setPerformanceToDelete] = useState<any>(null);
@@ -27,6 +29,9 @@ export default function TournoiPerformances() {
   const [isTerminating, setIsTerminating] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [modalActiveTab, setModalActiveTab] = useState<'participant' | 'tirage'>('participant');
+  const [noteInput, setNoteInput] = useState('');
+  const [localNotes, setLocalNotes] = useState<{ id: string; valeur: number; retenu: boolean }[]>([]);
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -43,6 +48,12 @@ export default function TournoiPerformances() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'note' && currentPerformance?.idPerfo) {
+      hydrateNotes(currentPerformance.idPerfo);
+    }
+  }, [activeTab, currentPerformance?.idPerfo]);
 
   const loadPerformances = async () => {
     try {
@@ -151,19 +162,90 @@ export default function TournoiPerformances() {
 
     setIsTerminating(true);
     try {
-      await updatePerformance(currentPerformance.idPerfo, {
+      const updatedPerformance = await updatePerformance(currentPerformance.idPerfo, {
         etat: 'terminée',
         duree: formatDurationSeconds(timerSeconds),
       });
       showSuccess('Performance terminée avec succès');
       setActiveTab('note');
-      setCurrentPerformance(null);
+      setCurrentPerformance(updatedPerformance);
       setTimerRunning(false);
       await loadPerformances();
     } catch (error) {
       showError('Erreur lors de la terminaison de la performance');
     } finally {
       setIsTerminating(false);
+    }
+  };
+
+  const handleAddNote = () => {
+    const noteValue = parseFloat(noteInput.replace(',', '.'));
+    if (isNaN(noteValue) || noteValue < 0 || noteValue > 10) {
+      showError('La note doit être un nombre entre 0 et 10');
+      return;
+    }
+    const newNote = { 
+      id: Date.now().toString(),
+      valeur: noteValue, 
+      retenu: true 
+    };
+    setLocalNotes([...localNotes, newNote]);
+    setNoteInput('');
+  };
+
+  const handleToggleRetenu = (noteId: string) => {
+    setLocalNotes(prev => prev.map(note => 
+      note.id === noteId ? { ...note, retenu: !note.retenu } : note
+    ));
+  };
+
+  const handleSaveNotes = async () => {
+    if (!currentPerformance?.idPerfo) {
+      showError('Aucune performance sélectionnée');
+      return;
+    }
+
+    if (localNotes.length === 0) {
+      showError('Veuillez ajouter au moins une note');
+      return;
+    }
+
+    const nbJury = tournoi?.nbJury || 3;
+    if (localNotes.length !== nbJury) {
+      showError(`Vous devez ajouter exactement ${nbJury} notes (nombre de jurys)`);
+      return;
+    }
+
+    setIsSavingNotes(true);
+    try {
+      const notesToSave = localNotes.map(({ id, ...note }) => note);
+      await createBulkNotes(currentPerformance.idPerfo, notesToSave);
+      showSuccess('Notes enregistrées avec succès');
+      
+      await updatePerformance(currentPerformance.idPerfo, {});
+      
+      setLocalNotes([]);
+      setCurrentPerformance(null);
+      clearNotes();
+      
+      await loadPerformances();
+    } catch (error) {
+      showError('Erreur lors de l\'enregistrement des notes');
+    } finally {
+      setIsSavingNotes(false);
+    }
+  };
+
+  const handleToggleNoteRetenu = async (noteId: number) => {
+    const note = notes.find(n => n.idNote === noteId);
+    if (!note) return;
+
+    try {
+      await updateNote(noteId, { retenu: !note.retenu });
+      showSuccess('Note mise à jour avec succès');
+      await hydrateNotes(currentPerformance.idPerfo);
+    } catch (error) {
+      showError('Erreur lors de la mise à jour de la note');
     }
   };
 
@@ -424,12 +506,114 @@ export default function TournoiPerformances() {
     );
   };
 
-  const renderNoteTab = () => (
-    <div className="text-center py-12 border border-border border-dashed">
-      <CheckCircle className="mx-auto mb-4 text-muted-foreground" size={48} />
-      <p className="text-muted-foreground">Onglet note - à implémenter</p>
-    </div>
-  );
+  const renderNoteTab = () => {
+    const allLocalNotes = [...localNotes].sort((a, b) => a.valeur - b.valeur);
+    const existingNotes = [...notes].sort((a, b) => a.valeur - b.valeur);
+    const nbJury = tournoi?.nbJury || 3;
+    const canAddNote = allLocalNotes.length < nbJury;
+
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-card border rounded-xl p-6">
+          <h3 className="text-foreground font-medium text-lg mb-4">Ajouter des notes ({allLocalNotes.length}/{nbJury})</h3>
+          
+          <div className="flex gap-3 mb-4">
+            <input
+              type="text"
+              value={noteInput}
+              onChange={(e) => setNoteInput(e.target.value)}
+              placeholder="Note (ex: 8,5)"
+              onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
+              disabled={!canAddNote}
+              className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            />
+            <button
+              onClick={handleAddNote}
+              disabled={!canAddNote}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Ajouter
+            </button>
+          </div>
+
+          {allLocalNotes.length > 0 && (
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-muted-foreground mb-3">Notes à enregistrer</h4>
+              <div className="flex flex-wrap gap-3">
+                {allLocalNotes.map((note) => (
+                  <div
+                    key={note.id}
+                    className={`flex items-center gap-2 px-4 py-2 bg-background border rounded-lg ${
+                      !note.retenu ? 'border-red-500/30 bg-red-500/5' : 'border-border'
+                    }`}
+                  >
+                    <span className={`text-foreground font-medium ${!note.retenu ? 'line-through text-destructive' : ''}`}>
+                      {note.valeur}
+                    </span>
+                    <button
+                      onClick={() => handleToggleRetenu(note.id)}
+                      className="text-sm text-destructive hover:underline"
+                    >
+                      {note.retenu ? 'Retirer' : 'Rétablir'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {!canAddNote && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Nombre maximum de notes atteint ({nbJury} jurys)
+                </p>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={handleSaveNotes}
+            disabled={isSavingNotes || localNotes.length === 0 || localNotes.length !== nbJury}
+            className="w-full bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isSavingNotes ? (
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                Enregistrement...
+              </>
+            ) : (
+              <>
+                <Send size={16} />
+                Enregistrer les notes ({localNotes.length}/{nbJury})
+              </>
+            )}
+          </button>
+        </div>
+
+        {existingNotes.length > 0 && (
+          <div className="bg-card border rounded-xl p-6 mt-6">
+            <h3 className="text-foreground font-medium text-lg mb-4">Notes existantes</h3>
+            <div className="flex flex-wrap gap-3">
+              {existingNotes.map((note) => (
+                <div
+                  key={note.idNote}
+                  className={`flex items-center gap-2 px-4 py-2 bg-background border rounded-lg ${
+                    !note.retenu ? 'border-red-500/30 bg-red-500/5' : 'border-border'
+                  }`}
+                >
+                  <span className={`text-foreground font-medium ${!note.retenu ? 'line-through text-destructive' : ''}`}>
+                    {note.valeur}
+                  </span>
+                  <button
+                    onClick={() => handleToggleNoteRetenu(note.idNote)}
+                    className="text-sm text-destructive hover:underline"
+                  >
+                    {note.retenu ? 'Retirer' : 'Rétablir'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
 
   const isGuestParticipant = (participant: any) => !!participant.guest;
 
