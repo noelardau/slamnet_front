@@ -25,6 +25,7 @@ export default function TournoiPerformances() {
   const [timerRunning, setTimerRunning] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTerminating, setIsTerminating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [modalActiveTab, setModalActiveTab] = useState<'participant' | 'tirage'>('participant');
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -71,6 +72,7 @@ export default function TournoiPerformances() {
       return;
     }
 
+    setIsCreating(true);
     try {
       const createData: any = {
         idTournoi: tournoi.idTournoi,
@@ -91,6 +93,8 @@ export default function TournoiPerformances() {
       await loadPerformances();
     } catch (error) {
       showError('Erreur lors de la création de la performance');
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -586,16 +590,24 @@ export default function TournoiPerformances() {
                         setSelectedParticipantId(null);
                         setModalActiveTab('participant');
                       }}
-                      className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors text-foreground"
+                      disabled={isCreating}
+                      className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Annuler
                     </button>
                     <button
                       onClick={handleCreatePerformance}
-                      disabled={!selectedParticipantId}
-                      className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={!selectedParticipantId || isCreating}
+                      className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      Créer
+                      {isCreating ? (
+                        <>
+                          <Loader2 className="animate-spin" size={16} />
+                          Création...
+                        </>
+                      ) : (
+                        'Créer'
+                      )}
                     </button>
                   </div>
                 </>
