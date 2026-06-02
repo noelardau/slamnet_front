@@ -6,6 +6,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { usePerformanceStore } from '../stores/performanceStore';
 import { useParticipantStore } from '../stores/participantStore';
 import { useNoteStore } from '../stores/noteStore';
+import { usePenaliteStore } from '../stores/penaliteStore';
 
 type PerformanceState = 'prêt' | 'en_cours' | 'en_pause' | 'terminée';
 
@@ -17,6 +18,7 @@ export default function TournoiPerformances() {
   const { participants, hydrateParticipants } = useParticipantStore();
   const { performances, isLoading, hydratePerformances, deletePerformance, createPerformance, updatePerformanceLocal, updatePerformance } = usePerformanceStore();
   const { notes, hydrateNotes, createBulkNotes, updateNote, clearNotes, isLoading: notesLoading } = useNoteStore();
+  const { penalites, hydratePenalites, createBulkPenalites, clearPenalites } = usePenaliteStore();
   
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [performanceToDelete, setPerformanceToDelete] = useState<any>(null);
@@ -31,6 +33,8 @@ export default function TournoiPerformances() {
   const [modalActiveTab, setModalActiveTab] = useState<'participant' | 'tirage'>('participant');
   const [noteInput, setNoteInput] = useState('');
   const [localNotes, setLocalNotes] = useState<{ id: string; valeur: number; retenu: boolean }[]>([]);
+  const [localPenalites, setLocalPenalites] = useState<{ id: string; valeur: number }[]>([]);
+  const [inputType, setInputType] = useState<'note' | 'penalite'>('note');
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -48,12 +52,6 @@ export default function TournoiPerformances() {
       }
     };
   }, []);
-
-  useEffect(() => {
-    if (activeTab === 'note' && currentPerformance?.idPerfo) {
-      hydrateNotes(currentPerformance.idPerfo);
-    }
-  }, [activeTab, currentPerformance?.idPerfo]);
 
   const loadPerformances = async () => {
     try {
@@ -179,17 +177,26 @@ export default function TournoiPerformances() {
   };
 
   const handleAddNote = () => {
-    const noteValue = parseFloat(noteInput.replace(',', '.'));
-    if (isNaN(noteValue) || noteValue < 0 || noteValue > 10) {
-      showError('La note doit être un nombre entre 0 et 10');
+    const value = parseFloat(noteInput.replace(',', '.'));
+    if (isNaN(value) || value < 0 || value > 10) {
+      showError('La valeur doit être un nombre entre 0 et 10');
       return;
     }
-    const newNote = { 
-      id: Date.now().toString(),
-      valeur: noteValue, 
-      retenu: true 
-    };
-    setLocalNotes([...localNotes, newNote]);
+
+    if (inputType === 'note') {
+      const newNote = { 
+        id: Date.now().toString(),
+        valeur: value, 
+        retenu: true 
+      };
+      setLocalNotes([...localNotes, newNote]);
+    } else {
+      const newPenalite = {
+        id: Date.now().toString(),
+        valeur: value,
+      };
+      setLocalPenalites([...localPenalites, newPenalite]);
+    }
     setNoteInput('');
   };
 
@@ -205,12 +212,8 @@ export default function TournoiPerformances() {
       return;
     }
 
-    if (localNotes.length === 0) {
-      showError('Veuillez ajouter au moins une note');
-      return;
-    }
-
     const nbJury = tournoi?.nbJury || 3;
+    
     if (localNotes.length !== nbJury) {
       showError(`Vous devez ajouter exactement ${nbJury} notes (nombre de jurys)`);
       return;
@@ -219,14 +222,22 @@ export default function TournoiPerformances() {
     setIsSavingNotes(true);
     try {
       const notesToSave = localNotes.map(({ id, ...note }) => note);
+      const penalitesToSave = localPenalites.map(({ id, ...penalite }) => penalite);
+      
       await createBulkNotes(currentPerformance.idPerfo, notesToSave);
+      if (penalitesToSave.length > 0) {
+        await createBulkPenalites(currentPerformance.idPerfo, penalitesToSave);
+      }
+      
       showSuccess('Notes enregistrées avec succès');
       
       await updatePerformance(currentPerformance.idPerfo, {});
       
       setLocalNotes([]);
+      setLocalPenalites([]);
       setCurrentPerformance(null);
       clearNotes();
+      clearPenalites();
       
       await loadPerformances();
     } catch (error) {
@@ -385,7 +396,7 @@ export default function TournoiPerformances() {
                     {performance.noteFinale && (
                       <>
                         <span>·</span>
-                        <span>Note: {performance.noteFinale}/10</span>
+                        <span>Note: {performance.noteFinale}</span>
                       </>
                     )}
                   </div>
@@ -508,36 +519,65 @@ export default function TournoiPerformances() {
 
   const renderNoteTab = () => {
     const allLocalNotes = [...localNotes].sort((a, b) => a.valeur - b.valeur);
+    const allLocalPenalites = [...localPenalites].sort((a, b) => a.valeur - b.valeur);
     const existingNotes = [...notes].sort((a, b) => a.valeur - b.valeur);
+    const existingPenalites = [...penalites].sort((a, b) => a.valeur - b.valeur);
     const nbJury = tournoi?.nbJury || 3;
     const canAddNote = allLocalNotes.length < nbJury;
 
     return (
       <div className="max-w-4xl mx-auto">
         <div className="bg-card border rounded-xl p-6">
-          <h3 className="text-foreground font-medium text-lg mb-4">Ajouter des notes ({allLocalNotes.length}/{nbJury})</h3>
+          <h3 className="text-foreground font-medium text-lg mb-4">Ajouter des notes et pénalités</h3>
           
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setInputType('note')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                inputType === 'note'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              Notes
+            </button>
+            <button
+              onClick={() => setInputType('penalite')}
+              className={`px-4 py-2 rounded-lg transition-colors ${
+                inputType === 'penalite'
+                  ? 'bg-destructive text-destructive-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
+              }`}
+            >
+              Pénalités
+            </button>
+          </div>
+
           <div className="flex gap-3 mb-4">
             <input
               type="text"
               value={noteInput}
               onChange={(e) => setNoteInput(e.target.value)}
-              placeholder="Note (ex: 8,5)"
+              placeholder={inputType === 'note' ? 'Note (ex: 8,5)' : 'Pénalité (ex: 1,5)'}
               onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
-              disabled={!canAddNote}
+              disabled={inputType === 'note' && !canAddNote}
               className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
             />
             <button
               onClick={handleAddNote}
-              disabled={!canAddNote}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={inputType === 'note' && !canAddNote}
+              className={`px-4 py-2 rounded-lg hover:opacity-90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                inputType === 'penalite'
+                  ? 'bg-destructive text-destructive-foreground'
+                  : 'bg-primary text-primary-foreground'
+              }`}
             >
               Ajouter
             </button>
           </div>
 
           {allLocalNotes.length > 0 && (
-            <div className="mb-6">
+            <div className="mb-4">
               <h4 className="text-sm font-medium text-muted-foreground mb-3">Notes à enregistrer</h4>
               <div className="flex flex-wrap gap-3">
                 {allLocalNotes.map((note) => (
@@ -567,9 +607,35 @@ export default function TournoiPerformances() {
             </div>
           )}
 
+          {allLocalPenalites.length > 0 && (
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-muted-foreground mb-3">Pénalités à enregistrer</h4>
+              <div className="flex flex-wrap gap-3">
+                {allLocalPenalites.map((penalite) => (
+                  <div
+                    key={penalite.id}
+                    className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border border-destructive/30 rounded-lg"
+                  >
+                    <span className="text-destructive font-medium">
+                      -{penalite.valeur}
+                    </span>
+                    <button
+                      onClick={() => {
+                        setLocalPenalites(prev => prev.filter(p => p.id !== penalite.id));
+                      }}
+                      className="text-sm text-destructive hover:underline"
+                    >
+                      Retirer
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <button
             onClick={handleSaveNotes}
-            disabled={isSavingNotes || localNotes.length === 0 || localNotes.length !== nbJury}
+            disabled={isSavingNotes || localNotes.length !== nbJury}
             className="w-full bg-primary text-primary-foreground px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isSavingNotes ? (
@@ -580,15 +646,15 @@ export default function TournoiPerformances() {
             ) : (
               <>
                 <Send size={16} />
-                Enregistrer les notes ({localNotes.length}/{nbJury})
+                Enregistrer ({localNotes.length}/{nbJury})
               </>
             )}
           </button>
         </div>
 
-        {existingNotes.length > 0 && (
+        {(existingNotes.length > 0 || existingPenalites.length > 0) && (
           <div className="bg-card border rounded-xl p-6 mt-6">
-            <h3 className="text-foreground font-medium text-lg mb-4">Notes existantes</h3>
+            <h3 className="text-foreground font-medium text-lg mb-4">Notes et pénalités existantes</h3>
             <div className="flex flex-wrap gap-3">
               {existingNotes.map((note) => (
                 <div
@@ -606,6 +672,16 @@ export default function TournoiPerformances() {
                   >
                     {note.retenu ? 'Retirer' : 'Rétablir'}
                   </button>
+                </div>
+              ))}
+              {existingPenalites.map((penalite) => (
+                <div
+                  key={penalite.idPenalite}
+                  className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border border-destructive/30 rounded-lg"
+                >
+                  <span className="text-destructive font-medium">
+                    -{penalite.valeur}
+                  </span>
                 </div>
               ))}
             </div>
