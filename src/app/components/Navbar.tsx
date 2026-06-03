@@ -29,6 +29,7 @@ export function Navbar() {
     try {
       await logout();
       showSuccess('Déconnexion réussie');
+      setIsLoggingOut(false);
       setShowLogoutDialog(false);
       navigate('/login', { replace: true });
     } catch (error) {
