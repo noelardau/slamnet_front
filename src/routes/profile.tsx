@@ -216,7 +216,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
                 className="flex items-center gap-2 px-4 py-2 border border-border hover:border-primary/60 transition-all duration-300"
               >
                 <Edit2 size={16} />
-                Modifier
+                <span className="hidden md:inline">Modifier</span>
               </button>
             )}
           </div>
@@ -270,31 +270,31 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
                 </div>
                </div>
  
-               <div className="flex gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  disabled={isSubmitting}
-                  className="flex-1 px-6 py-3 border border-border hover:border-primary/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  style={{ letterSpacing: "0.06em" }}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="animate-spin" size={16} />
-                      Enregistrement...
-                    </>
-                  ) : (
-                    'Enregistrer'
-                  )}
-                </button>
-              </div>
+               <div className="flex flex-col md:flex-row gap-4 pt-4">
+                 <button
+                   type="button"
+                   onClick={handleCancel}
+                   disabled={isSubmitting}
+                   className="flex-1 px-6 py-3 border border-border hover:border-primary/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   Annuler
+                 </button>
+                 <button
+                   type="submit"
+                   disabled={isSubmitting}
+                   className="flex-1 px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                   style={{ letterSpacing: "0.06em" }}
+                 >
+                   {isSubmitting ? (
+                     <>
+                       <Loader2 className="animate-spin" size={16} />
+                       Enregistrement...
+                     </>
+                   ) : (
+                     'Enregistrer'
+                   )}
+                 </button>
+               </div>
             </form>
           ) : (
             <div className="space-y-6">
