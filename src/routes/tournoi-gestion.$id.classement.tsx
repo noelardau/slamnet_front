@@ -1,5 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
-import { Trophy, Medal, Award, Loader2, Clock } from 'lucide-react';
+import { Trophy, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useParticipantStore } from '../stores/participantStore';
 import { usePerformanceStore } from '../stores/performanceStore';
@@ -81,22 +81,12 @@ export default function TournoiClassement() {
 
   const classement = calculateClassement();
 
-  const getMedalIcon = (position: number) => {
-    switch (position) {
-      case 1: return <Trophy size={24} className="text-yellow-500" />;
-      case 2: return <Medal size={24} className="text-gray-400" />;
-      case 3: return <Award size={24} className="text-amber-600" />;
-      default: return <span className="text-muted-foreground font-bold text-xl">{position}</span>;
-    }
+  const getRankNumber = (position: number) => {
+    return <span className="text-foreground font-bold text-xl md:text-2xl">{position}</span>;
   };
 
   const getScoreColor = (position: number) => {
-    switch (position) {
-      case 1: return 'text-yellow-500';
-      case 2: return 'text-gray-400';
-      case 3: return 'text-amber-600';
-      default: return 'text-foreground';
-    }
+    return 'text-foreground';
   };
 
   return (
@@ -123,10 +113,10 @@ export default function TournoiClassement() {
               </div>
             ) : (
               classement.map((participant) => (
-                <div key={participant.idParticipant} className={`border border-border bg-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${participant.position <= 3 ? 'border-primary/30' : ''}`}>
+                <div key={participant.idParticipant} className={`border border-border bg-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4`}>
                   <div className="flex items-center gap-6 w-full md:w-auto">
                     <div className="w-12 h-12 flex items-center justify-center">
-                      {getMedalIcon(participant.position)}
+                      {getRankNumber(participant.position)}
                     </div>
                     <div className="flex items-center gap-4">
                       {getParticipantPhoto(participant) ? (
