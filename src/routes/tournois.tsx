@@ -125,7 +125,7 @@ function TournoisContent() {
             className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
           >
             <Plus size={16} />
-            Ajouter un tournoi
+            <span className="hidden md:inline">Ajouter un tournoi</span>
           </button>
         </div>
         <h1
@@ -154,19 +154,19 @@ function TournoisContent() {
           </p>
           <button
             onClick={() => setShowCreateDialog(true)}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider md:px-6 md:py-3 sm:px-4 sm:py-2"
             style={{ letterSpacing: "0.06em" }}
           >
-            <Plus size={20} />
-            Créer un tournoi
+            <Plus size={20} className="sm:size-16" />
+            <span className="hidden md:inline">Créer un tournoi</span>
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tournois.map((tournoi) => (
             <div key={tournoi.idTournoi} className="border border-border bg-card hover:border-primary/60 transition-all duration-300 group">
-              <div className="flex h-full">
-                <div className="w-1/2 h-full">
+              <div className="flex flex-col md:flex-row h-full">
+                <div className="w-full md:w-1/2 h-48 md:h-full">
                   {tournoi.afficheTournoi ? (
                     <img
                       src={tournoi.afficheTournoi}
@@ -180,7 +180,7 @@ function TournoisContent() {
                   )}
                 </div>
 
-                <div className="w-1/2 p-6 flex flex-col justify-center">
+                <div className="w-full md:w-1/2 p-6 flex flex-col justify-center">
                   <div className="flex items-start justify-between mb-4">
                     <h3 
                       className="text-foreground group-hover:text-primary transition-colors"
@@ -192,19 +192,21 @@ function TournoisContent() {
                       <button 
                         onClick={() => handleUpdateClick(tournoi)}
                         className="p-2 hover:bg-primary/20 rounded-lg transition-colors"
+                        aria-label="Modifier"
                       >
                         <Edit size={16} className="text-muted-foreground hover:text-primary" />
                       </button>
                       <button 
                         onClick={() => handleDeleteClick(tournoi)}
                         className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                        aria-label="Supprimer"
                       >
                         <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
                       </button>
                     </div>
                   </div>
 
-                  <div className="space-y-3 mb-6">
+                  <div className="space-y-3 mb-6 hidden md:block">
                     <div className="flex items-center gap-3 text-muted-foreground text-sm">
                       <Calendar size={16} />
                       <span>{formatDate(tournoi.dateTournoi)}</span>
@@ -227,7 +229,8 @@ function TournoisContent() {
                     onClick={() => navigate(`/tournoi-gestion/${tournoi.idTournoi}`)}
                     className="w-full px-4 py-3 border border-border hover:border-primary/60 hover:bg-primary/10 transition-all duration-300 font-medium text-sm"
                   >
-                    Gérer le tournoi
+                    <span className="hidden md:inline">Gérer le tournoi</span>
+                    <span className="md:hidden">Gérer</span>
                   </button>
                 </div>
               </div>

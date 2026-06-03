@@ -103,7 +103,7 @@ function MembresContent() {
             className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
           >
             <Plus size={16} />
-            Ajouter un membre
+            <span className="hidden md:inline">Ajouter un membre</span>
           </button>
         </div>
         <h1
@@ -155,66 +155,79 @@ function MembresContent() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMembres.map((membre) => (
-            <div key={membre.idMembre} className="border border-border bg-card p-6 hover:border-primary/60 transition-all duration-300">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-border flex items-center justify-center">
-                    {membre.photoMembre ? (
-                      <ImageWithFallback
-                        src={membre.photoMembre}
-                        alt={`${membre.prenomMembre} ${membre.nomMembre}`}
-                        className="w-full h-full object-cover"
-                        fallback={<User className="text-muted-foreground" size={32} />}
-                      />
-                    ) : (
-                      <User className="text-muted-foreground" size={32} />
-                    )}
-                  </div>
-                  <div>
-                    <h3 
-                      className="text-foreground"
-                      style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem" }}
-                    >
-                      {membre.prenomMembre} {membre.nomMembre.toUpperCase()}
-                    </h3>
-                    <p className="text-primary text-sm mt-1">@{membre.pseudoMembre}</p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleUpdateClick(membre.idMembre)}
-                    className="p-2 hover:bg-primary/10 rounded transition-colors"
-                    title="Modifier"
-                  >
-                    <Edit2 size={16} className="text-muted-foreground hover:text-primary" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteClick(membre.idMembre)}
-                    className="p-2 hover:bg-destructive/10 rounded transition-colors"
-                    title="Supprimer"
-                  >
-                    <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
-                  </button>
-                </div>
-              </div>
+           {filteredMembres.map((membre) => (
+             <div key={membre.idMembre} className="border border-border bg-card p-6 hover:border-primary/60 transition-all duration-300">
+               <div className="flex items-start justify-between mb-4">
+                 <div className="flex items-center gap-4">
+                   <div className="w-16 h-16 rounded-full overflow-hidden bg-border flex items-center justify-center">
+                     {membre.photoMembre ? (
+                       <ImageWithFallback
+                         src={membre.photoMembre}
+                         alt={`${membre.prenomMembre} ${membre.nomMembre}`}
+                         className="w-full h-full object-cover"
+                         fallback={<User className="text-muted-foreground" size={32} />}
+                       />
+                     ) : (
+                       <User className="text-muted-foreground" size={32} />
+                     )}
+                   </div>
+                   <div>
+                     <h3 
+                       className="text-foreground"
+                       style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem" }}
+                     >
+                       {membre.prenomMembre} {membre.nomMembre.toUpperCase()}
+                     </h3>
+                     <p className="text-primary text-sm mt-1">@{membre.pseudoMembre}</p>
+                   </div>
+                 </div>
+                 <div className="flex gap-2">
+                   <button
+                     onClick={() => handleUpdateClick(membre.idMembre)}
+                     className="p-2 hover:bg-primary/10 rounded transition-colors"
+                     title="Modifier"
+                     aria-label="Modifier"
+                   >
+                     <Edit2 size={16} className="text-muted-foreground hover:text-primary" />
+                   </button>
+                   <button
+                     onClick={() => handleDeleteClick(membre.idMembre)}
+                     className="p-2 hover:bg-destructive/10 rounded transition-colors"
+                     title="Supprimer"
+                     aria-label="Supprimer"
+                   >
+                     <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
+                   </button>
+                 </div>
+               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <AtSign size={16} />
-                  <span>{membre.emailMembre}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <Calendar size={16} />
-                  <span>Né(e) le {formatDate(membre.dateNaissance)}</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                  <MapPin size={16} />
-                  <span>{membre.adresse}</span>
-                </div>
-              </div>
-            </div>
-          ))}
+               <div className="space-y-3 hidden md:block">
+                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                   <AtSign size={16} />
+                   <span>{membre.emailMembre}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                   <Calendar size={16} />
+                   <span>Né(e) le {formatDate(membre.dateNaissance)}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                   <MapPin size={16} />
+                   <span>{membre.adresse}</span>
+                 </div>
+               </div>
+
+               <div className="flex flex-col gap-2 md:hidden">
+                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                   <AtSign size={14} />
+                   <span className="truncate">{membre.emailMembre}</span>
+                 </div>
+                 <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                   <Calendar size={14} />
+                   <span>{new Date(membre.dateNaissance).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                 </div>
+               </div>
+             </div>
+           ))}
         </div>
       )}
 

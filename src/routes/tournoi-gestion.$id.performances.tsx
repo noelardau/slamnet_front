@@ -370,10 +370,10 @@ export default function TournoiPerformances() {
           {performances.map((performance, index) => (
             <div 
               key={performance.idPerfo} 
-              className={`border bg-card p-4 flex items-center justify-between group ${getEtatClass(performance.etat)}`}
+              className={`border bg-card p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-0 group ${getEtatClass(performance.etat)}`}
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+              <div className="flex items-center gap-4 w-full md:w-auto">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
                   {getParticipantPhoto(performance) ? (
                     <img
                       src={getParticipantPhoto(performance)}
@@ -384,48 +384,59 @@ export default function TournoiPerformances() {
                     <Mic className="text-muted-foreground" size={20} />
                   )}
                 </div>
-                <div>
-                  <h3 className="text-foreground font-medium">{getParticipantName(performance)}</h3>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-foreground font-medium text-base md:text-lg truncate">{getParticipantName(performance)}</h3>
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm text-muted-foreground mt-1">
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                       isGuest(performance) ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
                     }`}>
                       {getParticipantType(performance)}
                     </span>
-                    <span>·</span>
-                    <span>Durée: {formatDuration(performance.duree)}</span>
+                    <span className="hidden md:inline">·</span>
+                    <span className="flex items-center gap-1">
+                      <Clock size={12} className="md:hidden" />
+                      <span>Durée: {formatDuration(performance.duree)}</span>
+                    </span>
                     {performance.noteFinale && (
                       <>
-                        <span>·</span>
-                        <span>Note: {performance.noteFinale}</span>
+                        <span className="hidden md:inline">·</span>
+                        <span className="flex items-center gap-1">
+                          <CheckCircle size={12} className="md:hidden" />
+                          <span>Note: {performance.noteFinale}</span>
+                        </span>
                       </>
                     )}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
-                {performance.etat && (
-                  <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getEtatColor(performance.etat)}`}>
-                    {getEtatIcon(performance.etat)}
-                    {getEtatLabel(performance.etat)}
-                  </span>
-                )}
-                <span className="text-sm text-muted-foreground font-medium">#{index + 1}</span>
-                {performance.etat === 'prêt' && (
+              <div className="flex items-center justify-between w-full md:w-auto gap-3 md:gap-3 mt-2 md:mt-0">
+                <div className="flex items-center gap-3">
+                  {performance.etat && (
+                    <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getEtatColor(performance.etat)}`}>
+                      {getEtatIcon(performance.etat)}
+                      <span className="hidden md:inline">{getEtatLabel(performance.etat)}</span>
+                    </span>
+                  )}
+                  <span className="text-sm text-muted-foreground font-medium">#{index + 1}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {performance.etat === 'prêt' && (
+                    <button
+                      onClick={() => handleStartPerformance(performance)}
+                      className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-all text-sm flex items-center gap-2"
+                    >
+                      <Play size={14} />
+                      <span className="hidden md:inline">Démarrer</span>
+                    </button>
+                  )}
                   <button
-                    onClick={() => handleStartPerformance(performance)}
-                    className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-all text-sm flex items-center gap-2"
+                    onClick={() => handleDeleteClick(performance)}
+                    className="opacity-0 md:opacity-0 md:group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all bg-destructive/5 md:bg-transparent"
+                    aria-label="Supprimer"
                   >
-                    <Play size={14} />
-                    Démarrer
+                    <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
                   </button>
-                )}
-                <button
-                  onClick={() => handleDeleteClick(performance)}
-                  className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all"
-                >
-                  <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
-                </button>
+                </div>
               </div>
             </div>
           ))}
@@ -525,6 +536,21 @@ export default function TournoiPerformances() {
     const existingPenalites = [...penalites].sort((a, b) => a.valeur - b.valeur);
     const nbJury = tournoi?.nbJury || 3;
     const canAddNote = allLocalNotes.length < nbJury;
+
+    if (!currentPerformance || currentPerformance.etat !== 'terminée') {
+      return (
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center py-12 border border-border border-dashed">
+            <AlertCircle className="mx-auto mb-4 text-muted-foreground" size={48} />
+            <p className="text-muted-foreground">
+              {!currentPerformance 
+                ? 'Sélectionnez une performance terminée pour ajouter des notes' 
+                : 'Cette performance doit être terminée avant de pouvoir ajouter des notes'}
+            </p>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="max-w-4xl mx-auto">
@@ -651,43 +677,43 @@ export default function TournoiPerformances() {
               </>
             )}
           </button>
-        </div>
 
-        {(existingNotes.length > 0 || existingPenalites.length > 0) && (
-          <div className="bg-card border rounded-xl p-6 mt-6">
-            <h3 className="text-foreground font-medium text-lg mb-4">Notes et pénalités existantes</h3>
-            <div className="flex flex-wrap gap-3">
-              {existingNotes.map((note) => (
-                <div
-                  key={note.idNote}
-                  className={`flex items-center gap-2 px-4 py-2 bg-background border rounded-lg ${
-                    !note.retenu ? 'border-red-500/30 bg-red-500/5' : 'border-border'
-                  }`}
-                >
-                  <span className={`text-foreground font-medium ${!note.retenu ? 'line-through text-destructive' : ''}`}>
-                    {note.valeur}
-                  </span>
-                  <button
-                    onClick={() => handleToggleNoteRetenu(note.idNote)}
-                    className="text-sm text-destructive hover:underline"
+          {(existingNotes.length > 0 || existingPenalites.length > 0) && (
+            <div className="bg-card border rounded-xl p-6 mt-6">
+              <h3 className="text-foreground font-medium text-lg mb-4">Notes et pénalités existantes</h3>
+              <div className="flex flex-wrap gap-3">
+                {existingNotes.map((note) => (
+                  <div
+                    key={note.idNote}
+                    className={`flex items-center gap-2 px-4 py-2 bg-background border rounded-lg ${
+                      !note.retenu ? 'border-red-500/30 bg-red-500/5' : 'border-border'
+                    }`}
                   >
-                    {note.retenu ? 'Retirer' : 'Rétablir'}
-                  </button>
-                </div>
-              ))}
-              {existingPenalites.map((penalite) => (
-                <div
-                  key={penalite.idPenalite}
-                  className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border border-destructive/30 rounded-lg"
-                >
-                  <span className="text-destructive font-medium">
-                    -{penalite.valeur}
-                  </span>
-                </div>
-              ))}
+                    <span className={`text-foreground font-medium ${!note.retenu ? 'line-through text-destructive' : ''}`}>
+                      {note.valeur}
+                    </span>
+                    <button
+                      onClick={() => handleToggleNoteRetenu(note.idNote)}
+                      className="text-sm text-destructive hover:underline"
+                    >
+                      {note.retenu ? 'Retirer' : 'Rétablir'}
+                    </button>
+                  </div>
+                ))}
+                {existingPenalites.map((penalite) => (
+                  <div
+                    key={penalite.idPenalite}
+                    className="flex items-center gap-2 px-4 py-2 bg-destructive/10 border border-destructive/30 rounded-lg"
+                  >
+                    <span className="text-destructive font-medium">
+                      -{penalite.valeur}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     );
   };
@@ -754,7 +780,7 @@ export default function TournoiPerformances() {
             className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
           >
             <Plus size={16} />
-            Ajouter une performance
+            <span className="hidden md:inline">Ajouter une performance</span>
           </button>
         )}
       </div>

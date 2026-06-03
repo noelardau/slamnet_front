@@ -78,7 +78,7 @@ export default function TournoiParticipants() {
           className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
         >
           <Plus size={16} />
-          Ajouter un participant
+          <span className="hidden md:inline">Ajouter un participant</span>
         </button>
       </div>
 
@@ -101,39 +101,43 @@ export default function TournoiParticipants() {
               : participant.membre!.pseudoMembre;
             const photo = isGuest ? null : participant.membre!.photoMembre;
             
-            return (
-              <div key={participant.idParticipant} className="border border-border bg-card p-4 flex items-center justify-between group">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
-                    {photo ? (
-                      <img
-                        src={photo}
-                        alt={pseudo}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <User className="text-muted-foreground" size={24} />
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-foreground font-medium text-lg">{pseudo}</h3>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                        isGuest ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
-                      }`}>
-                        {isGuest ? 'Invité' : 'Membre'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDeleteClick(participant)}
-                  className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all"
-                >
-                  <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
-                </button>
-              </div>
-            );
+             return (
+               <div key={participant.idParticipant} className="border border-border bg-card p-4 flex flex-col md:flex-row items-center md:items-center justify-between group gap-3 md:gap-0">
+                 <div className="flex items-center gap-4 w-full md:w-auto">
+                   <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
+                     {photo ? (
+                       <img
+                         src={photo}
+                         alt={pseudo}
+                         className="w-full h-full object-cover"
+                       />
+                     ) : (
+                       <User className="text-muted-foreground" size={20} />
+                     )}
+                   </div>
+                   <div className="flex-1 min-w-0">
+                     <h3 className="text-foreground font-medium text-base md:text-lg truncate">{pseudo}</h3>
+                     <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
+                       <span className={`px-2 py-0.5 rounded text-xs md:text-sm font-medium ${
+                         isGuest ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
+                       }`}>
+                         {isGuest ? 'Invité' : 'Membre'}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+                 <button
+                   onClick={() => handleDeleteClick(participant)}
+                   className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all w-full md:w-auto md:opacity-0 md:group-hover:opacity-100 bg-destructive/5 md:bg-transparent"
+                   aria-label="Supprimer"
+                 >
+                   <div className="flex items-center justify-center gap-2">
+                     <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
+                     <span className="md:hidden text-sm text-destructive">Supprimer</span>
+                   </div>
+                 </button>
+               </div>
+             );
           })
         )}
       </div>

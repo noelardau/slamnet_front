@@ -165,20 +165,22 @@ export function Navbar() {
               </div>
             ) : (
               <>
-                <Link
-                  to="/login"
-                  className="text-muted-foreground hover:text-foreground transition-colors"
-                  style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
-                >
-                  Connexion
-                </Link>
-                <Link
-                  to="/signup"
-                  className="bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95"
-                  style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.04em" }}
-                >
-                  CRÉER UN COMPTE
-                </Link>
+                 <Link
+                   to="/login"
+                   className="text-muted-foreground hover:text-foreground transition-colors px-3 py-2 text-center"
+                   style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
+                 >
+                   <span className="hidden md:inline">Connexion</span>
+                   <span className="md:hidden">Connexion</span>
+                 </Link>
+                 <Link
+                   to="/signup"
+                   className="bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-center"
+                   style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.04em" }}
+                 >
+                   <span className="hidden md:inline">CRÉER UN COMPTE</span>
+                   <span className="md:hidden">S'inscrire</span>
+                 </Link>
               </>
             )}
           </div>
@@ -208,7 +210,7 @@ export function Navbar() {
                     { label: "DASHBOARD", to: "/dashboard" },
                     { label: "MEMBRES", to: "/membres" },
                     { label: "TOURNOIS", to: "/tournois" },
-                    { label: "PROFIL", to: "/profile" },
+                   
                   ].map((link) => {
                     const isActive = location.pathname === link.to;
                     return (
@@ -242,35 +244,35 @@ export function Navbar() {
                        </div>
                        <ThemeToggle />
                      </div>
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
-                      onClick={() => setOpen(false)}
-                    >
-                      <User size={16} />
-                      <span className="text-sm">Mon profil</span>
-                    </Link>
-                    <button
-                      onClick={() => {
-                        setOpen(false);
-                        handleLogoutClick();
-                      }}
-                      disabled={isLoggingOut}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-                    >
-                      {isLoggingOut ? (
-                        <>
-                          <Loader2 className="animate-spin" size={16} />
-                          Déconnexion...
-                        </>
-                      ) : (
-                        <>
-                          <LogOut size={16} />
-                          Déconnexion
-                        </>
-                      )}
-                    </button>
+                     <Link
+                       to="/profile"
+                       className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                       onClick={() => setOpen(false)}
+                     >
+                       <User size={16} />
+                       <span className="text-sm">Mon profil</span>
+                     </Link>
+                     <button
+                       onClick={() => {
+                         setOpen(false);
+                         handleLogoutClick();
+                       }}
+                       disabled={isLoggingOut}
+                       className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                       style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                     >
+                       {isLoggingOut ? (
+                         <>
+                           <Loader2 className="animate-spin" size={16} />
+                           <span>Déconnexion...</span>
+                         </>
+                       ) : (
+                         <>
+                           <LogOut size={16} />
+                           <span>Déconnexion</span>
+                         </>
+                       )}
+                     </button>
                   </div>
                 </>
               ) : (
