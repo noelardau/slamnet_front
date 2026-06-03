@@ -5,6 +5,7 @@ export interface Participant {
   idMembre: number | null;
   idTournoi: number;
   idGuest: number | null;
+  totalNote: number;
   membre?: {
     idMembre: number;
     nomMembre: string;

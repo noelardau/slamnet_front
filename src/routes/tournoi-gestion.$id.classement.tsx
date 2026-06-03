@@ -1,14 +1,85 @@
 import { useOutletContext } from 'react-router-dom';
-import { Trophy, Medal, Award } from 'lucide-react';
-import { useState } from 'react';
+import { Trophy, Medal, Award, Loader2, Clock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParticipantStore } from '../stores/participantStore';
+import { usePerformanceStore } from '../stores/performanceStore';
 
 export default function TournoiClassement() {
   const { tournoi } = useOutletContext<any>();
-  const [classement, setClassement] = useState<any[]>([
-    { id: 1, nom: 'Koumba Diop', pseudo: 'K. D.', total: 27.6, round1: 9.2, round2: 9.4, round3: 9.0 },
-    { id: 2, nom: 'Lucas Martin', pseudo: 'L. M.', total: 25.8, round1: 8.8, round2: 8.5, round3: 8.5 },
-    { id: 3, nom: 'Amélie Rousseau', pseudo: 'A. R.', total: 24.3, round1: 8.1, round2: 8.2, round3: 8.0 },
-  ]);
+  const { participants, hydrateParticipants, isLoading: participantsLoading } = useParticipantStore();
+  const { performances, hydratePerformances } = usePerformanceStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (tournoi?.idTournoi) {
+        setIsLoading(true);
+        try {
+          await hydrateParticipants(tournoi.idTournoi);
+          await hydratePerformances(tournoi.idTournoi);
+        } catch (error) {
+          console.error('Erreur lors du chargement des données:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadData();
+  }, [tournoi?.idTournoi]);
+
+  const getParticipantName = (participant: any) => {
+    if (participant.membre) {
+      return `${participant.membre.prenomMembre} ${participant.membre.nomMembre}`;
+    } else if (participant.guest) {
+      return participant.guest.pseudo;
+    }
+    return 'Inconnu';
+  };
+
+  const getParticipantPseudo = (participant: any) => {
+    if (participant.membre) {
+      return participant.membre.pseudoMembre;
+    } else if (participant.guest) {
+      return participant.guest.pseudo;
+    }
+    return 'Inconnu';
+  };
+
+  const getParticipantPhoto = (participant: any) => {
+    if (participant.membre?.photoMembre) {
+      return participant.membre.photoMembre;
+    }
+    return null;
+  };
+
+  const getParticipantPerformances = (participant: any) => {
+    return performances.filter(p => p.idParticipant === participant.idParticipant);
+  };
+
+  const calculateClassement = () => {
+    return participants
+      .map(participant => {
+        const participantPerformances = getParticipantPerformances(participant);
+        const sortedPerformances = participantPerformances
+          .filter(p => p.noteFinale !== null)
+          .sort((a, b) => (b.noteFinale || 0) - (a.noteFinale || 0))
+          .slice(0, 3);
+
+        return {
+          ...participant,
+          performances: sortedPerformances,
+          rounds: sortedPerformances.map(p => p.noteFinale || 0),
+        };
+      })
+      .sort((a, b) => b.totalNote - a.totalNote)
+      .map((participant, index) => ({
+        ...participant,
+        position: index + 1,
+      }));
+  };
+
+  const classement = calculateClassement();
 
   const getMedalIcon = (position: number) => {
     switch (position) {
@@ -37,58 +108,92 @@ export default function TournoiClassement() {
         Classement
       </h2>
 
-      <div className="space-y-3">
-        {classement.length === 0 ? (
-          <div className="text-center py-12 border border-border border-dashed">
-            <Trophy className="mx-auto mb-4 text-muted-foreground" size={48} />
-            <p className="text-muted-foreground">Aucun classement pour le moment</p>
+      {isLoading || participantsLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="animate-spin text-primary" size={32} />
+          <p className="text-muted-foreground ml-3">Chargement du classement...</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-3">
+            {classement.length === 0 ? (
+              <div className="text-center py-12 border border-border border-dashed">
+                <Trophy className="mx-auto mb-4 text-muted-foreground" size={48} />
+                <p className="text-muted-foreground">Aucun classement pour le moment</p>
+              </div>
+            ) : (
+              classement.map((participant) => (
+                <div key={participant.idParticipant} className={`border border-border bg-card p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${participant.position <= 3 ? 'border-primary/30' : ''}`}>
+                  <div className="flex items-center gap-6 w-full md:w-auto">
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      {getMedalIcon(participant.position)}
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {getParticipantPhoto(participant) ? (
+                        <img
+                          src={getParticipantPhoto(participant)}
+                          alt={getParticipantPseudo(participant)}
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-border flex items-center justify-center">
+                          <span className="text-muted-foreground font-bold text-lg">
+                            {getParticipantPseudo(participant).charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-foreground font-medium text-lg">@{getParticipantPseudo(participant)}</h3>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full md:w-auto text-center md:text-right">
+                    <div className={`text-3xl md:text-4xl font-bold ${getScoreColor(participant.position)}`} style={{ fontFamily: "Anton, sans-serif" }}>
+                      {participant.totalNote}
+                    </div>
+                    {participant.rounds.length > 0 && (
+                      <div className="text-muted-foreground text-xs md:text-sm mt-1">
+                        {participant.rounds.map((note: number, index: number) => (
+                          <span key={index}>
+                            R{index + 1}: {note}
+                            {index < participant.rounds.length - 1 && ' · '}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-        ) : (
-          classement.map((participant) => (
-            <div key={participant.id} className={`border border-border bg-card p-6 flex items-center justify-between ${participant.id <= 3 ? 'border-primary/30' : ''}`}>
-              <div className="flex items-center gap-6">
-                <div className="w-12 h-12 flex items-center justify-center">
-                  {getMedalIcon(participant.id)}
+
+          {classement.length > 0 && (
+            <div className="mt-8 p-6 bg-card border border-border">
+              <h3 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem" }}>
+                Résumé
+              </h3>
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-muted-foreground text-sm mb-1">Participants</div>
+                  <div className="text-2xl font-bold text-foreground">{classement.length}</div>
                 </div>
                 <div>
-                  <h3 className="text-foreground font-medium text-lg">{participant.nom}</h3>
-                  <div className="text-muted-foreground text-sm">@{participant.pseudo}</div>
+                  <div className="text-muted-foreground text-sm mb-1">Moyenne</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {(classement.reduce((sum: number, p: any) => sum + p.totalNote, 0) / classement.length).toFixed(1)}
+                  </div>
                 </div>
-              </div>
-              <div className="text-right">
-                <div className={`text-3xl font-bold ${getScoreColor(participant.id)}`} style={{ fontFamily: "Anton, sans-serif" }}>
-                  {participant.total}
-                </div>
-                <div className="text-muted-foreground text-xs">
-                  R1: {participant.round1} · R2: {participant.round2} · R3: {participant.round3}
+                <div>
+                  <div className="text-muted-foreground text-sm mb-1">Rounds max</div>
+                  <div className="text-2xl font-bold text-foreground">
+                    {Math.max(...classement.map((p: any) => p.rounds.length))}
+                  </div>
                 </div>
               </div>
             </div>
-          ))
-        )}
-      </div>
-
-      <div className="mt-8 p-6 bg-card border border-border">
-        <h3 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem" }}>
-          Résumé
-        </h3>
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-muted-foreground text-sm mb-1">Participants</div>
-            <div className="text-2xl font-bold text-foreground">{classement.length}</div>
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm mb-1">Moyenne</div>
-            <div className="text-2xl font-bold text-foreground">
-              {(classement.reduce((sum, p) => sum + p.total, 0) / classement.length).toFixed(1)}
-            </div>
-          </div>
-          <div>
-            <div className="text-muted-foreground text-sm mb-1">Rounds</div>
-            <div className="text-2xl font-bold text-foreground">3</div>
-          </div>
-        </div>
-      </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
