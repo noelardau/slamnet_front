@@ -25,16 +25,15 @@ export function Navbar() {
   };
 
   const handleLogoutConfirm = async () => {
-    setShowLogoutDialog(false);
     setIsLoggingOut(true);
     try {
       await logout();
       showSuccess('Déconnexion réussie');
+      setShowLogoutDialog(false);
       navigate('/login', { replace: true });
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
       showError('Erreur lors de la déconnexion');
-    } finally {
       setIsLoggingOut(false);
     }
   };
@@ -263,50 +262,56 @@ export function Navbar() {
                        <User size={16} />
                        <span className="text-sm">Mon profil</span>
                      </Link>
-                     <button
-                       onClick={() => {
-                         setOpen(false);
-                         handleLogoutClick();
-                       }}
-                       disabled={isLoggingOut}
-                       className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                       style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-                     >
-                       {isLoggingOut ? (
-                         <>
-                           <Loader2 className="animate-spin" size={16} />
-                           <span>Déconnexion...</span>
-                         </>
-                       ) : (
-                         <>
-                           <LogOut size={16} />
-                           <span>Déconnexion</span>
-                         </>
-                       )}
-                     </button>
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          handleLogoutClick();
+                        }}
+                        disabled={isLoggingOut}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                      >
+                        {isLoggingOut ? (
+                          <Loader2 className="animate-spin" size={16} />
+                        ) : (
+                          <LogOut size={16} />
+                        )}
+                        <span>{isLoggingOut ? 'Déconnexion...' : 'Déconnexion'}</span>
+                      </button>
                   </div>
                 </>
-              ) : (
-                <>
-                  {[
-                    { label: "FONCTIONNALITÉS", to: "/#features" },
-                    { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-                    { label: "COLLECTIFS", to: "/collectifs" },
-                  ].map((link) => (
-                    <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
-                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                      {link.label}
+               ) : (
+                  <>
+                    {[
+                      { label: "FONCTIONNALITÉS", to: "/#features" },
+                      { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
+                      { label: "COLLECTIFS", to: "/collectifs" },
+                    ].map((link) => (
+                      <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
+                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                        onClick={() => setOpen(false)}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                    <Link
+                      to="/login"
+                      className="text-muted-foreground hover:text-foreground py-1 text-center mt-2"
+                      style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
+                      onClick={() => setOpen(false)}
+                    >
+                      Connexion
                     </Link>
-                  ))}
-                  <Link
-                    to="/signup"
-                    className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
-                    style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
-                  >
-                    CRÉER UN COMPTE
-                  </Link>
-                </>
-              )}
+                    <Link
+                      to="/signup"
+                      className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
+                      style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
+                      onClick={() => setOpen(false)}
+                    >
+                      CRÉER UN COMPTE
+                    </Link>
+                  </>
+               )}
             </motion.div>
           )}
         </AnimatePresence>
