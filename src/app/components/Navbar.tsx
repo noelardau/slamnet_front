@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useCollectifStore } from "../../stores/collectifStore";
@@ -13,10 +13,12 @@ export function Navbar() {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [isTournoiMode, setIsTournoiMode] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const { profile } = useCollectifStore();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
+  const location = useLocation();
 
   const handleLogoutClick = () => {
     setShowLogoutDialog(true);
@@ -40,6 +42,11 @@ export function Navbar() {
   const handleLogoutCancel = () => {
     setShowLogoutDialog(false);
   };
+
+  useEffect(() => {
+    const isTournoiGestionPage = location.pathname.startsWith('/tournoi-gestion/');
+    setIsTournoiMode(isTournoiGestionPage);
+  }, [location.pathname]);
 
   return (
     <>
@@ -186,13 +193,17 @@ export function Navbar() {
           </div>
 
           {/* Mobile toggle */}
-          <button
-            className="md:hidden text-foreground p-2"
-            onClick={() => setOpen(!open)}
-            aria-label="Menu"
-          >
-            {open ? <X size={22} /> : <Menu size={22} />}
-          </button>
+          {!isTournoiMode && (
+            <button
+              className="md:hidden text-foreground p-2"
+              onClick={() => setOpen(!open)}
+              aria-label="Menu"
+            >
+              {open ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          )}
+          {/* Placeholder pour maintenir l'espacement quand le bouton est masqué */}
+          {isTournoiMode && <div className="md:hidden w-10" />}
         </div>
 
         {/* Mobile menu */}

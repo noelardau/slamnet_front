@@ -1,7 +1,7 @@
 import { useParams, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTournoiStore } from '../stores/tournoiStore';
 import { useEffect, useState } from 'react';
-import { Loader2, Users, Mic, Trophy, Menu, X, Settings } from 'lucide-react';
+import { Loader2, Users, Mic, Trophy, Menu, X, Settings, DoorOpen, ArrowLeft } from 'lucide-react';
 
 export default function TournoiGestionLayout() {
   const { id } = useParams();
@@ -34,6 +34,12 @@ export default function TournoiGestionLayout() {
       document.body.style.overflow = 'unset';
     };
   }, [mobileMenuOpen]);
+
+ 
+
+  const handleBackToTournois = () => {
+    navigate('/tournois');
+  };
 
   const tabs = [
     { id: 'participants', label: 'Participants', icon: Users, path: `/tournoi-gestion/${id}/participants` },
@@ -121,6 +127,13 @@ export default function TournoiGestionLayout() {
         <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           <aside className="hidden md:block w-full md:w-64 flex-shrink-0 order-2 md:order-1">
             <nav className="sticky top-4 md:top-8 space-y-1 sm:space-y-2">
+              <button
+                onClick={handleBackToTournois}
+                className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base text-muted-foreground hover:bg-card hover:text-foreground mb-2"
+              >
+                <ArrowLeft size={16} className="sm:size-[18px]" />
+                <span>Retour aux tournois</span>
+              </button>
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -162,55 +175,60 @@ export default function TournoiGestionLayout() {
                 onKeyDown={handleKeyDown}
                 aria-hidden="true"
               />
-              <aside 
-                className="md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-background shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto"
-                role="dialog"
-                aria-modal="true"
-                aria-label="Menu de navigation"
-              >
-                <div className="p-4 border-b border-border flex items-center justify-between sticky top-0 bg-background z-10">
-                  <span className="text-foreground font-medium text-lg">Menu</span>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-foreground p-2 hover:bg-accent rounded-lg transition-colors"
-                    aria-label="Fermer le menu"
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-                <nav className="p-4 space-y-1" role="navigation">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => navigate(tab.path)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base ${
-                          activeTab === tab.id
-                            ? 'bg-primary text-primary-foreground font-medium'
-                            : 'text-muted-foreground hover:bg-card hover:text-foreground'
-                        }`}
-                      >
-                        <Icon size={18} />
-                        <span>{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                  <div className="pt-4 mt-4 border-t border-border">
-                    <button
-                      onClick={() => navigate(`/tournoi-gestion/${id}/parametres`)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base ${
-                        isSettingsActive
-                          ? 'bg-primary text-primary-foreground font-medium'
-                          : 'text-muted-foreground hover:bg-card hover:text-foreground'
-                      }`}
-                    >
-                      <Settings size={18} />
-                      <span>Paramètres</span>
-                    </button>
-                  </div>
-                </nav>
-              </aside>
+               <aside 
+                 className="md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-background shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto"
+                 role="dialog"
+                 aria-modal="true"
+                 aria-label="Menu de navigation"
+               >
+                 <div className="p-4 border-b border-border flex items-center justify-between sticky top-0 bg-background z-10">
+                   <span className="text-foreground font-medium text-lg">Menu</span>
+                   <button
+                     onClick={() => setMobileMenuOpen(false)}
+                     className="text-foreground p-2 hover:bg-accent rounded-lg transition-colors"
+                     aria-label="Fermer le menu"
+                   >
+                     <X size={24} />
+                   </button>
+                 </div>
+                 <nav className="p-4 space-y-1" role="navigation">
+                   {tabs.map((tab) => {
+                     const Icon = tab.icon;
+                     return (
+                       <button
+                         key={tab.id}
+                         onClick={() => navigate(tab.path)}
+                         className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base ${
+                           activeTab === tab.id
+                             ? 'bg-primary text-primary-foreground font-medium'
+                             : 'text-muted-foreground hover:bg-card hover:text-foreground'
+                         }`}
+                       >
+                         <Icon size={18} />
+                         <span>{tab.label}</span>
+                       </button>
+                     );
+                   })}
+                   <button
+                     onClick={handleBackToTournois}
+                     className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base text-muted-foreground hover:bg-card hover:text-foreground"
+                   >
+                     <DoorOpen size={18} />
+                     <span>Retour aux tournois</span>
+                   </button>
+                   <button
+                     onClick={() => navigate(`/tournoi-gestion/${id}/parametres`)}
+                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base ${
+                       isSettingsActive
+                         ? 'bg-primary text-primary-foreground font-medium'
+                         : 'text-muted-foreground hover:bg-card hover:text-foreground'
+                     }`}
+                   >
+                     <Settings size={18} />
+                     <span>Paramètres</span>
+                   </button>
+                 </nav>
+               </aside>
             </>
           )}
 
