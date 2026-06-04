@@ -1,8 +1,12 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Mic } from "lucide-react";
+import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import demoVideo from "../../assets/demo.mp4";
+import { useState } from "react";
 
 export function Hero() {
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-16">
       {/* Background texture lines */}
@@ -103,13 +107,24 @@ export function Hero() {
               CRÉER MON COLLECTIF
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link
-              to="/collectifs"
-              className="flex items-center gap-3 border border-border text-foreground px-8 py-4 hover:border-foreground/30 transition-all duration-200"
-              style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 500, fontSize: "0.875rem" }}
-            >
-              VOIR UNE DÉMO
-            </Link>
+            <Dialog open={isDemoOpen} onOpenChange={setIsDemoOpen}>
+              <DialogTrigger asChild>
+                <button
+                  className="flex items-center gap-3 border border-border text-foreground px-8 py-4 hover:border-foreground/30 transition-all duration-200"
+                  style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 500, fontSize: "0.875rem" }}
+                >
+                  VOIR UNE DÉMO
+                </button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl p-0 overflow-hidden">
+                <video
+                  src={demoVideo}
+                  controls
+                  autoPlay
+                  className="w-full h-auto"
+                />
+              </DialogContent>
+            </Dialog>
           </motion.div>
 
           <motion.div
