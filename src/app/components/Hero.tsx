@@ -2,11 +2,32 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Mic } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
+import { useEffect, useState } from "react";
 import demoVideo from "../../assets/demo.mp4";
-import { useState } from "react";
+import demoMobileVideo from "../../assets/demoMobile.mp4";
 
 export function Hero() {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkDevice = () => {
+      const userAgent = navigator.userAgent || window.opera;
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Blazer|Mobile/i.test(userAgent) || 
+                         /Windows Phone|webOS|iPhone|iPad|iPod|Opera Mini|IEMobile|Mobile/i.test(userAgent) ||
+                         (userAgent.includes('Mac') && 'ontouch' in navigator.userAgent);
+
+      setIsMobile(isMobileDevice);
+    };
+
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+
+    return () => {
+      window.removeEventListener('resize', checkDevice);
+    };
+  }, []);
+
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-16">
       {/* Background texture lines */}
@@ -116,14 +137,17 @@ export function Hero() {
                   VOIR UNE DÉMO
                 </button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl p-0 overflow-hidden">
-                <video
-                  src={demoVideo}
-                  controls
-                  autoPlay
-                  className="w-full h-auto"
-                />
-              </DialogContent>
+               <DialogContent className="max-w-4xl p-0 overflow-hidden">
+                 <video
+                   key={isMobile ? 'mobile' : 'desktop'}
+                   controls
+                   autoPlay
+                   className="w-full h-auto"
+                 >
+                   <source src={demoVideo} media="(min-width: 768px)" />
+                   <source src={demoMobileVideo} media="(max-width: 767px)" />
+                 </video>
+               </DialogContent>
             </Dialog>
           </motion.div>
 
