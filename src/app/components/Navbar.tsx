@@ -20,6 +20,14 @@ export function Navbar() {
   const { showSuccess, showError } = useToast();
   const location = useLocation();
 
+  const handleScrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleLogoutClick = () => {
     setShowLogoutDialog(true);
   };
@@ -104,19 +112,20 @@ export function Navbar() {
               })}
             </>
           ) : (
-            [
-              { label: "FONCTIONNALITÉS", to: "/#features" },
-              { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-             
-            ].map((link) => (
-              <Link
-                key={link.label}
-                to={link.to}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200"
-              >
-                {link.label}
-              </Link>
-            ))
+             [
+               { label: "FONCTIONNALITÉS", to: "features" },
+               { label: "COMMENT ÇA MARCHE", to: "how-it-works" },
+              
+             ].map((link) => (
+               <a
+                 key={link.label}
+                 href={`/#${link.to}`}
+                 onClick={(e) => handleScrollToSection(e, link.to)}
+                 className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer"
+               >
+                 {link.label}
+               </a>
+             ))
           )}
         </div>
 
@@ -281,20 +290,37 @@ export function Navbar() {
                       </button>
                   </div>
                 </>
-               ) : (
-                  <>
-                    {[
-                      { label: "FONCTIONNALITÉS", to: "/#features" },
-                      { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-                      { label: "COLLECTIFS", to: "/collectifs" },
-                    ].map((link) => (
-                      <Link key={link.label} to={link.to} className="text-muted-foreground hover:text-foreground py-1"
-                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-                        onClick={() => setOpen(false)}
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
+                ) : (
+                   <>
+                     {[
+                       { label: "FONCTIONNALITÉS", to: "features" },
+                       { label: "COMMENT ÇA MARCHE", to: "how-it-works" },
+                       { label: "COLLECTIFS", to: "/collectifs" },
+                     ].map((link) => (
+                       link.to.startsWith('/') ? (
+                         <Link 
+                           key={link.label} 
+                           to={link.to} 
+                           className="text-muted-foreground hover:text-foreground py-1"
+                           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                           onClick={() => setOpen(false)}
+                         >
+                           {link.label}
+                         </Link>
+                       ) : (
+                         <a 
+                           key={link.label} 
+                           href={`/#${link.to}`}
+                           onClick={(e) => {
+                             handleScrollToSection(e, link.to);
+                             setOpen(false);
+                           }}
+                           className="text-muted-foreground hover:text-foreground py-1 cursor-pointer"
+                           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                         >
+                           {link.label}
+                         </a>
+                       )))}
                     <Link
                       to="/login"
                       className="text-muted-foreground hover:text-foreground py-1 text-center mt-2"

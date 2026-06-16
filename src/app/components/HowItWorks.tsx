@@ -35,7 +35,7 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-28 border-t border-border bg-card">
+    <section id="how-it-works" className="py-28 border-t border-border bg-card">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-20">
           <div className="flex items-center gap-3 mb-6">
