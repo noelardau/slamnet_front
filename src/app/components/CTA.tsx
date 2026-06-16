@@ -65,12 +65,7 @@ export function CTA() {
             </Link>
           </div>
 
-          <p
-            className="mt-6 text-muted-foreground/60"
-            style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em" }}
-          >
-            Aucune carte bancaire · Données hébergées en France
-          </p>
+         
         </motion.div>
       </div>
     </section>

@@ -157,7 +157,7 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.7 }}
             className="mt-12 flex items-center gap-8"
           >
-            {[
+            {/* {[
               { value: "120+", label: "Collectifs inscrits" },
               { value: "3 400", label: "Poètes enregistrés" },
               { value: "860", label: "Tournois organisés" },
@@ -176,7 +176,7 @@ export function Hero() {
                   {label.toUpperCase()}
                 </div>
               </div>
-            ))}
+            ))} */}
           </motion.div>
         </div>
 

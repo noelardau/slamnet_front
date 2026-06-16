@@ -10,7 +10,7 @@ export default function HomePage() {
       <Hero />
       <Features />
       <HowItWorks />
-      <Testimonials />
+      {/* <Testimonials /> */}
       <CTA />
     </>
   );
