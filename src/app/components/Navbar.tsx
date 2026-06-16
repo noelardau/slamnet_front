@@ -107,7 +107,7 @@ export function Navbar() {
             [
               { label: "FONCTIONNALITÉS", to: "/#features" },
               { label: "COMMENT ÇA MARCHE", to: "/#how-it-works" },
-              { label: "COLLECTIFS", to: "/collectifs" },
+             
             ].map((link) => (
               <Link
                 key={link.label}
