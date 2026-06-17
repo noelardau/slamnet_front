@@ -1,7 +1,7 @@
 import { PerformanceDetailed, NoteObjet } from '../../../services/statisticsService';
 import { 
-  AreaChart, Area, BarChart, Bar, LineChart, Line,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+  AreaChart, Area, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import { useLanguage } from '../../../contexts/LanguageContext';
 
@@ -15,9 +15,6 @@ export function PerformanceChart({ performances }: PerformanceChartProps) {
   const chartData = performances.map((perf, index) => ({
     round: index + 1,
     score: perf.noteFinale || 0,
-    moyenneJury: perf.notes.length > 0 
-      ? perf.notes.reduce((sum, note) => sum + note.valeur, 0) / perf.notes.length 
-      : 0,
     penalites: perf.penalites.reduce((sum, p) => sum + p, 0)
   }));
 
@@ -61,30 +58,6 @@ export function PerformanceChart({ performances }: PerformanceChartProps) {
               className="text-primary"
             />
           </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Bar Chart - Score vs Moyenne Jury */}
-      <div>
-        <h3 className="text-sm font-medium text-muted-foreground mb-3">
-          {t('statistics.participantStats.scoreVsAverage')}
-        </h3>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-            <XAxis dataKey="round" className="text-foreground" />
-            <YAxis className="text-foreground" />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'hsl(var(--card))', 
-                border: '1px solid hsl(var(--border))',
-                borderRadius: '0.5rem'
-              }}
-            />
-            <Legend />
-            <Bar dataKey="score" name="Score Final" fill="hsl(var(--primary))" />
-            <Bar dataKey="moyenneJury" name="Moyenne Jury" fill="hsl(var(--muted))" />
-          </BarChart>
         </ResponsiveContainer>
       </div>
 
