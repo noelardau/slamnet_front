@@ -118,25 +118,25 @@ export function ParticipantStatsModal({
                         </span>
                       </div>
                      
-                     <div className="mb-2">
-                       <div className="text-sm text-muted-foreground mb-2">
-                         Notes ({perf.nombreNotesRetenues}/{perf.nombreNotesTotal} {t('statistics.participantStats.notes')})
-                       </div>
-                       <div className="flex flex-wrap gap-2">
-                         {perf.notes.map((note, idx) => (
-                           <span
-                             key={idx}
-                             className={`px-3 py-1 bg-background border border-border rounded-md text-sm font-medium ${
-                               !note.retenu
-                                 ? 'line-through text-destructive border-destructive/30 bg-destructive/5'
-                                 : 'text-foreground'
-                             }`}
-                           >
-                             {note.valeur}
-                           </span>
-                         ))}
-                       </div>
-                     </div>
+                      <div className="mb-2">
+                        <div className="text-sm text-muted-foreground mb-2">
+                          Notes ({perf.nombreNotesRetenues}/{perf.nombreNotesTotal} {t('statistics.participantStats.notes')})
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {perf.notes.sort((a, b) => a.valeur - b.valeur).map((note, idx) => (
+                            <span
+                              key={idx}
+                              className={`px-3 py-1 bg-background border border-border rounded-md text-sm font-medium ${
+                                !note.retenu
+                                  ? 'line-through text-destructive border-destructive/30 bg-destructive/5'
+                                  : 'text-foreground'
+                              }`}
+                            >
+                              {note.valeur}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                      
                      {perf.penalites.length > 0 && (
                        <div>
