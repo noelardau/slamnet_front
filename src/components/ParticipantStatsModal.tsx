@@ -104,14 +104,19 @@ export function ParticipantStatsModal({
                      key={perf.idPerfo} 
                      className="border border-border rounded-lg p-4 bg-card"
                    >
-                     <div className="flex justify-between items-center mb-3">
-                       <span className="font-semibold text-foreground">
-                         Round {index + 1}
-                       </span>
-                       <span className="text-xl font-bold text-primary">
-                         {perf.noteFinale}
-                       </span>
-                     </div>
+                      <div className="flex justify-between items-center mb-3">
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold text-foreground">
+                            Round {index + 1}
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {perf.duree}
+                          </span>
+                        </div>
+                        <span className="text-xl font-bold text-primary">
+                          {perf.noteFinale}
+                        </span>
+                      </div>
                      
                      <div className="mb-2">
                        <div className="text-sm text-muted-foreground mb-2">
