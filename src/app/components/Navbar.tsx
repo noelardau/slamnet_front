@@ -187,7 +187,7 @@ export function Navbar() {
               </div>
             ) : (
               <>
-                 <button
+                 {/* <button
                    onClick={() => {
                      openLoginModal();
                      setOpen(false);
@@ -197,17 +197,19 @@ export function Navbar() {
                  >
                    <span className="hidden md:inline">{t('nav.login')}</span>
                    <span className="md:hidden">{t('nav.login')}</span>
-                 </button>
+                 </button> */}
                  <button
                    onClick={() => {
-                     openSignupModal();
+                    openLoginModal();
                      setOpen(false);
+                    //  openSignupModal();
+                    //  setOpen(false);
                    }}
                    className="bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-center"
                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.04em" }}
                  >
-                   <span className="hidden md:inline">{t('nav.signup')}</span>
-                   <span className="md:hidden">{t('auth.signUp')}</span>
+                   <span className="hidden md:inline">{t('nav.login')}</span>
+                   <span className="md:hidden">{t('nav.login')}</span>
                  </button>
               </>
             )}
