@@ -4,6 +4,7 @@ import HomePage from './_index';
 import CollectifDetailPage from './collectifs.$id';
 import DashboardPage from './dashboard';
 import MembresPage from './membres';
+import MembreDetailPage from './membres.$id';
 import ProfilePage from './profile';
 import TournoisPage from './tournois';
 import TournoiDetailPage from './tournois.$id';
@@ -25,6 +26,7 @@ export const routes: RouteObject[] = [
       { path: 'collectifs/:id', element: <CollectifDetailPage /> },
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'membres', element: <MembresPage /> },
+      { path: 'membres/:id', element: <MembreDetailPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'tournois', element: <TournoisPage /> },
       { path: 'tournois/:id', element: <TournoiDetailPage /> },

@@ -1,9 +1,11 @@
 import { useOutletContext } from 'react-router-dom';
-import { Trophy, Loader2 } from 'lucide-react';
+import { Trophy, Loader2, BarChart3 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useParticipantStore } from '../stores/participantStore';
 import { usePerformanceStore } from '../stores/performanceStore';
+import { Button } from '../app/components/ui/button';
+import { ParticipantStatsModal } from '../components/ParticipantStatsModal';
 
 export default function TournoiClassement() {
   const { tournoi } = useOutletContext<any>();
@@ -11,6 +13,8 @@ export default function TournoiClassement() {
   const { participants, hydrateParticipants, isLoading: participantsLoading } = useParticipantStore();
   const { performances, hydratePerformances } = usePerformanceStore();
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedParticipantId, setSelectedParticipantId] = useState<number | null>(null);
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -139,10 +143,23 @@ export default function TournoiClassement() {
                       </div>
                     </div>
                   </div>
-                  <div className="w-full md:w-auto text-center md:text-right">
-                    <div className={`text-3xl md:text-4xl font-bold ${getScoreColor(participant.position)}`} style={{ fontFamily: "Anton, sans-serif" }}>
-                      {participant.totalNote}
-                    </div>
+                   <div className="w-full md:w-auto text-center md:text-right">
+                     <div className="flex items-center gap-3 justify-center md:justify-end">
+                       <div className={`text-3xl md:text-4xl font-bold ${getScoreColor(participant.position)}`} style={{ fontFamily: "Anton, sans-serif" }}>
+                         {participant.totalNote}
+                       </div>
+                       <Button 
+                         variant="ghost" 
+                         size="icon"
+                         onClick={() => {
+                           setSelectedParticipantId(participant.idParticipant);
+                           setStatsModalOpen(true);
+                         }}
+                         className="h-9 w-9"
+                       >
+                         <BarChart3 size={18} />
+                       </Button>
+                     </div>
                     {participant.rounds.length > 0 && (
                       <div className="text-muted-foreground text-xs md:text-sm mt-1">
                         {participant.rounds.map((note: number, index: number) => (
@@ -183,9 +200,16 @@ export default function TournoiClassement() {
                 </div>
               </div>
             </div>
-          )}
-        </>
-      )}
+           )}
+         </>
+       )}
+      
+      <ParticipantStatsModal
+        isOpen={statsModalOpen}
+        onClose={() => setStatsModalOpen(false)}
+        participantId={selectedParticipantId || 0}
+        tournamentId={tournoi?.idTournoi || 0}
+      />
     </div>
   );
 }
