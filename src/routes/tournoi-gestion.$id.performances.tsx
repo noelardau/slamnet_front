@@ -493,10 +493,17 @@ export default function TournoiPerformances() {
           </div>
 
           <div className="text-center mb-8">
-                <div className="text-6xl font-mono font-bold text-foreground mb-2" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-                {formatDurationSeconds(timerSeconds)}
-              </div>
-            <p className="text-muted-foreground">{t('tournoiPerformances.timer')}</p>
+                <div 
+                  className={`text-6xl font-mono font-bold mb-2 ${
+                    timerSeconds > parseDuration(tournoi?.dureePerfo) 
+                      ? 'text-red-500 animate-pulse' 
+                      : 'text-foreground'
+                  }`}
+                  style={{ fontFamily: 'JetBrains Mono, monospace' }}
+                >
+                  {formatDurationSeconds(timerSeconds)}
+                </div>
+                <p className="text-muted-foreground">{t('tournoiPerformances.timer')}</p>
           </div>
 
           <div className="flex gap-4">
