@@ -125,30 +125,50 @@ export function Navbar() {
                     )}
                   </Link>
                 );
-              })}
+               })}
+              <Link
+                to="/slam-poetry"
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer relative"
+              >
+                {t('nav.slamPoetry')}
+              </Link>
             </>
           ) : (
-             [
-               { label: t('nav.features'), to: "features" },
-               { label: t('nav.howItWorks'), to: "how-it-works" },
-              
-              ].map((link) => (
-                <a
-                  key={link.label}
-                  href={`/#${link.to}`}
-                  onClick={(e) => {
-                    if (location.pathname !== '/') {
-                      e.preventDefault();
-                      navigate(`/#${link.to}`);
-                      return;
-                    }
-                    handleScrollToSection(e, link.to);
-                  }}
-                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer"
-                >
-                  {link.label}
-                </a>
-              ))
+              [
+                { label: t('nav.features'), to: "features" },
+                { label: t('nav.howItWorks'), to: "how-it-works" },
+                { label: t('nav.slamPoetry'), to: "/slam-poetry" },
+               
+              ].map((link) => {
+                if (link.to.startsWith('/')) {
+                  return (
+                    <Link
+                      key={link.label}
+                      to={link.to}
+                      className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer"
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                }
+                return (
+                  <a
+                    key={link.label}
+                    href={`/#${link.to}`}
+                    onClick={(e) => {
+                      if (location.pathname !== '/') {
+                        e.preventDefault();
+                        navigate(`/#${link.to}`);
+                        return;
+                      }
+                      handleScrollToSection(e, link.to);
+                    }}
+                    className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer"
+                  >
+                    {link.label}
+                  </a>
+                );
+              })
           )}
         </div>
 
@@ -263,12 +283,13 @@ export function Navbar() {
                >
                {isAuthenticated ? (
                  <>
-                    {[
-                      { label: t('nav.dashboard'), to: "/dashboard" },
-                      { label: t('nav.members'), to: "/membres" },
-                      { label: t('nav.tournaments'), to: "/tournois" },
-                    
-                   ].map((link) => {
+                     {[
+                       { label: t('nav.dashboard'), to: "/dashboard" },
+                       { label: t('nav.members'), to: "/membres" },
+                       { label: t('nav.tournaments'), to: "/tournois" },
+                       { label: t('nav.slamPoetry'), to: "/slam-poetry" },
+                     
+                    ].map((link) => {
                      const isActive = location.pathname === link.to;
                      return (
                        <Link 
@@ -329,10 +350,11 @@ export function Navbar() {
                  </>
                  ) : (
                     <>
-                      {[
-                        { label: t('nav.features'), to: "features" },
-                        { label: t('nav.howItWorks'), to: "how-it-works" },
-                      ].map((link) => (
+                       {[
+                          { label: t('nav.features'), to: "features" },
+                          { label: t('nav.howItWorks'), to: "how-it-works" },
+                          { label: t('nav.slamPoetry'), to: "/slam-poetry" },
+                        ].map((link) => (
                         link.to.startsWith('/') ? (
                           <Link 
                             key={link.label} 

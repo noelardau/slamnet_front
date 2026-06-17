@@ -16,6 +16,7 @@ import TournoiParametresPage from './tournoi-gestion.$id.parametres';
 import PrivacyPage from './privacy';
 import TermsPage from './terms';
 import ContactPage from './contact';
+import SlamPoetryPage from './slam-poetry';
 
 export const routes: RouteObject[] = [
   {
@@ -44,6 +45,7 @@ export const routes: RouteObject[] = [
       { path: 'privacy', element: <PrivacyPage /> },
       { path: 'terms', element: <TermsPage /> },
       { path: 'contact', element: <ContactPage /> },
+      { path: 'slam-poetry', element: <SlamPoetryPage /> },
     ]
   }
 ];
