@@ -2,6 +2,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Plus, User, Trash2, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { AddParticipantDialog } from '../components/AddParticipantDialog';
 import { useParticipantStore } from '../stores/participantStore';
@@ -10,6 +11,7 @@ import { Participant } from '../services/participantService';
 export default function TournoiParticipants() {
   const { tournoi } = useOutletContext<any>();
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [participantToDelete, setParticipantToDelete] = useState<Participant | null>(null);
@@ -28,7 +30,7 @@ export default function TournoiParticipants() {
     try {
       await hydrateParticipants(tournoi.idTournoi);
     } catch (error) {
-      showError('Erreur lors du chargement des participants');
+      showError(t('tournoiParticipants.loadingError'));
     } finally {
       setIsLoading(false);
     }
@@ -49,12 +51,12 @@ export default function TournoiParticipants() {
       } else if (participantToDelete.membre) {
         await removeParticipant(tournoi.idTournoi);
       }
-      showSuccess('Participant retiré avec succès');
+      showSuccess(t('tournoiParticipants.removeSuccess'));
       setShowDeleteDialog(false);
       setParticipantToDelete(null);
       await loadParticipants();
     } catch (error) {
-      showError('Erreur lors du retrait du participant');
+      showError(t('tournoiParticipants.removeError'));
     } finally {
       setIsLoading(false);
     }
@@ -71,14 +73,14 @@ export default function TournoiParticipants() {
           className="text-foreground"
           style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
         >
-          Participants
+          {t('tournoiParticipants.title')}
         </h2>
         <button
           onClick={() => setShowAddDialog(true)}
           className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
         >
           <Plus size={16} />
-          <span className="hidden md:inline">Ajouter un participant</span>
+          <span className="hidden md:inline">{t('tournoiParticipants.addParticipant')}</span>
         </button>
       </div>
 
@@ -86,12 +88,12 @@ export default function TournoiParticipants() {
         {isLoading && participants.length === 0 ? (
           <div className="text-center py-12">
             <Loader2 className="mx-auto mb-4 text-muted-foreground animate-spin" size={48} />
-            <p className="text-muted-foreground">Chargement des participants...</p>
+            <p className="text-muted-foreground">{t('tournoiParticipants.loading')}</p>
           </div>
         ) : participants.length === 0 ? (
           <div className="text-center py-12 border border-border border-dashed">
             <User className="mx-auto mb-4 text-muted-foreground" size={48} />
-            <p className="text-muted-foreground">Aucun participant pour le moment</p>
+            <p className="text-muted-foreground">{t('tournoiParticipants.noParticipants')}</p>
           </div>
         ) : (
           participants.map((participant) => {
@@ -117,25 +119,25 @@ export default function TournoiParticipants() {
                    </div>
                    <div className="flex-1 min-w-0">
                      <h3 className="text-foreground font-medium text-base md:text-lg truncate">{pseudo}</h3>
-                     <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
-                       <span className={`px-2 py-0.5 rounded text-xs md:text-sm font-medium ${
-                         isGuest ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
-                       }`}>
-                         {isGuest ? 'Invité' : 'Membre'}
-                       </span>
-                     </div>
+                      <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
+                        <span className={`px-2 py-0.5 rounded text-xs md:text-sm font-medium ${
+                          isGuest ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
+                        }`}>
+                          {isGuest ? t('tournoiParticipants.guest') : t('tournoiParticipants.member')}
+                        </span>
+                      </div>
                    </div>
                  </div>
-                 <button
-                   onClick={() => handleDeleteClick(participant)}
-                   className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all w-full md:w-auto md:opacity-0 md:group-hover:opacity-100 bg-destructive/5 md:bg-transparent"
-                   aria-label="Supprimer"
-                 >
-                   <div className="flex items-center justify-center gap-2">
-                     <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
-                     <span className="md:hidden text-sm text-destructive">Supprimer</span>
-                   </div>
-                 </button>
+                  <button
+                    onClick={() => handleDeleteClick(participant)}
+                    className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all w-full md:w-auto md:opacity-0 md:group-hover:opacity-100 bg-destructive/5 md:bg-transparent"
+                    aria-label={t('tournoiParticipants.delete')}
+                  >
+                    <div className="flex items-center justify-center gap-2">
+                      <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
+                      <span className="md:hidden text-sm text-destructive">{t('tournoiParticipants.delete')}</span>
+                    </div>
+                  </button>
                </div>
              );
           })
@@ -144,10 +146,10 @@ export default function TournoiParticipants() {
 
       <ConfirmDialog
         isOpen={showDeleteDialog}
-        title="Retirer le participant"
-        message="Êtes-vous sûr de vouloir retirer ce participant du tournoi ?"
-        confirmText="Retirer"
-        cancelText="Annuler"
+        title={t('tournoiParticipants.removeTitle')}
+        message={t('tournoiParticipants.removeMessage')}
+        confirmText={t('tournoiParticipants.remove')}
+        cancelText={t('common.cancel')}
         onConfirm={handleDeleteConfirm}
         loading={isLoading}
         onCancel={() => {

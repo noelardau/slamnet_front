@@ -1,5 +1,6 @@
 import { useParams, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTournoiStore } from '../stores/tournoiStore';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useEffect, useState } from 'react';
 import { Loader2, Users, Mic, Trophy, Menu, X, Settings, DoorOpen, ArrowLeft } from 'lucide-react';
 
@@ -7,6 +8,7 @@ export default function TournoiGestionLayout() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
   const { tournois } = useTournoiStore();
   const [isLoading, setIsLoading] = useState(true);
   const [tournoi, setTournoi] = useState<any>(null);
@@ -42,9 +44,9 @@ export default function TournoiGestionLayout() {
   };
 
   const tabs = [
-    { id: 'participants', label: 'Participants', icon: Users, path: `/tournoi-gestion/${id}/participants` },
-    { id: 'performances', label: 'Performances', icon: Mic, path: `/tournoi-gestion/${id}/performances` },
-    { id: 'classement', label: 'Classement', icon: Trophy, path: `/tournoi-gestion/${id}/classement` },
+    { id: 'participants', label: t('tournoiGestion.participants'), icon: Users, path: `/tournoi-gestion/${id}/participants` },
+    { id: 'performances', label: t('tournoiGestion.performances'), icon: Mic, path: `/tournoi-gestion/${id}/performances` },
+    { id: 'classement', label: t('tournoiGestion.ranking'), icon: Trophy, path: `/tournoi-gestion/${id}/classement` },
   ] as const;
 
   const isSettingsActive = location.pathname === `/tournoi-gestion/${id}/parametres`;
@@ -52,7 +54,7 @@ export default function TournoiGestionLayout() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return date.toLocaleDateString(t('language') === 'en' ? 'en-US' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -66,7 +68,7 @@ export default function TournoiGestionLayout() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
-          <p className="text-muted-foreground">Chargement du tournoi...</p>
+          <p className="text-muted-foreground">{t('tournoiGestion.loading')}</p>
         </div>
       </div>
     );
@@ -75,7 +77,7 @@ export default function TournoiGestionLayout() {
   if (!tournoi) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground">Tournoi non trouvé</p>
+        <p className="text-muted-foreground">{t('tournoiGestion.notFound')}</p>
       </div>
     );
   }
@@ -92,7 +94,7 @@ export default function TournoiGestionLayout() {
                   className="text-primary flex-shrink-0"
                   style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.6rem sm:0.7rem", letterSpacing: "0.2em" }}
                 >
-                  TOURNOI
+                  {t('tournoiGestion.tournament')}
                 </span>
               </div>
               <h1
@@ -117,7 +119,7 @@ export default function TournoiGestionLayout() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden text-foreground p-2 ml-2 flex-shrink-0 hover:bg-accent rounded-lg transition-colors"
-            aria-label="Menu"
+            aria-label={t('tournoiGestion.menu')}
             aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -132,7 +134,7 @@ export default function TournoiGestionLayout() {
                 className="w-full flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 text-sm sm:text-base text-muted-foreground hover:bg-card hover:text-foreground mb-2"
               >
                 <ArrowLeft size={16} className="sm:size-[18px]" />
-                <span>Retour aux tournois</span>
+                <span>{t('tournoiGestion.backToTournois')}</span>
               </button>
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -161,7 +163,7 @@ export default function TournoiGestionLayout() {
                   }`}
                 >
                   <Settings size={16} className="sm:size-[18px]" />
-                  <span>Paramètres</span>
+                  <span>{t('tournoiGestion.settings')}</span>
                 </button>
               </div>
             </nav>
@@ -179,14 +181,14 @@ export default function TournoiGestionLayout() {
                  className="md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-background shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto"
                  role="dialog"
                  aria-modal="true"
-                 aria-label="Menu de navigation"
+                 aria-label={t('tournoiGestion.menu')}
                >
                  <div className="p-4 border-b border-border flex items-center justify-between sticky top-0 bg-background z-10">
-                   <span className="text-foreground font-medium text-lg">Menu</span>
+                   <span className="text-foreground font-medium text-lg">{t('tournoiGestion.menu')}</span>
                    <button
                      onClick={() => setMobileMenuOpen(false)}
                      className="text-foreground p-2 hover:bg-accent rounded-lg transition-colors"
-                     aria-label="Fermer le menu"
+                     aria-label={t('tournoiGestion.closeMenu')}
                    >
                      <X size={24} />
                    </button>
@@ -214,7 +216,7 @@ export default function TournoiGestionLayout() {
                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base text-muted-foreground hover:bg-card hover:text-foreground"
                    >
                      <DoorOpen size={18} />
-                     <span>Retour aux tournois</span>
+                     <span>{t('tournoiGestion.backToTournois')}</span>
                    </button>
                    <button
                      onClick={() => navigate(`/tournoi-gestion/${id}/parametres`)}
@@ -225,7 +227,7 @@ export default function TournoiGestionLayout() {
                      }`}
                    >
                      <Settings size={18} />
-                     <span>Paramètres</span>
+                     <span>{t('tournoiGestion.settings')}</span>
                    </button>
                  </nav>
                </aside>

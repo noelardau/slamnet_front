@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Loader2, UserPlus, Search, User, UserCheck, CheckCircle2 } from 'lucide-react';
 
 interface AddParticipantDialogProps {
@@ -16,6 +17,7 @@ interface ParticipantRecord {
 }
 
 export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tournamentId }: AddParticipantDialogProps) {
+  const { t, language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingMembres, setIsLoadingMembres] = useState(false);
   const [isLoadingParticipants, setIsLoadingParticipants] = useState(false);
@@ -43,8 +45,8 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
       const membresData = await membreService.getMembres();
       setMembres(membresData);
     } catch (error) {
-      console.error('Erreur lors du chargement des membres:', error);
-      showError('Erreur lors du chargement des membres');
+      console.error('Error loading members:', error);
+      showError(t('addParticipant.loadingMembers'));
     } finally {
       setIsLoadingMembres(false);
     }
@@ -62,7 +64,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
       );
       setInscribedMemberIds(memberIds);
     } catch (error) {
-      console.error('Erreur lors du chargement des participants:', error);
+      console.error('Error loading participants:', error);
     } finally {
       setIsLoadingParticipants(false);
     }
@@ -70,12 +72,12 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
 
   const handleSubmitMember = async () => {
     if (!selectedMembreId) {
-      showError('Veuillez sélectionner un membre');
+      showError(t('addParticipant.selectMember'));
       return;
     }
 
     if (inscribedMemberIds.has(selectedMembreId)) {
-      showError('Ce membre est déjà inscrit au tournoi');
+      showError(t('addParticipant.alreadyInscribed'));
       return;
     }
     
@@ -84,15 +86,15 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
       const { participantService } = await import('../services/participantService');
       await participantService.addParticipantToTournament(tournamentId, selectedMembreId);
       
-      // Marquer le membre comme inscrit
+      // Mark the member as registered
       setInscribedMemberIds(prev => new Set([...prev, selectedMembreId]));
       
-      showSuccess('Membre inscrit au tournoi avec succès');
+      showSuccess(t('addParticipant.registerSuccess'));
       setSelectedMembreId(null);
       onParticipantAdded();
     } catch (error) {
-      console.error('Erreur lors de l\'inscription:', error);
-      showError('Erreur lors de l\'inscription au tournoi');
+      console.error('Error during registration:', error);
+      showError(t('addParticipant.registerError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -101,7 +103,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
   const handleSubmitGuest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!guestFormData.pseudo.trim()) {
-      showError('Le pseudo est requis');
+      showError(t('addParticipant.pseudoRequired'));
       return;
     }
 
@@ -109,13 +111,13 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
     try {
       const { participantService } = await import('../services/participantService');
       await participantService.addGuestToTournament(tournamentId, { pseudo: guestFormData.pseudo.trim() });
-      showSuccess('Invité inscrit au tournoi avec succès');
+      showSuccess(t('addParticipant.guestSuccess'));
       resetForm();
       onParticipantAdded();
       onClose();
     } catch (error) {
-      console.error('Erreur lors de l\'inscription de l\'invité:', error);
-      showError('Erreur lors de l\'inscription de l\'invité');
+      console.error('Error during guest registration:', error);
+      showError(t('addParticipant.guestError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -158,11 +160,11 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
                 className="text-foreground truncate"
                 style={{ fontFamily: "Anton, sans-serif", fontSize: "1.5rem sm:1.8rem" }}
               >
-                Ajouter des participants
+                {t('addParticipant.title')}
               </h2>
               {mode === 'select' && inscribedCount > 0 && (
                 <p className="text-sm text-primary mt-1">
-                  {inscribedCount} membre{inscribedCount > 1 ? 's' : ''} inscrit{inscribedCount > 1 ? 's' : ''}
+                  {inscribedCount} {t('addParticipant.membersCount')}{language === 'fr' && inscribedCount > 1 ? 's' : ''} {t('addParticipant.inscribed')}{language === 'fr' && inscribedCount > 1 ? 's' : ''}
                 </p>
               )}
             </div>
@@ -186,8 +188,8 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
               }`}
             >
               <User size={16} />
-              <span className="hidden sm:inline">Membre du collectif</span>
-              <span className="sm:hidden">Membres</span>
+              <span className="hidden sm:inline">{t('addParticipant.membersTab')}</span>
+              <span className="sm:hidden">{t('membres.title')}</span>
             </button>
             <button
               onClick={() => setMode('guest')}
@@ -199,7 +201,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
               }`}
             >
               <UserPlus size={16} />
-              Invité
+              {t('addParticipant.guestsTab')}
             </button>
           </div>
         </div>
@@ -211,7 +213,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
                 <input
                   type="text"
-                  placeholder="Rechercher un membre..."
+                  placeholder={t('addParticipant.searchMember')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -227,16 +229,16 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
                 <div className="text-center py-12 border border-border border-dashed rounded-lg">
                   <User className="mx-auto mb-4 text-muted-foreground" size={48} />
                   <p className="text-muted-foreground">
-                    {searchTerm ? 'Aucun membre trouvé' : 'Aucun membre disponible'}
+                    {searchTerm ? t('addParticipant.noMemberFound') : t('addParticipant.noMemberAvailable')}
                   </p>
                 </div>
               ) : (
                 <>
                   <div className="flex items-center justify-between text-sm text-muted-foreground mb-2">
-                    <span>{filteredMembres.length} membre{filteredMembres.length > 1 ? 's' : ''}</span>
+                    <span>{filteredMembres.length} {language === 'fr' && filteredMembres.length === 1 ? 'membre' : t('addParticipant.membersCount')}</span>
                     {inscribedCount > 0 && (
                       <span className="text-primary">
-                        {inscribedCount} inscrit{inscribedCount > 1 ? 's' : ''}
+                        {inscribedCount} {language === 'fr' && inscribedCount === 1 ? 'inscrit' : t('addParticipant.inscribed')}
                       </span>
                     )}
                   </div>
@@ -280,7 +282,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
                           {isInscribed ? (
                             <div className="flex items-center gap-1 text-primary flex-shrink-0">
                               <CheckCircle2 size={16} />
-                              <span className="text-xs font-medium">Inscrit</span>
+                              <span className="text-xs font-medium">{t('addParticipant.memberInscribed')}</span>
                             </div>
                           ) : isSelected ? (
                             <UserCheck className="text-primary flex-shrink-0" size={20} />
@@ -295,7 +297,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
           ) : (
             <form onSubmit={handleSubmitGuest} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-2">Pseudo *</label>
+                <label className="block text-sm font-medium mb-2">{t('addParticipant.pseudo')} *</label>
                 <input
                   type="text"
                   required
@@ -303,7 +305,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
                   onChange={(e) => setGuestFormData({ ...guestFormData, pseudo: e.target.value })}
                   className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   disabled={isSubmitting}
-                  placeholder="Entrez le pseudo de l'invité"
+                  placeholder={t('addParticipant.guestPlaceholder')}
                 />
               </div>
             </form>
@@ -318,7 +320,7 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
               disabled={isSubmitting}
               className="flex-1 px-6 py-3 border border-border hover:border-primary/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {mode === 'select' && inscribedCount > 0 ? 'Terminer' : 'Annuler'}
+              {mode === 'select' && inscribedCount > 0 ? t('addParticipant.finish') : t('common.cancel')}
             </button>
             {mode === 'select' ? (
               <button
@@ -330,12 +332,12 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
                 {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" size={16} />
-                    Inscription...
+                    {t('addParticipant.registering')}
                   </>
                 ) : (
                   <>
                     <UserPlus size={16} />
-                    Inscrire
+                    {t('addParticipant.register')}
                   </>
                 )}
               </button>
@@ -349,10 +351,10 @@ export function AddParticipantDialog({ isOpen, onClose, onParticipantAdded, tour
                 {isSubmitting ? (
                   <>
                     <Loader2 className="animate-spin" size={16} />
-                    Inscription...
+                    {t('addParticipant.registering')}
                   </>
                 ) : (
-                  'Inscrire'
+                  t('addParticipant.register')
                 )}
               </button>
             )}

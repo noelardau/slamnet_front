@@ -1,11 +1,13 @@
 import { useOutletContext } from 'react-router-dom';
 import { Trophy, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useParticipantStore } from '../stores/participantStore';
 import { usePerformanceStore } from '../stores/performanceStore';
 
 export default function TournoiClassement() {
   const { tournoi } = useOutletContext<any>();
+  const { t } = useLanguage();
   const { participants, hydrateParticipants, isLoading: participantsLoading } = useParticipantStore();
   const { performances, hydratePerformances } = usePerformanceStore();
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +20,7 @@ export default function TournoiClassement() {
           await hydrateParticipants(tournoi.idTournoi);
           await hydratePerformances(tournoi.idTournoi);
         } catch (error) {
-          console.error('Erreur lors du chargement des données:', error);
+          console.error(t('tournoiClassement.loadingError'), error);
         } finally {
           setIsLoading(false);
         }
@@ -95,13 +97,13 @@ export default function TournoiClassement() {
         className="text-foreground mb-6"
         style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
       >
-        Classement
+        {t('tournoiClassement.title')}
       </h2>
 
       {isLoading || participantsLoading ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="animate-spin text-primary" size={32} />
-          <p className="text-muted-foreground ml-3">Chargement du classement...</p>
+          <p className="text-muted-foreground ml-3">{t('tournoiClassement.loading')}</p>
         </div>
       ) : (
         <>
@@ -109,7 +111,7 @@ export default function TournoiClassement() {
             {classement.length === 0 ? (
               <div className="text-center py-12 border border-border border-dashed">
                 <Trophy className="mx-auto mb-4 text-muted-foreground" size={48} />
-                <p className="text-muted-foreground">Aucun classement pour le moment</p>
+                <p className="text-muted-foreground">{t('tournoiClassement.noRanking')}</p>
               </div>
             ) : (
               classement.map((participant) => (
@@ -160,21 +162,21 @@ export default function TournoiClassement() {
           {classement.length > 0 && (
             <div className="mt-8 p-6 bg-card border border-border">
               <h3 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.2rem" }}>
-                Résumé
+                {t('tournoiClassement.summary')}
               </h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-muted-foreground text-sm mb-1">Participants</div>
+                  <div className="text-muted-foreground text-sm mb-1">{t('tournoiClassement.participants')}</div>
                   <div className="text-2xl font-bold text-foreground">{classement.length}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground text-sm mb-1">Moyenne</div>
+                  <div className="text-muted-foreground text-sm mb-1">{t('tournoiClassement.average')}</div>
                   <div className="text-2xl font-bold text-foreground">
                     {(classement.reduce((sum: number, p: any) => sum + p.totalNote, 0) / classement.length).toFixed(1)}
                   </div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground text-sm mb-1">Rounds max</div>
+                  <div className="text-muted-foreground text-sm mb-1">{t('tournoiClassement.maxRounds')}</div>
                   <div className="text-2xl font-bold text-foreground">
                     {Math.max(...classement.map((p: any) => p.rounds.length))}
                   </div>

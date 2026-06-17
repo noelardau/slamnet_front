@@ -2,6 +2,7 @@ import { useOutletContext } from 'react-router-dom';
 import { Plus, Mic, Trash2, Loader2, Play, Pause, CheckCircle, Clock, AlertCircle, X, Send } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { usePerformanceStore } from '../stores/performanceStore';
 import { useParticipantStore } from '../stores/participantStore';
@@ -15,6 +16,7 @@ type TabType = 'liste' | 'en_cours' | 'note';
 export default function TournoiPerformances() {
   const { tournoi } = useOutletContext<any>();
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
   const { participants, hydrateParticipants } = useParticipantStore();
   const { performances, isLoading, hydratePerformances, deletePerformance, createPerformance, updatePerformanceLocal, updatePerformance } = usePerformanceStore();
   const { notes, hydrateNotes, createBulkNotes, updateNote, clearNotes, isLoading: notesLoading } = useNoteStore();
@@ -57,7 +59,7 @@ export default function TournoiPerformances() {
     try {
       await hydratePerformances(tournoi.idTournoi);
     } catch (error) {
-      showError('Erreur lors du chargement des performances');
+      showError(t('tournoiPerformances.loadingPerformances'));
     }
   };
 
@@ -65,19 +67,19 @@ export default function TournoiPerformances() {
     try {
       await hydrateParticipants(tournoi.idTournoi);
     } catch (error) {
-      showError('Erreur lors du chargement des participants');
+      showError(t('tournoiPerformances.loadingParticipants'));
     }
   };
 
   const handleCreatePerformance = async () => {
     if (!selectedParticipantId) {
-      showError('Veuillez sélectionner un participant');
+      showError(t('tournoiPerformances.selectParticipant'));
       return;
     }
 
     const participant = participants.find(p => p.idParticipant === selectedParticipantId);
     if (!participant) {
-      showError('Participant non trouvé');
+      showError(t('tournoiPerformances.participantNotFound'));
       return;
     }
 
@@ -97,12 +99,12 @@ export default function TournoiPerformances() {
       }
 
       await createPerformance(createData);
-      showSuccess('Performance créée avec succès');
+      showSuccess(t('tournoiPerformances.createSuccess'));
       setShowAddDialog(false);
       setSelectedParticipantId(null);
       await loadPerformances();
     } catch (error) {
-      showError('Erreur lors de la création de la performance');
+      showError(t('tournoiPerformances.createError'));
     } finally {
       setIsCreating(false);
     }
@@ -165,13 +167,13 @@ export default function TournoiPerformances() {
         etat: 'terminée',
         duree: formatDurationSeconds(timerSeconds),
       });
-      showSuccess('Performance terminée avec succès');
+      showSuccess(t('tournoiPerformances.terminatedSuccess'));
       setActiveTab('note');
       setCurrentPerformance(updatedPerformance);
       setTimerRunning(false);
       await loadPerformances();
     } catch (error) {
-      showError('Erreur lors de la terminaison de la performance');
+      showError(t('tournoiPerformances.terminateError'));
     } finally {
       setIsTerminating(false);
     }
@@ -180,7 +182,7 @@ export default function TournoiPerformances() {
   const handleAddNote = () => {
     const value = parseFloat(noteInput.replace(',', '.'));
     if (isNaN(value) || value < 0 || value > 10) {
-      showError('La valeur doit être un nombre entre 0 et 10');
+      showError(t('tournoiPerformances.invalidNote'));
       return;
     }
 
@@ -209,14 +211,14 @@ export default function TournoiPerformances() {
 
   const handleSaveNotes = async () => {
     if (!currentPerformance?.idPerfo) {
-      showError('Aucune performance sélectionnée');
+      showError(t('tournoiPerformances.noPerformanceSelected'));
       return;
     }
 
     const nbJury = tournoi?.nbJury || 3;
     
     if (localNotes.length !== nbJury) {
-      showError(`Vous devez ajouter exactement ${nbJury} notes (nombre de jurys)`);
+      showError(t('tournoiPerformances.notesRequired').replace('{nb}', nbJury.toString()));
       return;
     }
 
@@ -230,7 +232,7 @@ export default function TournoiPerformances() {
         await createBulkPenalites(currentPerformance.idPerfo, penalitesToSave);
       }
       
-      showSuccess('Notes enregistrées avec succès');
+      showSuccess(t('tournoiPerformances.notesSaved'));
       
       await updatePerformance(currentPerformance.idPerfo, {});
       
@@ -242,7 +244,7 @@ export default function TournoiPerformances() {
       
       await loadPerformances();
     } catch (error) {
-      showError('Erreur lors de l\'enregistrement des notes');
+      showError(t('tournoiPerformances.saveError'));
     } finally {
       setIsSavingNotes(false);
     }
@@ -254,10 +256,10 @@ export default function TournoiPerformances() {
 
     try {
       await updateNote(noteId, { retenu: !note.retenu });
-      showSuccess('Note mise à jour avec succès');
+      showSuccess(t('tournoiPerformances.noteUpdated'));
       await hydrateNotes(currentPerformance.idPerfo);
     } catch (error) {
-      showError('Erreur lors de la mise à jour de la note');
+      showError(t('tournoiPerformances.updateNoteError'));
     }
   };
 
@@ -271,12 +273,12 @@ export default function TournoiPerformances() {
     
     try {
       await deletePerformance(performanceToDelete.idPerfo);
-      showSuccess('Performance supprimée avec succès');
+      showSuccess(t('tournoiPerformances.deleteSuccess'));
       setShowDeleteDialog(false);
       setPerformanceToDelete(null);
       await loadPerformances();
     } catch (error) {
-      showError('Erreur lors de la suppression de la performance');
+      showError(t('tournoiPerformances.deleteError'));
     }
   };
 
@@ -286,7 +288,7 @@ export default function TournoiPerformances() {
     } else if (item.guest) {
       return item.guest.pseudo;
     }
-    return 'Inconnu';
+    return t('tournoiPerformances.unknown');
   };
 
   const getParticipantPhoto = (item: any) => {
@@ -299,7 +301,7 @@ export default function TournoiPerformances() {
   const isGuest = (item: any) => !!item.guest;
 
   const getParticipantType = (item: any) => {
-    return isGuest(item) ? 'Invité' : 'Membre';
+    return isGuest(item) ? t('tournoiParticipants.guest') : t('tournoiParticipants.member');
   };
 
   const formatDuration = (duration: string | null): string => {
@@ -319,11 +321,11 @@ export default function TournoiPerformances() {
 
   const getEtatLabel = (etat: string | null) => {
     switch (etat) {
-      case 'prêt': return 'Prêt';
-      case 'en_cours': return 'En cours';
-      case 'en_pause': return 'En pause';
-      case 'terminée': return 'Terminée';
-      default: return etat || 'Non défini';
+      case 'prêt': return t('tournoiPerformances.ready');
+      case 'en_cours': return t('tournoiPerformances.inProgress');
+      case 'en_pause': return t('tournoiPerformances.paused');
+      case 'terminée': return t('tournoiPerformances.completed');
+      default: return etat || t('tournoiPerformances.notDefined');
     }
   };
 
@@ -348,9 +350,9 @@ export default function TournoiPerformances() {
   };
 
   const tabs = [
-    { id: 'liste' as TabType, label: 'Liste' },
-    { id: 'en_cours' as TabType, label: 'En cours' },
-    { id: 'note' as TabType, label: 'Note' },
+    { id: 'liste' as TabType, label: t('tournoiPerformances.listTab') },
+    { id: 'en_cours' as TabType, label: t('tournoiPerformances.inProgressTab') },
+    { id: 'note' as TabType, label: t('tournoiPerformances.notesTab') },
   ];
 
   const renderListeTab = () => (
@@ -358,12 +360,12 @@ export default function TournoiPerformances() {
       {isLoading && performances.length === 0 ? (
         <div className="text-center py-12">
           <Loader2 className="mx-auto mb-4 text-muted-foreground animate-spin" size={48} />
-          <p className="text-muted-foreground">Chargement des performances...</p>
+          <p className="text-muted-foreground">{t('tournoiPerformances.loading')}</p>
         </div>
       ) : performances.length === 0 ? (
         <div className="text-center py-12 border border-border border-dashed">
           <Mic className="mx-auto mb-4 text-muted-foreground" size={48} />
-          <p className="text-muted-foreground">Aucune performance pour le moment</p>
+          <p className="text-muted-foreground">{t('tournoiPerformances.noPerformances')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -395,14 +397,14 @@ export default function TournoiPerformances() {
                     <span className="hidden md:inline">·</span>
                     <span className="flex items-center gap-1">
                       <Clock size={12} className="md:hidden" />
-                      <span>Durée: {formatDuration(performance.duree)}</span>
+                      <span>{t('tournoiPerformances.duration')}: {formatDuration(performance.duree)}</span>
                     </span>
                     {performance.noteFinale && (
                       <>
                         <span className="hidden md:inline">·</span>
                         <span className="flex items-center gap-1">
                           <CheckCircle size={12} className="md:hidden" />
-                          <span>Note: {performance.noteFinale}</span>
+                          <span>{t('tournoiPerformances.score')}: {performance.noteFinale}</span>
                         </span>
                       </>
                     )}
@@ -426,13 +428,13 @@ export default function TournoiPerformances() {
                       className="bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:bg-primary/90 transition-all text-sm flex items-center gap-2"
                     >
                       <Play size={14} />
-                      <span className="hidden md:inline">Démarrer</span>
+                      <span className="hidden md:inline">{t('tournoiPerformances.start')}</span>
                     </button>
                   )}
                   <button
                     onClick={() => handleDeleteClick(performance)}
                     className="opacity-0 md:opacity-0 md:group-hover:opacity-100 p-2 hover:bg-destructive/10 rounded-lg transition-all bg-destructive/5 md:bg-transparent"
-                    aria-label="Supprimer"
+                    aria-label={t('tournoiParticipants.delete')}
                   >
                     <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
                   </button>
@@ -450,7 +452,7 @@ export default function TournoiPerformances() {
       return (
         <div className="text-center py-12 border border-border border-dashed">
           <Clock className="mx-auto mb-4 text-muted-foreground" size={48} />
-          <p className="text-muted-foreground">Aucune performance en cours</p>
+          <p className="text-muted-foreground">{t('tournoiPerformances.noCurrentPerformance')}</p>
         </div>
       );
     }
@@ -490,7 +492,7 @@ export default function TournoiPerformances() {
                 <div className="text-6xl font-mono font-bold text-foreground mb-2" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
                 {formatDurationSeconds(timerSeconds)}
               </div>
-            <p className="text-muted-foreground">Chronomètre</p>
+            <p className="text-muted-foreground">{t('tournoiPerformances.timer')}</p>
           </div>
 
           <div className="flex gap-4">
@@ -500,7 +502,7 @@ export default function TournoiPerformances() {
                 className="bg-primary text-primary-foreground px-8 py-3 rounded-lg hover:bg-primary/90 transition-all text-lg flex items-center gap-2"
               >
                 <Play size={20} />
-                Play
+                {t('tournoiPerformances.play')}
               </button>
             ) : (
               <button
@@ -508,7 +510,7 @@ export default function TournoiPerformances() {
                 className="bg-secondary text-secondary-foreground px-8 py-3 rounded-lg hover:bg-secondary/90 transition-all text-lg flex items-center gap-2"
               >
                 <Pause size={20} />
-                Pause
+                {t('tournoiPerformances.pause')}
               </button>
             )}
             <button
@@ -521,7 +523,7 @@ export default function TournoiPerformances() {
               ) : (
                 <CheckCircle size={20} />
               )}
-              {isTerminating ? 'Enregistrement...' : 'Terminer'}
+              {isTerminating ? t('tournoiPerformances.recording') : t('tournoiPerformances.finish')}
             </button>
           </div>
         </div>
@@ -544,8 +546,8 @@ export default function TournoiPerformances() {
             <AlertCircle className="mx-auto mb-4 text-muted-foreground" size={48} />
             <p className="text-muted-foreground">
               {!currentPerformance 
-                ? 'Sélectionnez une performance terminée pour ajouter des notes' 
-                : 'Cette performance doit être terminée avant de pouvoir ajouter des notes'}
+                ? t('tournoiPerformances.noPerformanceSelected')
+                : t('tournoiPerformances.mustBeTerminated')}
             </p>
           </div>
         </div>
@@ -555,7 +557,7 @@ export default function TournoiPerformances() {
     return (
       <div className="max-w-4xl mx-auto">
         <div className="bg-card border rounded-xl p-6">
-          <h3 className="text-foreground font-medium text-lg mb-4">Ajouter des notes et pénalités</h3>
+          <h3 className="text-foreground font-medium text-lg mb-4">{t('tournoiPerformances.addNotes')}</h3>
           
           <div className="flex gap-2 mb-4">
             <button
@@ -566,7 +568,7 @@ export default function TournoiPerformances() {
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
-              Notes
+              {t('tournoiPerformances.notes')}
             </button>
             <button
               onClick={() => setInputType('penalite')}
@@ -576,7 +578,7 @@ export default function TournoiPerformances() {
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
               }`}
             >
-              Pénalités
+              {t('tournoiPerformances.penalties')}
             </button>
           </div>
 
@@ -585,7 +587,7 @@ export default function TournoiPerformances() {
               type="text"
               value={noteInput}
               onChange={(e) => setNoteInput(e.target.value)}
-              placeholder={inputType === 'note' ? 'Note (ex: 8,5)' : 'Pénalité (ex: 1,5)'}
+              placeholder={inputType === 'note' ? t('tournoiPerformances.notePlaceholder') : t('tournoiPerformances.penaltyPlaceholder')}
               onKeyPress={(e) => e.key === 'Enter' && handleAddNote()}
               disabled={inputType === 'note' && !canAddNote}
               className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
@@ -599,13 +601,13 @@ export default function TournoiPerformances() {
                   : 'bg-primary text-primary-foreground'
               }`}
             >
-              Ajouter
+              {t('tournoiPerformances.add')}
             </button>
           </div>
 
           {allLocalNotes.length > 0 && (
             <div className="mb-4">
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">Notes à enregistrer</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-3">{t('tournoiPerformances.notesToRecord')}</h4>
               <div className="flex flex-wrap gap-3">
                 {allLocalNotes.map((note) => (
                   <div
@@ -621,14 +623,14 @@ export default function TournoiPerformances() {
                       onClick={() => handleToggleRetenu(note.id)}
                       className="text-sm text-destructive hover:underline"
                     >
-                      {note.retenu ? 'Retirer' : 'Rétablir'}
+                      {note.retenu ? t('tournoiPerformances.remove') : t('tournoiPerformances.restore')}
                     </button>
                   </div>
                 ))}
               </div>
               {!canAddNote && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  Nombre maximum de notes atteint ({nbJury} jurys)
+                  {t('tournoiPerformances.maxNotesReached').replace('{nb}', nbJury.toString())}
                 </p>
               )}
             </div>
@@ -636,7 +638,7 @@ export default function TournoiPerformances() {
 
           {allLocalPenalites.length > 0 && (
             <div className="mb-6">
-              <h4 className="text-sm font-medium text-muted-foreground mb-3">Pénalités à enregistrer</h4>
+              <h4 className="text-sm font-medium text-muted-foreground mb-3">{t('tournoiPerformances.penaltiesToRecord')}</h4>
               <div className="flex flex-wrap gap-3">
                 {allLocalPenalites.map((penalite) => (
                   <div
@@ -652,7 +654,7 @@ export default function TournoiPerformances() {
                       }}
                       className="text-sm text-destructive hover:underline"
                     >
-                      Retirer
+                      {t('tournoiPerformances.remove')}
                     </button>
                   </div>
                 ))}
@@ -668,19 +670,19 @@ export default function TournoiPerformances() {
             {isSavingNotes ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
-                Enregistrement...
+                {t('tournoiParametres.saving')}
               </>
             ) : (
               <>
                 <Send size={16} />
-                Enregistrer ({localNotes.length}/{nbJury})
+                {t('tournoiPerformances.save')} ({localNotes.length}/{nbJury})
               </>
             )}
           </button>
 
           {(existingNotes.length > 0 || existingPenalites.length > 0) && (
             <div className="bg-card border rounded-xl p-6 mt-6">
-              <h3 className="text-foreground font-medium text-lg mb-4">Notes et pénalités existantes</h3>
+              <h3 className="text-foreground font-medium text-lg mb-4">{t('tournoiPerformances.existingNotes')}</h3>
               <div className="flex flex-wrap gap-3">
                 {existingNotes.map((note) => (
                   <div
@@ -696,7 +698,7 @@ export default function TournoiPerformances() {
                       onClick={() => handleToggleNoteRetenu(note.idNote)}
                       className="text-sm text-destructive hover:underline"
                     >
-                      {note.retenu ? 'Retirer' : 'Rétablir'}
+                      {note.retenu ? t('tournoiPerformances.remove') : t('tournoiPerformances.restore')}
                     </button>
                   </div>
                 ))}
@@ -748,7 +750,7 @@ export default function TournoiPerformances() {
             <span className={`text-xs px-2 py-0.5 rounded ${
               isGuestParticipant(participant) ? 'bg-secondary text-secondary-foreground' : 'bg-primary/20 text-primary'
             }`}>
-              {isGuestParticipant(participant) ? 'Invité' : 'Membre'}
+              {isGuestParticipant(participant) ? t('tournoiParticipants.guest') : t('tournoiParticipants.member')}
             </span>
           </div>
           {selectedParticipantId === participant.idParticipant && (
@@ -761,7 +763,7 @@ export default function TournoiPerformances() {
 
   const renderTirageTab = () => (
     <div className="text-center py-8">
-      <p className="text-muted-foreground">Tirage au sort - à implémenter</p>
+      <p className="text-muted-foreground">{t('tournoiPerformances.draw')} - {t('tournoiPerformances.notDefined')}</p>
     </div>
   );
 
@@ -772,7 +774,7 @@ export default function TournoiPerformances() {
           className="text-foreground"
           style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
         >
-          Performances
+          {t('tournoiPerformances.title')}
         </h2>
         {activeTab === 'liste' && (
           <button
@@ -780,7 +782,7 @@ export default function TournoiPerformances() {
             className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
           >
             <Plus size={16} />
-            <span className="hidden md:inline">Ajouter une performance</span>
+            <span className="hidden md:inline">{t('tournoiPerformances.addPerformance')}</span>
           </button>
         )}
       </div>
@@ -810,10 +812,10 @@ export default function TournoiPerformances() {
 
       <ConfirmDialog
         isOpen={showDeleteDialog}
-        title="Supprimer la performance"
-        message="Êtes-vous sûr de vouloir supprimer cette performance ?"
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        title={t('tournoiPerformances.deleteTitle')}
+        message={t('tournoiPerformances.deleteMessage')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={handleDeleteConfirm}
         loading={isLoading}
         onCancel={() => {
@@ -826,7 +828,7 @@ export default function TournoiPerformances() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-card border rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold text-foreground">Créer une performance</h3>
+              <h3 className="text-lg font-semibold text-foreground">{t('tournoiPerformances.createPerformance')}</h3>
               <button
                 onClick={() => {
                   setShowAddDialog(false);
@@ -849,7 +851,7 @@ export default function TournoiPerformances() {
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  Participant
+                  {t('tournoiPerformances.participant')}
                   {modalActiveTab === 'participant' && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                   )}
@@ -862,7 +864,7 @@ export default function TournoiPerformances() {
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  Tirage au sort
+                  {t('tournoiPerformances.draw')}
                   {modalActiveTab === 'tirage' && (
                     <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
                   )}
@@ -884,7 +886,7 @@ export default function TournoiPerformances() {
                       disabled={isCreating}
                       className="flex-1 px-4 py-2 border border-border rounded-lg hover:bg-accent transition-colors text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Annuler
+                      {t('tournoiPerformances.cancel')}
                     </button>
                     <button
                       onClick={handleCreatePerformance}
@@ -894,10 +896,10 @@ export default function TournoiPerformances() {
                       {isCreating ? (
                         <>
                           <Loader2 className="animate-spin" size={16} />
-                          Création...
+                          {t('common.creating')}
                         </>
                       ) : (
-                        'Créer'
+                        t('tournoiPerformances.create')
                       )}
                     </button>
                   </div>
