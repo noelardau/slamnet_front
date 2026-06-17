@@ -145,9 +145,9 @@ export default function TournoiClassement() {
                   </div>
                    <div className="w-full md:w-auto text-center md:text-right">
                      <div className="flex items-center gap-3 justify-center md:justify-end">
-                       <div className={`text-3xl md:text-4xl font-bold ${getScoreColor(participant.position)}`} style={{ fontFamily: "Anton, sans-serif" }}>
-                         {participant.totalNote}
-                       </div>
+                      <div className={`text-3xl md:text-4xl font-bold ${getScoreColor(participant.position)}`} style={{ fontFamily: "Anton, sans-serif" }}>
+                          {participant.totalNote.toFixed(1)}
+                        </div>
                        <Button 
                          variant="ghost" 
                          size="icon"
@@ -160,16 +160,16 @@ export default function TournoiClassement() {
                          <BarChart3 size={18} />
                        </Button>
                      </div>
-                    {participant.rounds.length > 0 && (
-                      <div className="text-muted-foreground text-xs md:text-sm mt-1">
-                        {participant.rounds.map((note: number, index: number) => (
-                          <span key={index}>
-                            R{index + 1}: {note}
-                            {index < participant.rounds.length - 1 && ' · '}
-                          </span>
-                        ))}
-                      </div>
-                    )}
+                     {participant.rounds.length > 0 && (
+                       <div className="text-muted-foreground text-xs md:text-sm mt-1">
+                         {participant.rounds.map((note: number, index: number) => (
+                           <span key={index}>
+                             R{index + 1}: {note.toFixed(1)}
+                             {index < participant.rounds.length - 1 && ' · '}
+                           </span>
+                         ))}
+                       </div>
+                     )}
                   </div>
                 </div>
               ))
