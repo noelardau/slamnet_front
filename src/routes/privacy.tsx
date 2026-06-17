@@ -1,6 +1,6 @@
 export default function PrivacyPage() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-12">
+    <div className="max-w-4xl mx-auto px-6 py-24">
       <div className="mb-12">
         <h1
           style={{
