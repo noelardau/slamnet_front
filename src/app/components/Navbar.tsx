@@ -3,12 +3,11 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useCollectifStore } from "../../stores/collectifStore";
+import { useAuthModal } from "../../contexts/AuthModalContext";
 import { Menu, X, LogOut, Loader2, User, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ThemeToggle } from "../../components/ThemeToggle";
-import { LoginModal } from "./LoginModal";
-import { SignupModal } from "./SignupModal";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -16,35 +15,12 @@ export function Navbar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isTournoiMode, setIsTournoiMode] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [showSignupModal, setShowSignupModal] = useState(false);
+  const { openLoginModal, openSignupModal } = useAuthModal();
   const { isAuthenticated, logout } = useAuth();
   const { profile } = useCollectifStore();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
   const location = useLocation();
-
-  const handleOpenLogin = () => {
-    setShowLoginModal(true);
-    setShowSignupModal(false);
-    setOpen(false);
-  };
-
-  const handleOpenSignup = () => {
-    setShowSignupModal(true);
-    setShowLoginModal(false);
-    setOpen(false);
-  };
-
-  const handleSwitchToSignup = () => {
-    setShowSignupModal(true);
-    setShowLoginModal(false);
-  };
-
-  const handleSwitchToLogin = () => {
-    setShowLoginModal(true);
-    setShowSignupModal(false);
-  };
 
   const handleScrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
@@ -65,7 +41,7 @@ export function Navbar() {
       showSuccess('Déconnexion réussie');
       setIsLoggingOut(false);
       setShowLogoutDialog(false);
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
       showError('Erreur lors de la déconnexion');
@@ -208,7 +184,10 @@ export function Navbar() {
             ) : (
               <>
                  <button
-                   onClick={handleOpenLogin}
+                   onClick={() => {
+                     openLoginModal();
+                     setOpen(false);
+                   }}
                    className="text-muted-foreground hover:text-foreground transition-colors px-3 py-2 text-center"
                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
                  >
@@ -216,7 +195,10 @@ export function Navbar() {
                    <span className="md:hidden">Connexion</span>
                  </button>
                  <button
-                   onClick={handleOpenSignup}
+                   onClick={() => {
+                     openSignupModal();
+                     setOpen(false);
+                   }}
                    className="bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-center"
                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.04em" }}
                  >
@@ -348,14 +330,20 @@ export function Navbar() {
                          </a>
                        )))}
                      <button
-                       onClick={handleOpenLogin}
+                       onClick={() => {
+                         openLoginModal();
+                         setOpen(false);
+                       }}
                        className="text-muted-foreground hover:text-foreground py-1 text-center mt-2"
                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
                      >
                        Connexion
                      </button>
                      <button
-                       onClick={handleOpenSignup}
+                       onClick={() => {
+                         openSignupModal();
+                         setOpen(false);
+                       }}
                        className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
                        style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
                      >
@@ -377,16 +365,6 @@ export function Navbar() {
         onConfirm={handleLogoutConfirm}
         onCancel={handleLogoutCancel}
         loading={isLoggingOut}
-      />
-      <LoginModal 
-        open={showLoginModal} 
-        onOpenChange={setShowLoginModal}
-        onSwitchToSignup={handleSwitchToSignup}
-      />
-      <SignupModal 
-        open={showSignupModal} 
-        onOpenChange={setShowSignupModal}
-        onSwitchToLogin={handleSwitchToLogin}
       />
     </>
   );

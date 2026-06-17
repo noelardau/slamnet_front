@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../app/components/ui/dialog';
 
 interface LoginModalProps {
   open: boolean;

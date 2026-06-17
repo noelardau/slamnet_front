@@ -1,8 +1,6 @@
 import type { RouteObject } from 'react-router-dom';
 import { Layout } from '../app/layout';
 import HomePage from './_index';
-import LoginPage from './login';
-import SignupPage from './signup';
 import CollectifDetailPage from './collectifs.$id';
 import DashboardPage from './dashboard';
 import MembresPage from './membres';
@@ -24,8 +22,6 @@ export const routes: RouteObject[] = [
     element: <Layout />,
     children: [
       { index: true, element: <HomePage /> },
-      { path: 'login', element: <LoginPage /> },
-      { path: 'signup', element: <SignupPage /> },
       { path: 'collectifs/:id', element: <CollectifDetailPage /> },
       { path: 'dashboard', element: <DashboardPage /> },
       { path: 'membres', element: <MembresPage /> },

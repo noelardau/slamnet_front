@@ -1,10 +1,17 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useToast } from '../contexts/ToastContext';
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../app/components/ui/dialog';
 
-export default function SignupPage() {
+interface SignupModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSwitchToLogin: () => void;
+}
+
+export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModalProps) {
   const [formData, setFormData] = useState({
     nomCollectif: '',
     ville: '',
@@ -60,6 +67,7 @@ export default function SignupPage() {
         password: formData.password,
       });
       showSuccess('Compte créé avec succès');
+      onOpenChange(false);
       navigate('/dashboard', { replace: true });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
@@ -79,28 +87,29 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen py-8">
-      <div className="w-full max-w-md p-8">
-        <h1 
-          className="text-center mb-8"
-          style={{
-            fontFamily: "Anton, sans-serif",
-            fontSize: "2.5rem",
-            lineHeight: 1,
-            color: "#f2ede6",
-          }}
-        >
-          INSCRIPTION
-        </h1>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle 
+            className="text-center"
+            style={{
+              fontFamily: "Anton, sans-serif",
+              fontSize: "2rem",
+              lineHeight: 1,
+            }}
+          >
+            INSCRIPTION
+          </DialogTitle>
+        </DialogHeader>
         
         {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
+          <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-3">
             <AlertCircle className="text-red-500" size={20} />
             <span className="text-red-500 text-sm">{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-2">Nom du collectif</label>
             <input
@@ -203,13 +212,19 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p className="text-center mt-6 text-muted-foreground">
+        <p className="text-center mt-4 text-muted-foreground text-sm">
           Déjà un compte?{' '}
-          <Link to="/login" className="text-primary hover:underline">
+          <button 
+            onClick={() => {
+              onOpenChange(false);
+              onSwitchToLogin();
+            }}
+            className="text-primary hover:underline"
+          >
             Se connecter
-          </Link>
+          </button>
         </p>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

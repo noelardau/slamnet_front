@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Mic } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useEffect, useState } from "react";
+import { useAuthModal } from "../../contexts/AuthModalContext";
 import demoVideo from "../../assets/demo.mp4";
 import demoMobileVideo from "../../assets/demoMobile.mp4";
 
 export function Hero() {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { openSignupModal } = useAuthModal();
 
   useEffect(() => {
     const checkDevice = () => {
@@ -120,14 +122,14 @@ export function Hero() {
             transition={{ duration: 0.6, delay: 0.45 }}
             className="mt-10 flex flex-wrap gap-4"
           >
-            <Link
-              to="/signup"
+            <button
+              onClick={openSignupModal}
               className="group flex items-center gap-3 bg-primary text-primary-foreground px-8 py-4 hover:bg-primary/90 transition-all duration-200 hover:gap-4"
               style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.06em", fontSize: "0.875rem" }}
             >
               CRÉER MON COLLECTIF
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </button>
             <Dialog open={isDemoOpen} onOpenChange={setIsDemoOpen}>
               <DialogTrigger asChild>
                 <button
