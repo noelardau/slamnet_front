@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Loader2, X } from 'lucide-react';
 import { CreateTournoiData } from '../services/tournoiService';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface CreateTournoiDialogProps {
   isOpen: boolean;
@@ -23,18 +24,19 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { showError } = useToast();
+  const { t } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!formData.nomTournoi || !formData.LieuTournoi || !formData.dateTournoi || !formData.heureTournoi || !formData.nbJury) {
-      setError('Tous les champs requis doivent être remplis');
+      setError(t('createTournoi.allFieldsRequired'));
       return;
     }
 
     if (formData.nbJury < 1) {
-      setError('Le nombre de jurés doit être au moins 1');
+      setError(t('createTournoi.minJuryError'));
       return;
     }
 
@@ -43,7 +45,7 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
       await onSubmit(formData);
       handleClose();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la création du tournoi';
+      const errorMessage = err instanceof Error ? err.message : t('createTournoi.createError');
       setError(errorMessage);
       showError(errorMessage);
     } finally {
@@ -97,7 +99,7 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
               className="text-foreground"
               style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
             >
-              Nouveau tournoi
+              {t('createTournoi.title')}
             </h2>
             <button
               onClick={handleClose}
@@ -118,35 +120,35 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium mb-2">Nom du tournoi *</label>
+              <label className="block text-sm font-medium mb-2">{t('createTournoi.name')}</label>
               <input
                 type="text"
                 name="nomTournoi"
                 value={formData.nomTournoi}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Ex: Grand Slam de Paris"
+                placeholder={t('createTournoi.namePlaceholder')}
                 disabled={loading}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Lieu *</label>
+              <label className="block text-sm font-medium mb-2">{t('createTournoi.location')}</label>
               <input
                 type="text"
                 name="LieuTournoi"
                 value={formData.LieuTournoi}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Ex: Café de la Gare"
+                placeholder={t('createTournoi.locationPlaceholder')}
                 disabled={loading}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Date *</label>
+              <label className="block text-sm font-medium mb-2">{t('createTournoi.date')}</label>
               <input
                 type="date"
                 name="dateTournoi"
@@ -159,7 +161,7 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Heure *</label>
+              <label className="block text-sm font-medium mb-2">{t('createTournoi.time')}</label>
               <input
                 type="time"
                 name="heureTournoi"
@@ -172,7 +174,7 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Nombre de jurés *</label>
+              <label className="block text-sm font-medium mb-2">{t('createTournoi.juryCount')}</label>
               <select
                 name="nbJury"
                 value={formData.nbJury}
@@ -182,13 +184,13 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
                 required
               >
                 {[3,5,7,9].map(num => (
-                  <option key={num} value={num}>{num} juré{num > 1 ? 's' : ''}</option>
+                  <option key={num} value={num}>{num} {num > 1 ? t('tournois.jurors') : t('tournois.juror')}</option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Durée par performance (optionnel)</label>
+              <label className="block text-sm font-medium mb-2">{t('createTournoi.duration')}</label>
               <div className="flex gap-2">
                 <div className="flex-1">
                   <input
@@ -204,7 +206,7 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
                       }));
                     }}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Min"
+                    placeholder={t('createTournoi.min')}
                     disabled={loading}
                     min="0"
                     max="60"
@@ -224,14 +226,14 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
                       }));
                     }}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Sec"
+                    placeholder={t('createTournoi.sec')}
                     disabled={loading}
                     min="0"
                     max="59"
                   />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Format : minutes:secondes (ex: 3:00)</p>
+              <p className="text-xs text-muted-foreground mt-1">{t('createTournoi.durationFormat')}</p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -244,18 +246,18 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
                 className="w-5 h-5 rounded border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 disabled={loading}
               />
-              <label htmlFor="tirageAuSort" className="text-sm font-medium">Activer le tirage au sort des participants</label>
+              <label htmlFor="tirageAuSort" className="text-sm font-medium">{t('createTournoi.enableDraw')}</label>
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">URL de l'affiche (optionnel)</label>
+              <label className="block text-sm font-medium mb-2">{t('createTournoi.posterUrl')}</label>
               <input
                 type="url"
                 name="afficheTournoi"
                 value={formData.afficheTournoi}
                 onChange={handleChange}
                 className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="https://exemple.com/affiche.jpg"
+                placeholder={t('createTournoi.posterPlaceholder')}
                 disabled={loading}
               />
             </div>
@@ -270,7 +272,7 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
               disabled={loading}
               className="flex-1 px-6 py-3 border border-border hover:border-primary/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Annuler
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleSubmit}
@@ -281,10 +283,10 @@ export function CreateTournoiDialog({ isOpen, onClose, onSubmit }: CreateTournoi
               {loading ? (
                 <>
                   <Loader2 className="animate-spin" size={16} />
-                  Création...
+                  {t('common.creating')}
                 </>
               ) : (
-                'Créer'
+                t('common.create')
               )}
             </button>
           </div>

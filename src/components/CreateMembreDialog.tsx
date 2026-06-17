@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useMembreStore } from '../stores/membreStore';
 import { CreateMembreData } from '../services/membreService';
 import { X, Loader2 } from 'lucide-react';
@@ -13,6 +14,7 @@ interface CreateMembreDialogProps {
 export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateMembreDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
   const { createMembre } = useMembreStore();
   const [formData, setFormData] = useState<CreateMembreData>({
     nomMembre: '',
@@ -29,7 +31,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
 
     try {
       await createMembre(formData);
-      showSuccess('Membre créé avec succès');
+      showSuccess(t('createMember.createdSuccess'));
       setFormData({
         nomMembre: '',
         prenomMembre: '',
@@ -42,7 +44,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
       onClose();
     } catch (error) {
       console.error('Erreur lors de la création du membre:', error);
-      showError('Erreur lors de la création du membre');
+      showError(t('createMember.createError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -60,7 +62,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
               className="text-foreground"
               style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
             >
-              Nouveau membre
+              {t('createMember.title')}
             </h2>
             <button
               onClick={onClose}
@@ -76,7 +78,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Nom *</label>
+                <label className="block text-sm font-medium mb-2">{t('createMember.lastName')}</label>
                 <input
                   type="text"
                   required
@@ -88,7 +90,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Prénom *</label>
+                <label className="block text-sm font-medium mb-2">{t('createMember.firstName')}</label>
                 <input
                   type="text"
                   required
@@ -101,7 +103,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Pseudo *</label>
+              <label className="block text-sm font-medium mb-2">{t('createMember.pseudo')}</label>
               <input
                 type="text"
                 required
@@ -109,12 +111,12 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
                 onChange={(e) => setFormData({ ...formData, pseudoMembre: e.target.value })}
                 className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 disabled={isSubmitting}
-                placeholder="Nom de scène"
+                placeholder={t('common.stageName')}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Email *</label>
+              <label className="block text-sm font-medium mb-2">{t('createMember.email')}</label>
               <input
                 type="email"
                 required
@@ -126,7 +128,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Date de naissance *</label>
+              <label className="block text-sm font-medium mb-2">{t('createMember.dateOfBirth')}</label>
               <input
                 type="date"
                 required
@@ -138,7 +140,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Adresse *</label>
+              <label className="block text-sm font-medium mb-2">{t('createMember.address')}</label>
               <input
                 type="text"
                 required
@@ -159,7 +161,7 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
               disabled={isSubmitting}
               className="flex-1 px-6 py-3 border border-border hover:border-primary/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Annuler
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleSubmit}
@@ -170,10 +172,10 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
               {isSubmitting ? (
                 <>
                   <Loader2 className="animate-spin" size={16} />
-                  Création...
+                  {t('common.creating')}
                 </>
               ) : (
-                'Créer'
+                t('common.create')
               )}
             </button>
           </div>

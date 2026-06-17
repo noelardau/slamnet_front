@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useTournoiStore } from '../stores/tournoiStore';
 import { useCollectifStore } from '../stores/collectifStore';
 import { Tournoi, CreateTournoiData, UpdateTournoiData } from '../services/tournoiService';
@@ -14,6 +15,7 @@ import { UpdateTournoiDialog } from '../components/UpdateTournoiDialog';
 function TournoisContent() {
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
   const { tournois, isLoading, createTournoi, updateTournoi, deleteTournoi } = useTournoiStore();
   const { profile, isLoading: isProfileLoading } = useCollectifStore();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -27,7 +29,7 @@ function TournoisContent() {
   const handleCreateTournoi = async (data: CreateTournoiData) => {
     try {
       await createTournoi(data);
-      showSuccess('Tournoi créé avec succès');
+      showSuccess(t('tournois.createSuccess'));
       setShowCreateDialog(false);
     } catch (error) {
       console.error('Erreur lors de la création du tournoi:', error);
@@ -43,7 +45,7 @@ function TournoisContent() {
   const handleUpdateTournoi = async (id: number, data: UpdateTournoiData) => {
     try {
       await updateTournoi(id, data);
-      showSuccess('Tournoi modifié avec succès');
+      showSuccess(t('tournois.updateSuccess'));
       setShowUpdateDialog(false);
       setTournoiToUpdate(null);
     } catch (error) {
@@ -62,10 +64,10 @@ function TournoisContent() {
       setIsDeleting(true);
       try {
         await deleteTournoi(tournoiToDelete.idTournoi);
-        showSuccess(`Tournoi "${tournoiToDelete.nomTournoi}" supprimé avec succès`);
+        showSuccess(t('tournois.deleteSuccess'));
       } catch (error) {
         console.error('Erreur lors de la suppression du tournoi:', error);
-        showError('Erreur lors de la suppression du tournoi');
+        showError(t('tournois.deleteError'));
       } finally {
         setIsDeleting(false);
       }
@@ -81,7 +83,7 @@ function TournoisContent() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', { 
+    return date.toLocaleDateString(t('language') === 'en' ? 'en-US' : 'fr-FR', { 
       day: 'numeric', 
       month: 'long', 
       year: 'numeric' 
@@ -93,7 +95,7 @@ function TournoisContent() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
-          <p className="text-muted-foreground">Chargement des tournois...</p>
+          <p className="text-muted-foreground">{t('tournois.loading')}</p>
         </div>
       </div>
     );
@@ -102,7 +104,7 @@ function TournoisContent() {
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Vous devez être connecté pour accéder à cette page</p>
+        <p className="text-muted-foreground">{t('dashboard.needLogin')}</p>
       </div>
     );
   }
@@ -117,7 +119,7 @@ function TournoisContent() {
               className="text-primary"
               style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", letterSpacing: "0.2em" }}
             >
-              TOURNOIS
+              {t('tournois.title')}
             </span>
           </div>
           <button
@@ -125,7 +127,7 @@ function TournoisContent() {
             className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
           >
             <Plus size={16} />
-            <span className="hidden md:inline">Ajouter un tournoi</span>
+            <span className="hidden md:inline">{t('tournois.addTournament')}</span>
           </button>
         </div>
         <h1
@@ -136,10 +138,10 @@ function TournoisContent() {
             color: "#f2ede6",
           }}
         >
-          <span style={{ color: "#ff4d00" }}>NOS TOURNOIS.</span>
+          <span style={{ color: "#ff4d00" }}>{t('tournois.subtitle')}</span>
         </h1>
         <p className="mt-4 text-muted-foreground" style={{ fontSize: "1rem" }}>
-          Gérez les tournois de votre collectif
+          {t('tournois.description')}
         </p>
       </div>
 
@@ -147,10 +149,10 @@ function TournoisContent() {
         <div className="border border-border p-12 text-center">
           <Trophy className="mx-auto mb-4 text-muted-foreground" size={48} />
           <h2 className="text-foreground mb-2" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}>
-            Aucun tournoi
+            {t('tournois.noTournament')}
           </h2>
           <p className="text-muted-foreground mb-6">
-            Vous n'avez pas encore créé de tournoi. Commencez par organiser votre premier événement !
+            {t('tournois.noTournamentDesc')}
           </p>
           <button
             onClick={() => setShowCreateDialog(true)}
@@ -158,7 +160,7 @@ function TournoisContent() {
             style={{ letterSpacing: "0.06em" }}
           >
             <Plus size={20} className="sm:size-16" />
-            <span className="hidden md:inline">Créer un tournoi</span>
+            <span className="hidden md:inline">{t('tournois.createTournament')}</span>
           </button>
         </div>
       ) : (
@@ -192,14 +194,14 @@ function TournoisContent() {
                       <button 
                         onClick={() => handleUpdateClick(tournoi)}
                         className="p-2 hover:bg-primary/20 rounded-lg transition-colors"
-                        aria-label="Modifier"
+                        aria-label={t('common.edit')}
                       >
                         <Edit size={16} className="text-muted-foreground hover:text-primary" />
                       </button>
                       <button 
                         onClick={() => handleDeleteClick(tournoi)}
                         className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                        aria-label="Supprimer"
+                        aria-label={t('common.delete')}
                       >
                         <Trash2 size={16} className="text-muted-foreground hover:text-red-500" />
                       </button>
@@ -221,7 +223,7 @@ function TournoisContent() {
                     </div>
                     <div className="flex items-center gap-3 text-muted-foreground text-sm">
                       <Users size={16} />
-                      <span>{tournoi.nbJury} juré{tournoi.nbJury > 1 ? 's' : ''}</span>
+                      <span>{tournoi.nbJury} {tournoi.nbJury > 1 ? t('tournois.jurors') : t('tournois.juror')}</span>
                     </div>
                   </div>
 
@@ -229,8 +231,8 @@ function TournoisContent() {
                     onClick={() => navigate(`/tournoi-gestion/${tournoi.idTournoi}`)}
                     className="w-full px-4 py-3 border border-border hover:border-primary/60 hover:bg-primary/10 transition-all duration-300 font-medium text-sm"
                   >
-                    <span className="hidden md:inline">Gérer le tournoi</span>
-                    <span className="md:hidden">Gérer</span>
+                    <span className="hidden md:inline">{t('tournois.manage')}</span>
+                    <span className="md:hidden">{t('tournois.manageShort')}</span>
                   </button>
                 </div>
               </div>
@@ -257,10 +259,10 @@ function TournoisContent() {
 
       <ConfirmDialog
         isOpen={showDeleteDialog}
-        title="Supprimer le tournoi"
-        message={`Êtes-vous sûr de vouloir supprimer le tournoi "${tournoiToDelete?.nomTournoi}" ? Cette action est irréversible.`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        title={t('deleteTournoi.title')}
+        message={t('deleteTournoi.message', { name: tournoiToDelete?.nomTournoi })}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         loading={isDeleting}

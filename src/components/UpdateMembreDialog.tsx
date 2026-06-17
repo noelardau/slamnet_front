@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { membreService, Membre, UpdateMembreData } from '../services/membreService';
 import { useMembreStore } from '../stores/membreStore';
 import { Edit2, X, Loader2, Camera } from 'lucide-react';
@@ -17,6 +18,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
   const { updateMembre } = useMembreStore();
   const [membre, setMembre] = useState<Membre | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -55,7 +57,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
       setPreviewUrl(membreData.photoMembre || null);
     } catch (error) {
       console.error('Erreur lors du chargement du membre:', error);
-      showError('Erreur lors du chargement du membre');
+      showError(t('updateMember.updateError'));
       onClose();
     } finally {
       setIsLoading(false);
@@ -101,10 +103,10 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
         });
       }
       
-      showSuccess('Photo uploadée avec succès');
+      showSuccess(t('updateMember.photoUploadSuccess'));
     } catch (error) {
       console.error('Erreur upload:', error);
-      showError('Erreur lors de l\'upload de la photo');
+      showError(t('updateMember.photoUploadError'));
     } finally {
       setIsUploading(false);
     }
@@ -122,12 +124,12 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
 
     try {
       await updateMembre(membreId, formData);
-      showSuccess('Membre mis à jour avec succès');
+      showSuccess(t('updateMember.updatedSuccess'));
       onMembreUpdated();
       onClose();
     } catch (error) {
       console.error('Erreur lors de la mise à jour du membre:', error);
-      showError('Erreur lors de la mise à jour du membre');
+      showError(t('updateMember.updateError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +147,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
               className="text-foreground"
               style={{ fontFamily: "Anton, sans-serif", fontSize: "1.8rem" }}
             >
-              Modifier le membre
+              {t('updateMember.title')}
             </h2>
             <button
               onClick={onClose}
@@ -161,7 +163,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
           <div className="p-6 flex items-center justify-center flex-1">
             <div className="text-center">
               <Loader2 className="animate-spin text-primary mx-auto mb-4" size={32} />
-              <p className="text-muted-foreground text-sm">Chargement des informations...</p>
+              <p className="text-muted-foreground text-sm">{t('updateMember.loadingInfo')}</p>
             </div>
           </div>
         ) : (
@@ -173,11 +175,11 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                     {isUploading ? (
                       <Loader2 className="animate-spin text-primary" size={32} />
                     ) : previewUrl ? (
-                      <img src={previewUrl} alt="Prévisualisation" className="w-full h-full object-cover" />
+                      <img src={previewUrl} alt={t('updateMember.preview')} className="w-full h-full object-cover" />
                     ) : (
                       <>
                         <Camera className="text-muted-foreground" size={32} />
-                        <span className="absolute bottom-0 text-xs text-muted-foreground">Ajouter</span>
+                        <span className="absolute bottom-0 text-xs text-muted-foreground">{t('common.addPhoto')}</span>
                       </>
                     )}
                     <input
@@ -192,7 +194,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Nom</label>
+                    <label className="block text-sm font-medium mb-2">{t('updateMember.lastName')}</label>
                     <input
                       type="text"
                       value={formData.nomMembre}
@@ -203,7 +205,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">Prénom</label>
+                    <label className="block text-sm font-medium mb-2">{t('updateMember.firstName')}</label>
                     <input
                       type="text"
                       value={formData.prenomMembre}
@@ -215,19 +217,19 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Pseudo</label>
+                  <label className="block text-sm font-medium mb-2">{t('updateMember.pseudo')}</label>
                   <input
                     type="text"
                     value={formData.pseudoMembre}
                     onChange={(e) => setFormData({ ...formData, pseudoMembre: e.target.value })}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     disabled={isSubmitting}
-                    placeholder="Nom de scène"
+                    placeholder={t('common.stageName')}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Email</label>
+                  <label className="block text-sm font-medium mb-2">{t('updateMember.email')}</label>
                   <input
                     type="email"
                     value={formData.emailMembre}
@@ -238,7 +240,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Date de naissance</label>
+                  <label className="block text-sm font-medium mb-2">{t('updateMember.dateOfBirth')}</label>
                   <input
                     type="date"
                     value={formData.dateNaissance}
@@ -249,7 +251,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Adresse</label>
+                  <label className="block text-sm font-medium mb-2">{t('updateMember.address')}</label>
                   <input
                     type="text"
                     value={formData.adresse}
@@ -269,7 +271,7 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                   disabled={isSubmitting}
                   className="flex-1 px-6 py-3 border border-border hover:border-primary/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Annuler
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleSubmit}
@@ -280,10 +282,10 @@ export function UpdateMembreDialog({ isOpen, onClose, membreId, onMembreUpdated 
                   {isSubmitting ? (
                     <>
                       <Loader2 className="animate-spin" size={16} />
-                      Mise à jour...
+                      {t('common.updating')}
                     </>
                   ) : (
-                    'Mettre à jour'
+                    t('common.save')
                   )}
                 </button>
               </div>

@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 export function Footer() {
+  const { t } = useLanguage();
+
   return (
     <footer className="border-t border-border py-12">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -26,14 +29,14 @@ export function Footer() {
           className="text-muted-foreground"
           style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em" }}
         >
-          © 2026 SLAM NET · TOUS DROITS RÉSERVÉS
+          {t('footer.copyright')}
         </p>
 
         <div className="flex gap-6">
           {[
-            { label: "Confidentialité", to: "/privacy" },
-            { label: "CGU", to: "/terms" },
-            { label: "Contact", to: "/contact" },
+            { label: t('footer.privacy'), to: '/privacy' },
+            { label: t('footer.terms'), to: '/terms' },
+            { label: t('footer.contact'), to: '/contact' },
           ].map((link) => (
             <Link
               key={link.label}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useMembreStore } from '../stores/membreStore';
 import { useCollectifStore } from '../stores/collectifStore';
 import { CreateMembreDialog } from '../components/CreateMembreDialog';
@@ -13,6 +14,7 @@ import { ImageWithFallback } from '../app/components/figma/ImageWithFallback';
 function MembresContent() {
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
   const { membres, isLoading, error, createMembre, updateMembre, deleteMembre, refreshMembres } = useMembreStore();
   const { profile, isLoading: isProfileLoading } = useCollectifStore();
   const [searchQuery, setSearchQuery] = useState('');
@@ -46,12 +48,12 @@ function MembresContent() {
     setIsDeleting(true);
     try {
       await deleteMembre(selectedMembreId);
-      showSuccess('Membre supprimé avec succès');
+      showSuccess(t('membres.deleteSuccess'));
       setShowDeleteDialog(false);
       setSelectedMembreId(null);
     } catch (error) {
       console.error('Erreur lors de la suppression du membre:', error);
-      showError('Erreur lors de la suppression du membre');
+      showError(t('membres.deleteError'));
     } finally {
       setIsDeleting(false);
     }
@@ -59,7 +61,7 @@ function MembresContent() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
+    return date.toLocaleDateString(t('language') === 'en' ? 'en-US' : 'fr-FR', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
@@ -71,7 +73,7 @@ function MembresContent() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
-          <p className="text-muted-foreground">Chargement...</p>
+          <p className="text-muted-foreground">{t('membres.loading')}</p>
         </div>
       </div>
     );
@@ -80,7 +82,7 @@ function MembresContent() {
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Vous devez être connecté pour accéder à cette page</p>
+        <p className="text-muted-foreground">{t('dashboard.needLogin')}</p>
       </div>
     );
   }
@@ -95,7 +97,7 @@ function MembresContent() {
               className="text-primary"
               style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", letterSpacing: "0.2em" }}
             >
-              MEMBRES
+              {t('membres.title')}
             </span>
           </div>
           <button
@@ -103,7 +105,7 @@ function MembresContent() {
             className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
           >
             <Plus size={16} />
-            <span className="hidden md:inline">Ajouter un membre</span>
+            <span className="hidden md:inline">{t('membres.addMember')}</span>
           </button>
         </div>
         <h1
@@ -114,10 +116,10 @@ function MembresContent() {
             color: "#f2ede6",
           }}
         >
-          <span style={{ color: "#ff4d00" }}>NOS POÈTES.</span>
+          <span style={{ color: "#ff4d00" }}>{t('membres.subtitle')}</span>
         </h1>
         <p className="mt-4 text-muted-foreground" style={{ fontSize: "1rem" }}>
-          Gérez les membres de votre collectif
+          {t('membres.description')}
         </p>
       </div>
 
@@ -126,7 +128,7 @@ function MembresContent() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
           <input
             type="text"
-            placeholder="Rechercher un membre..."
+            placeholder={t('membres.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-background border border-border focus:border-primary focus:outline-none transition-colors"
@@ -142,14 +144,14 @@ function MembresContent() {
         <div className="text-center py-12 border border-border border-dashed">
           <User className="mx-auto mb-4 text-muted-foreground" size={48} />
           <p className="text-muted-foreground mb-4">
-            {searchQuery ? 'Aucun membre trouvé' : 'Aucun membre dans votre collectif'}
+            {searchQuery ? t('membres.noMembersFound') : t('membres.noMembers')}
           </p>
           {!searchQuery && (
             <button
               onClick={() => setShowCreateDialog(true)}
               className="text-primary hover:underline"
             >
-              Ajouter votre premier membre
+              {t('membres.addFirstMember')}
             </button>
           )}
         </div>
@@ -185,16 +187,16 @@ function MembresContent() {
                    <button
                      onClick={() => handleUpdateClick(membre.idMembre)}
                      className="p-2 hover:bg-primary/10 rounded transition-colors"
-                     title="Modifier"
-                     aria-label="Modifier"
+                     title={t('common.edit')}
+                     aria-label={t('common.edit')}
                    >
                      <Edit2 size={16} className="text-muted-foreground hover:text-primary" />
                    </button>
                    <button
                      onClick={() => handleDeleteClick(membre.idMembre)}
                      className="p-2 hover:bg-destructive/10 rounded transition-colors"
-                     title="Supprimer"
-                     aria-label="Supprimer"
+                     title={t('common.delete')}
+                     aria-label={t('common.delete')}
                    >
                      <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
                    </button>
@@ -208,7 +210,7 @@ function MembresContent() {
                  </div>
                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
                    <Calendar size={16} />
-                   <span>Né(e) le {formatDate(membre.dateNaissance)}</span>
+                   <span>{t('membres.bornOn')} {formatDate(membre.dateNaissance)}</span>
                  </div>
                  <div className="flex items-center gap-2 text-muted-foreground text-sm">
                    <MapPin size={16} />
@@ -223,7 +225,7 @@ function MembresContent() {
                  </div>
                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
                    <Calendar size={14} />
-                   <span>{new Date(membre.dateNaissance).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}</span>
+                   <span>{new Date(membre.dateNaissance).toLocaleDateString(t('language') === 'en' ? 'en-US' : 'fr-FR', { day: '2-digit', month: 'short' })}</span>
                  </div>
                </div>
              </div>
@@ -249,10 +251,10 @@ function MembresContent() {
 
       <ConfirmDialog
         isOpen={showDeleteDialog}
-        title="Supprimer le membre"
-        message="Êtes-vous sûr de vouloir supprimer ce membre ? Cette action est irréversible."
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        title={t('deleteMember.title')}
+        message={t('deleteMember.message')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
         onConfirm={handleDeleteConfirm}
         onCancel={() => {
           setShowDeleteDialog(false);

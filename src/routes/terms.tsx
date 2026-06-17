@@ -1,4 +1,8 @@
+import { useLanguage } from '../contexts/LanguageContext';
+
 export default function TermsPage() {
+  const { t } = useLanguage();
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-24">
       <div className="mb-12">
@@ -10,48 +14,44 @@ export default function TermsPage() {
             color: "#f2ede6",
           }}
         >
-          CONDITIONS GÉNÉRALES
+          {t('terms.title')}
         </h1>
       </div>
 
       <div className="space-y-8 text-muted-foreground" style={{ lineHeight: 1.7 }}>
         <div>
           <h2 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}>
-            Utilisation de la plateforme
+            {t('terms.platformUsage.title')}
           </h2>
           <p>
-            Slam Net est destiné aux collectifs de slam poésie pour organiser des événements et gérer
-            leurs membres. Toute utilisation abusive ou frauduleuse entraînera la suppression du compte.
+            {t('terms.platformUsage.description')}
           </p>
         </div>
 
         <div>
           <h2 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}>
-            Responsabilité
+            {t('terms.liability.title')}
           </h2>
           <p>
-            Slam Net ne peut être tenu responsable des dommages directs ou indirects résultant de
-            l'utilisation de la plateforme. Les utilisateurs sont responsables du contenu qu'ils publient.
+            {t('terms.liability.description')}
           </p>
         </div>
 
         <div>
           <h2 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}>
-            Propriété intellectuelle
+            {t('terms.intellectualProperty.title')}
           </h2>
           <p>
-            Les créations originales (poèmes, textes, performances) restent la propriété de leurs auteurs.
-            Slam Net ne revendique aucun droit sur le contenu créé par les utilisateurs.
+            {t('terms.intellectualProperty.description')}
           </p>
         </div>
 
         <div>
           <h2 className="text-foreground mb-4" style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}>
-            Modification des conditions
+            {t('terms.modification.title')}
           </h2>
           <p>
-            Slam Net se réserve le droit de modifier ces conditions générales à tout moment.
-            Les utilisateurs seront informés des changements importants.
+            {t('terms.modification.description')}
           </p>
         </div>
       </div>
