@@ -4,6 +4,7 @@ import { ArrowRight, Mic } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useEffect, useState } from "react";
 import { useAuthModal } from "../../contexts/AuthModalContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 import demoVideo from "../../assets/demo.mp4";
 import demoMobileVideo from "../../assets/demoMobile.mp4";
 
@@ -11,6 +12,7 @@ export function Hero() {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { openSignupModal } = useAuthModal();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const checkDevice = () => {
@@ -80,7 +82,7 @@ export function Hero() {
               className="text-primary uppercase tracking-[0.2em]"
               style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem" }}
             >
-              La plateforme des collectifs de slam
+              {t('hero.platform')}
             </span>
           </motion.div>
 
@@ -96,13 +98,13 @@ export function Hero() {
               letterSpacing: "-0.01em",
             }}
           >
-            GÉREZ VOS
+            {t('hero.title')}
             <br />
-            <span className="text-primary">MOTS.</span>
+            <span className="text-primary">{t('hero.title1')}</span>
             <br />
-            VOS SCÈNES.
+            {t('hero.title2')}
             <br />
-            VOS POÈTES.
+            {t('hero.title3')}
           </motion.h1>
 
           <motion.p
@@ -112,8 +114,7 @@ export function Hero() {
             className="mt-8 text-muted-foreground max-w-lg"
             style={{ fontFamily: "DM Sans, sans-serif", fontSize: "1.05rem", lineHeight: 1.7 }}
           >
-            Slam Net est la plateforme dédiée aux collectifs de slam poésie — gérez vos membres, organisez vos
-            tournois, tirez au sort les passages et suivez les classements en temps réel.
+            {t('hero.description')}
           </motion.p>
 
           <motion.div
@@ -127,7 +128,7 @@ export function Hero() {
               className="group flex items-center gap-3 bg-primary text-primary-foreground px-8 py-4 hover:bg-primary/90 transition-all duration-200 hover:gap-4"
               style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.06em", fontSize: "0.875rem" }}
             >
-              CRÉER MON COLLECTIF
+              {t('hero.createCollective')}
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <Dialog open={isDemoOpen} onOpenChange={setIsDemoOpen}>
@@ -136,7 +137,7 @@ export function Hero() {
                   className="flex items-center gap-3 border border-border text-foreground px-8 py-4 hover:border-foreground/30 transition-all duration-200"
                   style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 500, fontSize: "0.875rem" }}
                 >
-                  VOIR UNE DÉMO
+                  {t('hero.watchDemo')}
                 </button>
               </DialogTrigger>
                <DialogContent className="max-w-4xl p-0 overflow-hidden">
@@ -211,9 +212,9 @@ export function Hero() {
                   fontFamily: "JetBrains Mono, monospace",
                 }}
               >
-                <div className="text-muted-foreground mb-2" style={{ fontSize: "0.6rem", letterSpacing: "0.15em" }}>
-                  CLASSEMENT LIVE
-                </div>
+                 <div className="text-muted-foreground mb-2" style={{ fontSize: "0.6rem", letterSpacing: "0.15em" }}>
+                   {t('hero.liveRanking')}
+                 </div>
                 {[
                   { name: "Amina K.", score: "9.4" },
                   { name: "Dario M.", score: "9.1" },
@@ -249,9 +250,9 @@ export function Hero() {
                   color: "#0c0a09",
                   fontWeight: 700,
                 }}
-              >
-                TOURNOI EN COURS
-              </div>
+               >
+                 {t('hero.tournamentInProgress')}
+               </div>
             </div>
           </div>
         </motion.div>
@@ -267,9 +268,9 @@ export function Hero() {
         <span
           className="text-muted-foreground"
           style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.6rem", letterSpacing: "0.15em" }}
-        >
-          EXPLORER
-        </span>
+         >
+           {t('hero.explore')}
+         </span>
         <motion.div
           animate={{ y: [0, 6, 0] }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}

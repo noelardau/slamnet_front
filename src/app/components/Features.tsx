@@ -1,42 +1,33 @@
 import { motion } from "motion/react";
 import { Users, Trophy, Shuffle, Star } from "lucide-react";
-
-const features = [
-  {
-    icon: Users,
-    number: "01",
-    title: "GESTION DES MEMBRES",
-    description:
-      "Enregistrez chaque poète de votre collectif — nom, contact, biographie, historique de performances. Un annuaire complet, toujours à portée de main.",
-    detail: "Profils détaillés · Historique · Statuts",
-  },
-  {
-    icon: Trophy,
-    number: "02",
-    title: "TOURNOIS ORGANISÉS",
-    description:
-      "Créez des tournois, définissez les règles, gérez les inscriptions — membres du collectif ou invités extérieurs. Chaque événement, de A à Z.",
-    detail: "Multi-tours · Invités · Inscriptions en ligne",
-  },
-  {
-    icon: Shuffle,
-    number: "03",
-    title: "TIRAGE AU SORT",
-    description:
-      "Le tirage au sort automatique décide de l'ordre de passage à chaque tour. Transparent, impartial, sans friction.",
-    detail: "Aléatoire certifié · Ronde par ronde · Export PDF",
-  },
-  {
-    icon: Star,
-    number: "04",
-    title: "NOTES & CLASSEMENTS",
-    description:
-      "Saisissez les notes des jurés en direct. Le classement se met à jour instantanément. La scène connaît son champion dès la dernière note tombée.",
-    detail: "Notes en temps réel · Jury multiple · Podium",
-  },
-];
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export function Features() {
+  const { t } = useLanguage();
+
+  const features = [
+    {
+      icon: Users,
+      number: "01",
+      key: "01",
+    },
+    {
+      icon: Trophy,
+      number: "02",
+      key: "02",
+    },
+    {
+      icon: Shuffle,
+      number: "03",
+      key: "03",
+    },
+    {
+      icon: Star,
+      number: "04",
+      key: "04",
+    },
+  ];
+
   return (
     <section id="features" className="py-28 border-t border-border">
       <div className="max-w-7xl mx-auto px-6">
@@ -49,7 +40,7 @@ export function Features() {
                 className="text-primary"
                 style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", letterSpacing: "0.2em" }}
               >
-                FONCTIONNALITÉS
+                {t('features')}
               </span>
             </div>
             <h2
@@ -60,19 +51,18 @@ export function Features() {
                 lineHeight: 0.95,
               }}
             >
-              TOUT CE DONT
+              {t('features.title')}
               <br />
-              VOTRE COLLECTIF
+              {t('features.title1')}
               <br />
-              <span className="text-primary">A BESOIN.</span>
+              <span className="text-primary">{t('features.title2')}</span>
             </h2>
           </div>
           <p
             className="text-muted-foreground"
             style={{ fontFamily: "DM Sans, sans-serif", fontSize: "1rem", lineHeight: 1.75, maxWidth: 420 }}
           >
-            Une seule plateforme pour gérer la vie de votre collectif de slam — des membres aux podiums, en passant
-            par chaque vers prononcé sur scène.
+            {t('features.description')}
           </p>
         </div>
 
@@ -108,21 +98,21 @@ export function Features() {
                     className="mb-4 text-foreground"
                     style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem", letterSpacing: "0.02em" }}
                   >
-                    {feature.title}
+                    {t(`feature${feature.key}.title`)}
                   </h3>
 
                   <p
                     className="text-muted-foreground mb-6"
                     style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.9rem", lineHeight: 1.7 }}
                   >
-                    {feature.description}
+                    {t(`feature${feature.key}.description`)}
                   </p>
 
                   <div
                     className="text-primary/70"
                     style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.65rem", letterSpacing: "0.1em" }}
                   >
-                    {feature.detail}
+                    {t(`feature${feature.key}.detail`)}
                   </div>
 
                   {/* Bottom accent line */}

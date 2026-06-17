@@ -4,10 +4,12 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useCollectifStore } from "../../stores/collectifStore";
 import { useAuthModal } from "../../contexts/AuthModalContext";
+import { useLanguage } from "../../contexts/LanguageContext";
 import { Menu, X, LogOut, Loader2, User, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
 import { ThemeToggle } from "../../components/ThemeToggle";
+import { LanguageSelector } from "../../components/LanguageSelector";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -16,6 +18,7 @@ export function Navbar() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isTournoiMode, setIsTournoiMode] = useState(false);
   const { openLoginModal, openSignupModal } = useAuthModal();
+  const { t } = useLanguage();
   const { isAuthenticated, logout } = useAuth();
   const { profile } = useCollectifStore();
   const navigate = useNavigate();
@@ -84,12 +87,12 @@ export function Navbar() {
           className="hidden md:flex items-center gap-8"
           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
         >
-          {isAuthenticated ? (
+           {isAuthenticated ? (
             <>
               {[
-                { label: "DASHBOARD", to: "/dashboard" },
-                { label: "MEMBRES", to: "/membres" },
-                { label: "TOURNOIS", to: "/tournois" }
+                { label: t('nav.dashboard'), to: "/dashboard" },
+                { label: t('nav.members'), to: "/membres" },
+                { label: t('nav.tournaments'), to: "/tournois" }
               ].map((link) => {
                 const isActive = location.pathname === link.to;
                 return (
@@ -115,8 +118,8 @@ export function Navbar() {
             </>
           ) : (
              [
-               { label: "FONCTIONNALITÉS", to: "features" },
-               { label: "COMMENT ÇA MARCHE", to: "how-it-works" },
+               { label: t('nav.features'), to: "features" },
+               { label: t('nav.howItWorks'), to: "how-it-works" },
               
              ].map((link) => (
                <a
@@ -133,6 +136,7 @@ export function Navbar() {
 
           {/* CTA */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSelector />
             <ThemeToggle />
             {isAuthenticated ? (
               <div className="relative">
@@ -163,7 +167,7 @@ export function Navbar() {
                           onClick={() => setShowProfileMenu(false)}
                         >
                           <User size={16} />
-                          <span className="text-sm">Mon profil</span>
+                          <span className="text-sm">{t('nav.myProfile')}</span>
                         </Link>
                         <button
                           onClick={() => {
@@ -174,7 +178,7 @@ export function Navbar() {
                           className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
                         >
                           <LogOut size={16} />
-                          <span className="text-sm">Déconnexion</span>
+                          <span className="text-sm">{isLoggingOut ? t('nav.loggingOut') : t('nav.logout')}</span>
                         </button>
                       </div>
                     </motion.div>
@@ -191,8 +195,8 @@ export function Navbar() {
                    className="text-muted-foreground hover:text-foreground transition-colors px-3 py-2 text-center"
                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
                  >
-                   <span className="hidden md:inline">Connexion</span>
-                   <span className="md:hidden">Connexion</span>
+                   <span className="hidden md:inline">{t('nav.login')}</span>
+                   <span className="md:hidden">{t('nav.login')}</span>
                  </button>
                  <button
                    onClick={() => {
@@ -202,8 +206,8 @@ export function Navbar() {
                    className="bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-center"
                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", fontWeight: 700, letterSpacing: "0.04em" }}
                  >
-                   <span className="hidden md:inline">CRÉER UN COMPTE</span>
-                   <span className="md:hidden">S'inscrire</span>
+                   <span className="hidden md:inline">{t('nav.signup')}</span>
+                   <span className="md:hidden">{t('auth.signUp')}</span>
                  </button>
               </>
             )}
@@ -234,10 +238,10 @@ export function Navbar() {
             >
               {isAuthenticated ? (
                 <>
-                  {[
-                    { label: "DASHBOARD", to: "/dashboard" },
-                    { label: "MEMBRES", to: "/membres" },
-                    { label: "TOURNOIS", to: "/tournois" },
+                   {[
+                     { label: t('nav.dashboard'), to: "/dashboard" },
+                     { label: t('nav.members'), to: "/membres" },
+                     { label: t('nav.tournaments'), to: "/tournois" },
                    
                   ].map((link) => {
                     const isActive = location.pathname === link.to;
@@ -264,46 +268,49 @@ export function Navbar() {
                     );
                   })}
                    <div className="pt-4 border-t border-border">
-                     <div className="flex items-center justify-between mb-4 py-1">
-                       <div className="flex items-center gap-3 text-muted-foreground"
-                         style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                         <User size={16} />
-                         <span>{profile?.nomCollectif}</span>
-                       </div>
-                       <ThemeToggle />
-                     </div>
-                     <Link
-                       to="/profile"
-                       className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
-                       onClick={() => setOpen(false)}
-                     >
-                       <User size={16} />
-                       <span className="text-sm">Mon profil</span>
-                     </Link>
-                      <button
-                        onClick={() => {
-                          setOpen(false);
-                          handleLogoutClick();
-                        }}
-                        disabled={isLoggingOut}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
-                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                      <div className="flex items-center justify-between mb-4 py-1">
+                        <div className="flex items-center gap-3 text-muted-foreground"
+                          style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
+                          <User size={16} />
+                          <span>{profile?.nomCollectif}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <LanguageSelector />
+                          <ThemeToggle />
+                        </div>
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                        onClick={() => setOpen(false)}
                       >
-                        {isLoggingOut ? (
-                          <Loader2 className="animate-spin" size={16} />
-                        ) : (
-                          <LogOut size={16} />
-                        )}
-                        <span>{isLoggingOut ? 'Déconnexion...' : 'Déconnexion'}</span>
-                      </button>
+                        <User size={16} />
+                        <span className="text-sm">{t('nav.myProfile')}</span>
+                      </Link>
+                       <button
+                         onClick={() => {
+                           setOpen(false);
+                           handleLogoutClick();
+                         }}
+                         disabled={isLoggingOut}
+                         className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                         style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                       >
+                         {isLoggingOut ? (
+                           <Loader2 className="animate-spin" size={16} />
+                         ) : (
+                           <LogOut size={16} />
+                         )}
+                         <span>{isLoggingOut ? t('nav.loggingOut') : t('nav.logout')}</span>
+                       </button>
                   </div>
                 </>
                 ) : (
                    <>
                      {[
-                       { label: "FONCTIONNALITÉS", to: "features" },
-                       { label: "COMMENT ÇA MARCHE", to: "how-it-works" },
-                       { label: "COLLECTIFS", to: "/collectifs" },
+                       { label: t('nav.features'), to: "features" },
+                       { label: t('nav.howItWorks'), to: "how-it-works" },
+                       { label: t('nav.collectives'), to: "/collectifs" },
                      ].map((link) => (
                        link.to.startsWith('/') ? (
                          <Link 
@@ -337,7 +344,7 @@ export function Navbar() {
                        className="text-muted-foreground hover:text-foreground py-1 text-center mt-2"
                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
                      >
-                       Connexion
+                       {t('nav.login')}
                      </button>
                      <button
                        onClick={() => {
@@ -347,7 +354,7 @@ export function Navbar() {
                        className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
                        style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
                      >
-                       CRÉER UN COMPTE
+                       {t('nav.signup')}
                      </button>
                   </>
                )}
