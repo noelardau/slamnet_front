@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../app/components/ui/dialog';
 
@@ -26,26 +27,27 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
 
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
 
   const validateForm = () => {
     if (!formData.nomCollectif || !formData.ville || !formData.email || !formData.password || !formData.confirmPassword) {
-      setError('Tous les champs doivent être remplis');
+      setError(t('auth.allFieldsRequired'));
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError('Format d\'email invalide');
+      setError(t('auth.invalidEmail'));
       return false;
     }
 
     if (formData.password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères');
+      setError(t('auth.passwordMinLength'));
       return false;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Les mots de passe ne correspondent pas');
+      setError(t('auth.passwordMismatch'));
       return false;
     }
 
@@ -66,11 +68,11 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
         email: formData.email,
         password: formData.password,
       });
-      showSuccess('Compte créé avec succès');
+      showSuccess(t('auth.signupSuccess'));
       onOpenChange(false);
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de l\'inscription';
+      const errorMessage = err instanceof Error ? err.message : t('auth.signupError');
       setError(errorMessage);
       showError(errorMessage);
     } finally {
@@ -98,7 +100,7 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
               lineHeight: 1,
             }}
           >
-            INSCRIPTION
+            {t('auth.signup')}
           </DialogTitle>
         </DialogHeader>
         
@@ -112,48 +114,48 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium mb-1.5">Nom du collectif</label>
+              <label className="block text-xs font-medium mb-1.5">{t('auth.collectiveName')}</label>
               <input
                 type="text"
                 name="nomCollectif"
                 value={formData.nomCollectif}
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Nom de votre collectif"
+                placeholder={t('auth.collectiveNamePlaceholder')}
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1.5">Ville</label>
+              <label className="block text-xs font-medium mb-1.5">{t('auth.city')}</label>
               <input
                 type="text"
                 name="ville"
                 value={formData.ville}
                 onChange={handleChange}
                 className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="Votre ville"
+                placeholder={t('auth.cityPlaceholder')}
                 disabled={loading}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1.5">Email</label>
+            <label className="block text-xs font-medium mb-1.5">{t('auth.email')}</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="votre@email.com"
+              placeholder={t('auth.emailPlaceholder')}
               disabled={loading}
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium mb-1.5">Mot de passe</label>
+              <label className="block text-xs font-medium mb-1.5">{t('auth.password')}</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -161,7 +163,7 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
                   value={formData.password}
                   onChange={handleChange}
                   className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary pr-10"
-                  placeholder="••••••••"
+                  placeholder={t('auth.passwordPlaceholder')}
                   disabled={loading}
                 />
                 <button
@@ -176,7 +178,7 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1.5">Confirmer</label>
+              <label className="block text-xs font-medium mb-1.5">{t('auth.confirmPassword')}</label>
               <div className="relative">
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
@@ -184,7 +186,7 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className="w-full px-3 py-2.5 text-sm border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary pr-10"
-                  placeholder="••••••••"
+                  placeholder={t('auth.passwordPlaceholder')}
                   disabled={loading}
                 />
                 <button
@@ -208,16 +210,16 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
             {loading ? (
               <>
                 <Loader2 className="animate-spin" size={16} />
-                Inscription...
+                {t('auth.creatingAccount')}
               </>
             ) : (
-              'Créer mon compte'
+              t('auth.createAccount')
             )}
           </button>
         </form>
 
         <p className="text-center mt-3 text-muted-foreground text-xs">
-          Déjà un compte?{' '}
+          {t('auth.hasAccount')}{' '}
           <button 
             onClick={() => {
               onOpenChange(false);
@@ -225,7 +227,7 @@ export function SignupModal({ open, onOpenChange, onSwitchToLogin }: SignupModal
             }}
             className="text-primary hover:underline font-medium"
           >
-            Se connecter
+            {t('auth.loginLink')}
           </button>
         </p>
       </DialogContent>

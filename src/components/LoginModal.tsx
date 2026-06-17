@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Eye, EyeOff, AlertCircle, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../app/components/ui/dialog';
 
@@ -22,17 +23,18 @@ export function LoginModal({ open, onOpenChange, onSwitchToSignup }: LoginModalP
   const location = useLocation();
   const { login } = useAuth();
   const { showSuccess, showError } = useToast();
+  const { t } = useLanguage();
 
   const from = (location.state as any)?.from?.pathname || '/dashboard';
 
   const validateForm = () => {
     if (!email || !password) {
-      setError('Email et mot de passe requis');
+      setError(t('auth.emailPasswordRequired'));
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Format d\'email invalide');
+      setError(t('auth.invalidEmail'));
       return false;
     }
     return true;
@@ -47,11 +49,11 @@ export function LoginModal({ open, onOpenChange, onSwitchToSignup }: LoginModalP
     setLoading(true);
     try {
       await login(email, password);
-      showSuccess('Connexion réussie');
+      showSuccess(t('auth.loginSuccess'));
       onOpenChange(false);
       navigate(from, { replace: true });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Erreur lors de la connexion';
+      const errorMessage = err instanceof Error ? err.message : t('auth.loginError');
       setError(errorMessage);
       showError(errorMessage);
     } finally {
@@ -71,7 +73,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToSignup }: LoginModalP
               lineHeight: 1,
             }}
           >
-            CONNEXION
+            {t('auth.login')}
           </DialogTitle>
         </DialogHeader>
         
@@ -86,32 +88,32 @@ export function LoginModal({ open, onOpenChange, onSwitchToSignup }: LoginModalP
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
               <Loader2 className="animate-spin text-primary mx-auto mb-4" size={48} />
-              <p className="text-muted-foreground">Connexion en cours...</p>
+              <p className="text-muted-foreground">{t('auth.loggingIn')}</p>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
+              <label className="block text-sm font-medium mb-2">{t('auth.email')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                placeholder="votre@email.com"
+                placeholder={t('auth.emailPlaceholder')}
                 disabled={loading}
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Mot de passe</label>
+              <label className="block text-sm font-medium mb-2">{t('auth.password')}</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary pr-12"
-                  placeholder="••••••••"
+                  placeholder={t('auth.passwordPlaceholder')}
                   disabled={loading}
                 />
                 <button
@@ -134,17 +136,17 @@ export function LoginModal({ open, onOpenChange, onSwitchToSignup }: LoginModalP
               {loading ? (
                 <>
                   <span className="animate-spin">⟳</span>
-                  Connexion...
+                  {t('auth.signingIn')}
                 </>
               ) : (
-                'Se connecter'
+                t('auth.signIn')
               )}
             </button>
           </form>
         )}
 
         <p className="text-center mt-4 text-muted-foreground text-sm">
-          Pas encore de compte?{' '}
+          {t('auth.noAccount')}{' '}
           <button 
             onClick={() => {
               onOpenChange(false);
@@ -152,7 +154,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToSignup }: LoginModalP
             }}
             className="text-primary hover:underline"
           >
-            S'inscrire
+            {t('auth.signUp')}
           </button>
         </p>
       </DialogContent>

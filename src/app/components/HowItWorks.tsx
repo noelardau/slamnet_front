@@ -1,39 +1,35 @@
 import { motion } from "motion/react";
-
-const steps = [
-  {
-    step: "01",
-    title: "Créez votre collectif",
-    description: "Inscrivez-vous en 2 minutes, nommez votre collectif et commencez à inviter vos poètes.",
-  },
-  {
-    step: "02",
-    title: "Enregistrez vos membres",
-    description: "Ajoutez chaque slammeur avec son profil complet. Ils peuvent aussi rejoindre via un lien d'invitation.",
-  },
-  {
-    step: "03",
-    title: "Lancez un tournoi",
-    description: "Créez un tournoi, définissez les rounds, ouvrez les inscriptions aux membres et aux invités.",
-  },
-  {
-    step: "04",
-    title: "Tirage & passages",
-    description: "Déclenchez le tirage au sort. L'ordre de passage est généré automatiquement pour chaque tour.",
-  },
-  {
-    step: "05",
-    title: "Saisissez les notes",
-    description: "Chaque juré note en direct. Le système calcule les moyennes et met à jour le classement.",
-  },
-  {
-    step: "06",
-    title: "Couronnez le champion",
-    description: "Le classement final est établi. Partagez le podium, archivez l'événement.",
-  },
-];
+import { useLanguage } from "../../contexts/LanguageContext";
 
 export function HowItWorks() {
+  const { t } = useLanguage();
+
+  const steps = [
+    {
+      step: "01",
+      key: "01",
+    },
+    {
+      step: "02",
+      key: "02",
+    },
+    {
+      step: "03",
+      key: "03",
+    },
+    {
+      step: "04",
+      key: "04",
+    },
+    {
+      step: "05",
+      key: "05",
+    },
+    {
+      step: "06",
+      key: "06",
+    },
+  ];
   return (
     <section id="how-it-works" className="py-28 border-t border-border bg-card">
       <div className="max-w-7xl mx-auto px-6">
@@ -44,7 +40,7 @@ export function HowItWorks() {
               className="text-primary"
               style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", letterSpacing: "0.2em" }}
             >
-              COMMENT ÇA MARCHE
+              {t('howItWorks')}
             </span>
           </div>
           <h2
@@ -55,11 +51,11 @@ export function HowItWorks() {
               lineHeight: 0.95,
             }}
           >
-            DU COLLECTIF
+            {t('howItWorks.title')}
             <br />
-            <span className="text-primary">AU PODIUM</span>
+            <span className="text-primary">{t('howItWorks.title1')}</span>
             <br />
-            EN 6 ÉTAPES.
+            {t('howItWorks.title2')}
           </h2>
         </div>
 
@@ -88,20 +84,20 @@ export function HowItWorks() {
                    {step.step}
                  </div>
 
-                <div className="flex-1 pt-2">
-                  <h3
-                    className="text-foreground mb-2 group-hover:text-primary transition-colors duration-300"
-                    style={{ fontFamily: "Anton, sans-serif", fontSize: "1.3rem", letterSpacing: "0.02em" }}
-                  >
-                    {step.title}
-                  </h3>
-                  <p
-                    className="text-muted-foreground"
-                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.9rem", lineHeight: 1.7 }}
-                  >
-                    {step.description}
-                  </p>
-                </div>
+                 <div className="flex-1 pt-2">
+                   <h3
+                     className="text-foreground mb-2 group-hover:text-primary transition-colors duration-300"
+                     style={{ fontFamily: "Anton, sans-serif", fontSize: "1.3rem", letterSpacing: "0.02em" }}
+                   >
+                     {t(`step${step.key}.title`)}
+                   </h3>
+                   <p
+                     className="text-muted-foreground"
+                     style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.9rem", lineHeight: 1.7 }}
+                   >
+                     {t(`step${step.key}.description`)}
+                   </p>
+                 </div>
               </motion.div>
             ))}
           </div>
