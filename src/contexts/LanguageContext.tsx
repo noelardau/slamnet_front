@@ -11,13 +11,13 @@ interface LanguageContextType {
 const translations = {
   en: {
     // Navbar
-    'nav.dashboard': 'Dashboard',
-    'nav.members': 'Members',
-    'nav.tournaments': 'Tournaments',
+    'nav.dashboard': 'DASHBOARD',
+    'nav.members': 'MEMBERS',
+    'nav.tournaments': 'TOURNAMENTS',
     'nav.features': 'FEATURES',
     'nav.howItWorks': 'HOW IT WORKS',
-    'nav.collectives': 'Collectives',
-    'nav.login': 'Login',
+    'nav.collectives': 'COLLECTIVES',
+    'nav.login': 'LOGIN',
     'nav.signup': 'Create Account',
     'nav.myProfile': 'My Profile',
     'nav.logout': 'Logout',
@@ -457,7 +457,7 @@ const translations = {
     'nav.features': 'FONCTIONNALITÉS',
     'nav.howItWorks': 'COMMENT ÇA MARCHE',
     'nav.collectives': 'COLLECTIFS',
-    'nav.login': 'Connexion',
+    'nav.login': 'CONNEXION',
     'nav.signup': 'CRÉER UN COMPTE',
     'nav.myProfile': 'Mon profil',
     'nav.logout': 'Déconnexion',
