@@ -3,9 +3,13 @@ import { membreService, Membre, CreateMembreData, UpdateMembreData } from '../se
 
 interface MembreStore {
   membres: Membre[];
+  membre: Membre | null;
   isLoading: boolean;
+  isLoadingMembre: boolean;
   error: string | null;
   hydrateMembres: () => Promise<void>;
+  hydrateMembre: (id: number) => Promise<void>;
+  clearMembre: () => void;
   createMembre: (data: CreateMembreData) => Promise<Membre>;
   updateMembre: (id: number, data: UpdateMembreData) => Promise<Membre>;
   deleteMembre: (id: number) => Promise<void>;
@@ -14,7 +18,9 @@ interface MembreStore {
 
 export const useMembreStore = create<MembreStore>((set, get) => ({
   membres: [],
+  membre: null,
   isLoading: false,
+  isLoadingMembre: false,
   error: null,
 
   hydrateMembres: async () => {
@@ -27,6 +33,22 @@ export const useMembreStore = create<MembreStore>((set, get) => ({
       set({ error: errorMessage, isLoading: false });
       throw error;
     }
+  },
+
+  hydrateMembre: async (id: number) => {
+    try {
+      set({ isLoadingMembre: true, error: null });
+      const membre = await membreService.getMembre(id);
+      set({ membre, isLoadingMembre: false });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur lors du chargement du membre';
+      set({ error: errorMessage, isLoadingMembre: false });
+      throw error;
+    }
+  },
+
+  clearMembre: () => {
+    set({ membre: null, error: null });
   },
 
   createMembre: async (data: CreateMembreData) => {

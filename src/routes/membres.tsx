@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
@@ -8,6 +9,7 @@ import { useCollectifStore } from '../stores/collectifStore';
 import { CreateMembreDialog } from '../components/CreateMembreDialog';
 import { UpdateMembreDialog } from '../components/UpdateMembreDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+
 import { Plus, Search, Edit2, Trash2, User, Loader2, Calendar, MapPin, AtSign } from 'lucide-react';
 import { ImageWithFallback } from '../app/components/figma/ImageWithFallback';
 
@@ -183,24 +185,33 @@ function MembresContent() {
                      <p className="text-primary text-sm mt-1">@{membre.pseudoMembre}</p>
                    </div>
                  </div>
-                 <div className="flex gap-2">
-                   <button
-                     onClick={() => handleUpdateClick(membre.idMembre)}
-                     className="p-2 hover:bg-primary/10 rounded transition-colors"
-                     title={t('common.edit')}
-                     aria-label={t('common.edit')}
-                   >
-                     <Edit2 size={16} className="text-muted-foreground hover:text-primary" />
-                   </button>
-                   <button
-                     onClick={() => handleDeleteClick(membre.idMembre)}
-                     className="p-2 hover:bg-destructive/10 rounded transition-colors"
-                     title={t('common.delete')}
-                     aria-label={t('common.delete')}
-                   >
-                     <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
-                   </button>
-                 </div>
+                  <div className="flex gap-2">
+                    <Link to={`/membres/${membre.idMembre}`}>
+                      <button
+                        className="p-2 hover:bg-primary/10 rounded transition-colors"
+                        title={t('statistics.memberProfile.viewProfile')}
+                        aria-label={t('statistics.memberProfile.viewProfile')}
+                      >
+                        <User size={16} className="text-muted-foreground hover:text-primary" />
+                      </button>
+                    </Link>
+                    <button
+                      onClick={() => handleUpdateClick(membre.idMembre)}
+                      className="p-2 hover:bg-primary/10 rounded transition-colors"
+                      title={t('common.edit')}
+                      aria-label={t('common.edit')}
+                    >
+                      <Edit2 size={16} className="text-muted-foreground hover:text-primary" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClick(membre.idMembre)}
+                      className="p-2 hover:bg-destructive/10 rounded transition-colors"
+                      title={t('common.delete')}
+                      aria-label={t('common.delete')}
+                    >
+                      <Trash2 size={16} className="text-muted-foreground hover:text-destructive" />
+                    </button>
+                  </div>
                </div>
 
                <div className="space-y-3 hidden md:block">
