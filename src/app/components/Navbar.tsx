@@ -27,10 +27,21 @@ export function Navbar() {
 
   const handleScrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     e.preventDefault();
-    const element = document.getElementById(sectionId);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    
+    // Si on n'est pas sur la page d'accueil, naviguer d'abord
+    if (location.pathname !== '/') {
+      navigate(`/#${sectionId}`);
+      setOpen(false);
+      return;
     }
+    
+    // Si on est déjà sur la page d'accueil, scroller directement
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 0);
   };
 
   const handleLogoutClick = () => {
@@ -84,7 +95,7 @@ export function Navbar() {
 
         {/* Desktop links */}
         <div
-          className="hidden md:flex items-center gap-8"
+          className="hidden md:flex items-center gap-8 flex-1 justify-center"
           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
         >
            {isAuthenticated ? (
@@ -121,24 +132,31 @@ export function Navbar() {
                { label: t('nav.features'), to: "features" },
                { label: t('nav.howItWorks'), to: "how-it-works" },
               
-             ].map((link) => (
-               <a
-                 key={link.label}
-                 href={`/#${link.to}`}
-                 onClick={(e) => handleScrollToSection(e, link.to)}
-                 className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer"
-               >
-                 {link.label}
-               </a>
-             ))
+              ].map((link) => (
+                <a
+                  key={link.label}
+                  href={`/#${link.to}`}
+                  onClick={(e) => {
+                    if (location.pathname !== '/') {
+                      e.preventDefault();
+                      navigate(`/#${link.to}`);
+                      return;
+                    }
+                    handleScrollToSection(e, link.to);
+                  }}
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer"
+                >
+                  {link.label}
+                </a>
+              ))
           )}
         </div>
 
-          {/* CTA */}
-          <div className="hidden md:flex items-center gap-3">
-            <LanguageSelector />
-            <ThemeToggle />
-            {isAuthenticated ? (
+           {/* CTA */}
+           <div className="hidden md:flex items-center gap-3 ml-auto">
+             <LanguageSelector />
+             <ThemeToggle />
+             {isAuthenticated ? (
               <div className="relative">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -215,121 +233,127 @@ export function Navbar() {
             )}
           </div>
 
-          {/* Mobile toggle */}
-          {!isTournoiMode && (
-            <button
-              className="md:hidden text-foreground p-2"
-              onClick={() => setOpen(!open)}
-              aria-label="Menu"
-            >
-              {open ? <X size={22} /> : <Menu size={22} />}
-            </button>
-          )}
-          {/* Placeholder pour maintenir l'espacement quand le bouton est masqué */}
-          {isTournoiMode && <div className="md:hidden w-10" />}
+            {/* Mobile toggle */}
+            {!isTournoiMode && (
+              <div className="flex items-center gap-1">
+                <div className="md:hidden">
+                  <LanguageSelector />
+                </div>
+                <button
+                  className="md:hidden text-foreground p-2"
+                  onClick={() => setOpen(!open)}
+                  aria-label="Menu"
+                >
+                  {open ? <X size={22} /> : <Menu size={22} />}
+                </button>
+              </div>
+            )}
+            {/* Placeholder pour maintenir l'espacement quand le bouton est masqué */}
+            {isTournoiMode && <div className="md:hidden w-10" />}
         </div>
 
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden border-t border-border bg-background px-6 pb-6 flex flex-col gap-4 pt-4"
-            >
-              {isAuthenticated ? (
-                <>
-                   {[
-                     { label: t('nav.dashboard'), to: "/dashboard" },
-                     { label: t('nav.members'), to: "/membres" },
-                     { label: t('nav.tournaments'), to: "/tournois" },
-                   
-                  ].map((link) => {
-                    const isActive = location.pathname === link.to;
-                    return (
-                      <Link 
-                        key={link.label} 
-                        to={link.to} 
-                        className={`relative py-1 ${
-                          isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                        }`}
-                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-                        onClick={() => setOpen(false)}
-                      >
-                        {link.label}
-                        {isActive && (
-                          <motion.div
-                            className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
-                            layoutId="activeLinkMobile"
-                            initial={false}
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                          />
-                        )}
-                      </Link>
-                    );
-                  })}
-                   <div className="pt-4 border-t border-border">
-                      <div className="flex items-center justify-between mb-4 py-1">
-                        <div className="flex items-center gap-3 text-muted-foreground"
-                          style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
-                          <User size={16} />
-                          <span>{profile?.nomCollectif}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <LanguageSelector />
-                          <ThemeToggle />
-                        </div>
-                      </div>
-                      <Link
-                        to="/profile"
-                        className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
-                        onClick={() => setOpen(false)}
-                      >
-                        <User size={16} />
-                        <span className="text-sm">{t('nav.myProfile')}</span>
-                      </Link>
-                       <button
-                         onClick={() => {
-                           setOpen(false);
-                           handleLogoutClick();
-                         }}
-                         disabled={isLoggingOut}
-                         className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+           {/* Mobile menu */}
+           <AnimatePresence>
+             {open && (
+               <motion.div
+                 initial={{ opacity: 0, height: 0 }}
+                 animate={{ opacity: 1, height: "auto" }}
+                 exit={{ opacity: 0, height: 0 }}
+                 className="md:hidden border-t border-border bg-background px-6 pb-6 flex flex-col gap-4 pt-4"
+               >
+               {isAuthenticated ? (
+                 <>
+                    {[
+                      { label: t('nav.dashboard'), to: "/dashboard" },
+                      { label: t('nav.members'), to: "/membres" },
+                      { label: t('nav.tournaments'), to: "/tournois" },
+                    
+                   ].map((link) => {
+                     const isActive = location.pathname === link.to;
+                     return (
+                       <Link 
+                         key={link.label} 
+                         to={link.to} 
+                         className={`relative py-1 ${
+                           isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                         }`}
                          style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                         onClick={() => setOpen(false)}
                        >
-                         {isLoggingOut ? (
-                           <Loader2 className="animate-spin" size={16} />
-                         ) : (
-                           <LogOut size={16} />
+                         {link.label}
+                         {isActive && (
+                           <motion.div
+                             className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                             layoutId="activeLinkMobile"
+                             initial={false}
+                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                           />
                          )}
-                         <span>{isLoggingOut ? t('nav.loggingOut') : t('nav.logout')}</span>
-                       </button>
-                  </div>
-                </>
-                ) : (
-                   <>
-                     {[
-                       { label: t('nav.features'), to: "features" },
-                       { label: t('nav.howItWorks'), to: "how-it-works" },
-                       { label: t('nav.collectives'), to: "/collectifs" },
-                     ].map((link) => (
-                       link.to.startsWith('/') ? (
-                         <Link 
-                           key={link.label} 
-                           to={link.to} 
-                           className="text-muted-foreground hover:text-foreground py-1"
-                           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-                           onClick={() => setOpen(false)}
-                         >
-                           {link.label}
-                         </Link>
-                       ) : (
+                       </Link>
+                     );
+                   })}
+                    <div className="pt-4 border-t border-border">
+                       <div className="flex items-center justify-between mb-4 py-1">
+                         <div className="flex items-center gap-3 text-muted-foreground"
+                           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}>
+                           <User size={16} />
+                           <span>{profile?.nomCollectif}</span>
+                         </div>
+                         <ThemeToggle />
+                       </div>
+                       <Link
+                         to="/profile"
+                         className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                         onClick={() => setOpen(false)}
+                       >
+                         <User size={16} />
+                         <span className="text-sm">{t('nav.myProfile')}</span>
+                       </Link>
+                        <button
+                          onClick={() => {
+                            setOpen(false);
+                            handleLogoutClick();
+                          }}
+                          disabled={isLoggingOut}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-left"
+                          style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                        >
+                          {isLoggingOut ? (
+                            <Loader2 className="animate-spin" size={16} />
+                          ) : (
+                            <LogOut size={16} />
+                          )}
+                          <span>{isLoggingOut ? t('nav.loggingOut') : t('nav.logout')}</span>
+                        </button>
+                   </div>
+                 </>
+                 ) : (
+                    <>
+                      {[
+                        { label: t('nav.features'), to: "features" },
+                        { label: t('nav.howItWorks'), to: "how-it-works" },
+                      ].map((link) => (
+                        link.to.startsWith('/') ? (
+                          <Link 
+                            key={link.label} 
+                            to={link.to} 
+                            className="text-muted-foreground hover:text-foreground py-1"
+                            style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                            onClick={() => setOpen(false)}
+                          >
+                            {link.label}
+                          </Link>
+                        ) : (
                          <a 
                            key={link.label} 
                            href={`/#${link.to}`}
                            onClick={(e) => {
-                             handleScrollToSection(e, link.to);
+                             if (location.pathname !== '/') {
+                               e.preventDefault();
+                               navigate(`/#${link.to}`);
+                             } else {
+                               handleScrollToSection(e, link.to);
+                             }
                              setOpen(false);
                            }}
                            className="text-muted-foreground hover:text-foreground py-1 cursor-pointer"
@@ -337,32 +361,32 @@ export function Navbar() {
                          >
                            {link.label}
                          </a>
-                       )))}
-                     <button
-                       onClick={() => {
-                         openLoginModal();
-                         setOpen(false);
-                       }}
-                       className="text-muted-foreground hover:text-foreground py-1 text-center mt-2"
-                       style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
-                     >
-                       {t('nav.login')}
-                     </button>
-                     <button
-                       onClick={() => {
-                         openSignupModal();
-                         setOpen(false);
-                       }}
-                       className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
-                       style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
-                     >
-                       {t('nav.signup')}
-                     </button>
-                  </>
-               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                        )))}
+                      <button
+                        onClick={() => {
+                          openLoginModal();
+                          setOpen(false);
+                        }}
+                        className="text-muted-foreground hover:text-foreground py-1 text-center mt-2"
+                        style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem" }}
+                      >
+                        {t('nav.login')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          openSignupModal();
+                          setOpen(false);
+                        }}
+                        className="bg-primary text-primary-foreground px-5 py-3 text-center mt-2"
+                        style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.04em" }}
+                      >
+                        {t('nav.signup')}
+                      </button>
+                   </>
+                )}
+             </motion.div>
+           )}
+         </AnimatePresence>
       </nav>
     
       <ConfirmDialog
