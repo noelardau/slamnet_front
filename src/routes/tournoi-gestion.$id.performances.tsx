@@ -209,6 +209,10 @@ export default function TournoiPerformances() {
     ));
   };
 
+  const handleDeleteNote = (noteId: string) => {
+    setLocalNotes(prev => prev.filter(n => n.id !== noteId));
+  };
+
   const handleSaveNotes = async () => {
     if (!currentPerformance?.idPerfo) {
       showError(t('tournoiPerformances.noPerformanceSelected'));
@@ -608,23 +612,31 @@ export default function TournoiPerformances() {
           {allLocalNotes.length > 0 && (
             <div className="mb-4">
               <h4 className="text-sm font-medium text-muted-foreground mb-3">{t('tournoiPerformances.notesToRecord')}</h4>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3 justify-center">
                 {allLocalNotes.map((note) => (
                   <div
                     key={note.id}
-                    className={`flex items-center gap-2 px-4 py-2 bg-background border rounded-lg ${
+                    className={`relative flex items-center justify-center px-6 py-4 bg-background border rounded-lg ${
                       !note.retenu ? 'border-red-500/30 bg-red-500/5' : 'border-border'
                     }`}
                   >
-                    <span className={`text-foreground font-medium ${!note.retenu ? 'line-through text-destructive' : ''}`}>
-                      {note.valeur}
-                    </span>
                     <button
-                      onClick={() => handleToggleRetenu(note.id)}
-                      className="text-sm text-destructive hover:underline"
+                      onClick={() => handleDeleteNote(note.id)}
+                      className="absolute top-2 right-2 text-muted-foreground hover:text-destructive transition-colors"
                     >
-                      {note.retenu ? t('tournoiPerformances.remove') : t('tournoiPerformances.restore')}
+                      <X size={14} />
                     </button>
+                    <div className="flex flex-col items-center gap-2">
+                      <span className={`text-foreground font-medium text-lg ${!note.retenu ? 'line-through text-destructive' : ''}`}>
+                        {note.valeur}
+                      </span>
+                      <button
+                        onClick={() => handleToggleRetenu(note.id)}
+                        className="text-sm text-destructive hover:underline"
+                      >
+                        {note.retenu ? t('tournoiPerformances.remove') : t('tournoiPerformances.restore')}
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
