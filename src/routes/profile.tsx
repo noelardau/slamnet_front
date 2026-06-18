@@ -4,12 +4,14 @@ import { PageLoader } from '../components/PageLoader';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { useCollectifStore } from '../stores/collectifStore';
+import { useLanguage } from '../contexts/LanguageContext';
 import { Edit2, Loader2, Mail, MapPin, Camera } from 'lucide-react';
 
 function ProfileContent() {
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
   const { profile, isLoading, isProfileLoading, updateProfile, hydrateProfile } = useCollectifStore();
+  const { t, language } = useLanguage();
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -63,8 +65,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erreur lors de l\'upload');
+      const error = await response.json();
+      throw new Error(error.error || t('profile.uploadError'));
       }
 
       const data = await response.json();
@@ -72,10 +74,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
       // Recharger le profil depuis le store pour avoir les données à jour
       await hydrateProfile();
       
-      showSuccess('Photo mise à jour avec succès');
+      showSuccess(t('profile.photoUpdated'));
     } catch (error) {
       console.error('Erreur upload:', error);
-      showError('Erreur lors de l\'upload de la photo');
+      showError(t('profile.photoUploadError'));
     } finally {
       setIsUploading(false);
     }
@@ -91,11 +93,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
 
     try {
       await updateProfile(formData);
-      showSuccess('Profil mis à jour avec succès');
+      showSuccess(t('profile.updated'));
       setIsEditing(false);
     } catch (error) {
       console.error('Erreur lors de la mise à jour du profil:', error);
-      showError('Erreur lors de la mise à jour du profil');
+      showError(t('profile.updateError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -104,7 +106,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Vous devez être connecté pour accéder à cette page</p>
+        <p className="text-muted-foreground">{t('profile.mustBeLoggedIn')}</p>
       </div>
     );
   }
@@ -116,7 +118,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
   if (!profile) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Erreur de chargement du profil</p>
+        <p className="text-muted-foreground">{t('profile.loadingError')}</p>
       </div>
     );
   }
@@ -130,7 +132,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
             className="text-primary"
             style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.7rem", letterSpacing: "0.2em" }}
           >
-            PROFIL
+            {t('profile.title')}
           </span>
         </div>
         <h1
@@ -141,11 +143,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
             color: "#f2ede6",
           }}
         >
-          MON
-          <span style={{ color: "#ff4d00" }}> PROFIL.</span>
+          {t('profile.myProfile')}
         </h1>
         <p className="mt-4 text-muted-foreground" style={{ fontSize: "1rem" }}>
-          Gérez les informations de votre collectif
+          {t('profile.description')}
         </p>
       </div>
 
@@ -216,7 +217,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
                 className="flex items-center gap-2 px-4 py-2 border border-border hover:border-primary/60 transition-all duration-300"
               >
                 <Edit2 size={16} />
-                <span className="hidden md:inline">Modifier</span>
+                  <span className="hidden md:inline">{t('profile.edit')}</span>
               </button>
             )}
           </div>
@@ -227,14 +228,14 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
                   <div className="flex items-center gap-3">
                     <Loader2 className="animate-spin text-primary" size={16} />
-                    <span className="text-sm font-medium">Upload en cours...</span>
+                    <span className="text-sm font-medium">{t('profile.uploadInProgress')}</span>
                   </div>
                 </div>
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Nom du collectif</label>
+                  <label className="block text-sm font-medium mb-2">{t('profile.collectiveName')}</label>
                   <input
                     type="text"
                     value={formData.nomCollectif}
@@ -245,7 +246,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Ville</label>
+                  <label className="block text-sm font-medium mb-2">{t('profile.city')}</label>
                   <input
                     type="text"
                     value={formData.ville}
@@ -257,7 +258,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Email</label>
+                <label className="block text-sm font-medium mb-2">{t('profile.email')}</label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                   <input
@@ -277,7 +278,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
                    disabled={isSubmitting}
                    className="flex-1 px-6 py-3 border border-border hover:border-primary/60 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                  >
-                   Annuler
+                    {t('profile.cancel')}
                  </button>
                  <button
                    type="submit"
@@ -288,10 +289,10 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
                    {isSubmitting ? (
                      <>
                        <Loader2 className="animate-spin" size={16} />
-                       Enregistrement...
+                        {t('profile.saving')}
                      </>
                    ) : (
-                     'Enregistrer'
+                      t('profile.save')
                    )}
                  </button>
                </div>
@@ -299,17 +300,17 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
           ) : (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm text-muted-foreground mb-2">Nom du collectif</label>
+                <label className="block text-sm text-muted-foreground mb-2">{t('profile.collectiveName')}</label>
                 <div className="text-foreground font-medium">{profile.nomCollectif}</div>
               </div>
 
               <div>
-                <label className="block text-sm text-muted-foreground mb-2">Ville</label>
+                <label className="block text-sm text-muted-foreground mb-2">{t('profile.city')}</label>
                 <div className="text-foreground font-medium">{profile.ville}</div>
               </div>
 
               <div>
-                <label className="block text-sm text-muted-foreground mb-2">Email</label>
+                <label className="block text-sm text-muted-foreground mb-2">{t('profile.email')}</label>
                 <div className="flex items-center gap-2 text-foreground">
                   <Mail size={16} className="text-muted-foreground" />
                   <span>{profile.email}</span>
@@ -318,9 +319,9 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
 
                 {profile.createdAt && (
                   <div>
-                    <label className="block text-sm text-muted-foreground mb-2">Membre depuis</label>
+                    <label className="block text-sm text-muted-foreground mb-2">{t('profile.memberSince')}</label>
                     <div className="text-foreground font-medium">
-                      {new Date(profile.createdAt).toLocaleDateString('fr-FR', {
+                      {new Date(profile.createdAt).toLocaleDateString(language === 'fr' ? 'fr-FR' : 'en-US', {
                         day: 'numeric',
                         month: 'long',
                         year: 'numeric',
