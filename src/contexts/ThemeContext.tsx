@@ -5,7 +5,6 @@ type Theme = 'dark' | 'light';
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  actualTheme: Theme;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -18,11 +17,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'dark';
   });
 
-  const [actualTheme, setActualTheme] = useState<Theme>(theme);
-
+  // Appliquer le thème immédiatement quand il change
   useEffect(() => {
     const root = window.document.documentElement;
-    setActualTheme(theme);
     
     if (theme === 'dark') {
       root.classList.add('dark');
@@ -31,6 +28,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme]);
 
+  // Initialiser avec le thème dark au premier rendu
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const root = window.document.documentElement;
@@ -44,7 +42,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, actualTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
