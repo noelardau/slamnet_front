@@ -1,5 +1,5 @@
 import { useOutletContext } from 'react-router-dom';
-import { Plus, Mic, Trash2, Loader2, Play, Pause, CheckCircle, Clock, AlertCircle, X, Send } from 'lucide-react';
+import { Plus, Mic, Trash2, Loader2, Play, Pause, CheckCircle, Clock, AlertCircle, X, Send, Shuffle } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -40,6 +40,19 @@ export default function TournoiPerformances() {
   const [isSavingNotes, setIsSavingNotes] = useState(false);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [rouletteState, setRouletteState] = useState({
+    isRunning: false,
+    currentParticipants: [] as any[],
+    winner: null as any,
+    progress: 0,
+    velocity: 0,
+  });
+  const [displayedParticipants, setDisplayedParticipants] = useState<any[]>([]);
+  const [drawnParticipant, setDrawnParticipant] = useState<any>(null);
+  const [showDrawResult, setShowDrawResult] = useState(false);
+  const [drawInfo, setDrawInfo] = useState<any>(null);
+  const [noteIdCounter, setNoteIdCounter] = useState(0);
+
   useEffect(() => {
     if (tournoi?.idTournoi) {
       loadPerformances();
@@ -55,6 +68,16 @@ export default function TournoiPerformances() {
     };
   }, []);
 
+  useEffect(() => {
+    if (showAddDialog && tournoi?.tirageAuSort) {
+      usePerformanceStore.getState().setParticipants(participants);
+      setTimeout(() => {
+        const info = usePerformanceStore.getState().computeTirageDistribution();
+        setDrawInfo(info);
+      }, 100);
+    }
+  }, [showAddDialog, tournoi?.tirageAuSort, participants]);
+
   const loadPerformances = async () => {
     try {
       await hydratePerformances(tournoi.idTournoi);
@@ -66,6 +89,8 @@ export default function TournoiPerformances() {
   const loadParticipants = async () => {
     try {
       await hydrateParticipants(tournoi.idTournoi);
+      const storeParticipants = usePerformanceStore.getState().participants;
+      usePerformanceStore.getState().setParticipants(storeParticipants.length > 0 ? storeParticipants : participants);
     } catch (error) {
       showError(t('tournoiPerformances.loadingParticipants'));
     }
@@ -188,17 +213,19 @@ export default function TournoiPerformances() {
 
     if (inputType === 'note') {
       const newNote = { 
-        id: Date.now().toString(),
+        id: `note-${Date.now()}-${noteIdCounter}`,
         valeur: value, 
         retenu: true 
       };
       setLocalNotes([...localNotes, newNote]);
+      setNoteIdCounter(prev => prev + 1);
     } else {
       const newPenalite = {
-        id: Date.now().toString(),
+        id: `penalite-${Date.now()}-${noteIdCounter}`,
         valeur: value,
       };
       setLocalPenalites([...localPenalites, newPenalite]);
+      setNoteIdCounter(prev => prev + 1);
     }
     setNoteInput('');
   };
@@ -281,6 +308,10 @@ export default function TournoiPerformances() {
       setShowDeleteDialog(false);
       setPerformanceToDelete(null);
       await loadPerformances();
+      
+      if (tournoi?.tirageAuSort) {
+        usePerformanceStore.getState().setParticipants(participants);
+      }
     } catch (error) {
       showError(t('tournoiPerformances.deleteError'));
     }
@@ -780,10 +811,329 @@ export default function TournoiPerformances() {
     </div>
   );
 
-  const renderTirageTab = () => (
-    <div className="text-center py-8">
-      <p className="text-muted-foreground">{t('tournoiPerformances.draw')} - {t('tournoiPerformances.notDefined')}</p>
+  const generateRouletteList = (participants: any[], winnerIndex: number) => {
+    const list = [];
+    const cycles = 3;
+    const itemsPerCycle = participants.length;
+    
+    for (let i = 0; i < cycles * itemsPerCycle; i++) {
+      list.push(participants[i % itemsPerCycle]);
+    }
+    
+    for (let i = 0; i <= winnerIndex; i++) {
+      list.push(participants[i]);
+    }
+    
+    return list;
+  };
+
+  const renderTirageTab = () => {
+    if (!drawInfo) {
+      return (
+        <div className="text-center py-8">
+          <Loader2 className="mx-auto animate-spin text-muted-foreground" size={32} />
+        </div>
+      );
+    }
+
+    if (drawInfo.available.length === 0) {
+      return (
+        <div className="text-center py-8">
+          <CheckCircle className="mx-auto mb-4 text-green-500" size={48} />
+          <p className="text-foreground font-medium mb-2">{t('tournoiPerformances.allParticipantsEqual')}</p>
+          <p className="text-muted-foreground text-sm">
+            {t('tournoiPerformances.allHavePerformances').replace('{count}', drawInfo.maxPerfo)}
+          </p>
+          <button
+            onClick={() => {
+              usePerformanceStore.getState().setParticipants(participants);
+              const newInfo = usePerformanceStore.getState().computeTirageDistribution();
+              setDrawInfo(newInfo);
+            }}
+            className="mt-4 text-primary hover:underline text-sm"
+          >
+            {t('tournoiPerformances.startNextRound')}
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        {showDrawResult ? (
+          <WinnerDisplay
+            winner={drawnParticipant}
+            isLast={drawInfo.isLast}
+            onConfirm={handleConfirmDraw}
+            onCancel={handleCancelDraw}
+            t={t}
+            getParticipantName={getParticipantName}
+            getParticipantPhoto={getParticipantPhoto}
+            isGuestParticipant={isGuestParticipant}
+            isCreating={isCreating}
+          />
+        ) : rouletteState.isRunning ? (
+          <div className="space-y-4">
+            <CasinoRoulette
+              displayedParticipants={displayedParticipants}
+              isRunning={rouletteState.isRunning}
+              winner={rouletteState.winner}
+              velocity={rouletteState.velocity}
+              getParticipantName={getParticipantName}
+              getParticipantPhoto={getParticipantPhoto}
+              isGuestParticipant={isGuestParticipant}
+              t={t}
+            />
+            <div className="text-center">
+              <p className="text-primary font-medium animate-pulse">
+                {t('tournoiPerformances.drawing')}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <DrawButton
+            availableCount={drawInfo.available.length}
+            maxPerfo={drawInfo.maxPerfo}
+            allEqual={drawInfo.allEqual}
+            onDraw={handleDraw}
+            t={t}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const handleDraw = async () => {
+    const available = drawInfo.available;
+    const randomIndex = Math.floor(Math.random() * available.length);
+    const selected = available[randomIndex];
+    
+    setRouletteState({ 
+      isRunning: true, 
+      winner: null,
+      progress: 0,
+      velocity: 1,
+    });
+    
+    const rouletteList = generateRouletteList(available, randomIndex);
+    setRouletteState(prev => ({ ...prev, currentParticipants: rouletteList }));
+    
+    const totalDuration = 2500;
+    const frameRate = 60;
+    const totalFrames = (totalDuration / 1000) * frameRate;
+    
+    for (let frame = 0; frame <= totalFrames; frame++) {
+      const progress = frame / totalFrames;
+      const easedProgress = progress * progress;
+      
+      const index = Math.floor(easedProgress * (rouletteList.length - 1));
+      const currentParticipant = rouletteList[index];
+      
+      setDisplayedParticipants([{ participant: currentParticipant, position: 0 }]);
+      setRouletteState(prev => ({ 
+        ...prev, 
+        progress: easedProgress,
+        velocity: 1 - easedProgress,
+      }));
+      
+      await new Promise(resolve => setTimeout(resolve, 1000 / frameRate));
+    }
+    
+    const winner = available[randomIndex];
+    setRouletteState({ isRunning: false, winner, progress: 1, velocity: 0 });
+    setDrawnParticipant(winner);
+    setShowDrawResult(true);
+  };
+
+  const handleConfirmDraw = async () => {
+    setIsCreating(true);
+    
+    try {
+      const createData: any = {
+        idTournoi: tournoi.idTournoi,
+        idParticipant: drawnParticipant.idParticipant,
+        etat: 'prêt',
+        duree: '00:00',
+      };
+
+      if (drawnParticipant.idMembre) {
+        createData.idMembre = drawnParticipant.idMembre;
+      } else if (drawnParticipant.idGuest) {
+        createData.idGuest = drawnParticipant.idGuest;
+      }
+
+      await createPerformance(createData);
+      showSuccess(t('tournoiPerformances.createSuccess'));
+      
+      setShowAddDialog(false);
+      setSelectedParticipantId(null);
+      setShowDrawResult(false);
+      setDrawnParticipant(null);
+      setModalActiveTab('participant');
+      
+      await loadPerformances();
+    } catch (error) {
+      showError(t('tournoiPerformances.createError'));
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleCancelDraw = () => {
+    setShowDrawResult(false);
+    setDrawnParticipant(null);
+  };
+
+  const CasinoRoulette = ({ 
+    displayedParticipants, 
+    isRunning, 
+    winner,
+    velocity,
+    getParticipantName,
+    getParticipantPhoto,
+    isGuestParticipant,
+    t
+  }: any) => {
+    const currentParticipant = displayedParticipants[0]?.participant;
+    
+    if (!currentParticipant) {
+      return (
+        <div className="w-48 h-48 mx-auto bg-card border-2 border-primary/30 rounded-lg flex items-center justify-center">
+          <Loader2 className="animate-spin text-primary" size={32} />
+        </div>
+      );
+    }
+    
+    return (
+      <div className="w-56 h-48 mx-auto rounded-lg overflow-hidden relative flex items-end">
+        <div className="absolute inset-0">
+          {getParticipantPhoto(currentParticipant) ? (
+            <img
+              src={getParticipantPhoto(currentParticipant)}
+              alt={getParticipantName(currentParticipant)}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+              <Mic className="text-white" size={64} />
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+        </div>
+        
+        <div className="relative z-10 w-full p-4">
+          <p className="text-white text-lg font-bold text-center drop-shadow-lg">
+            {getParticipantName(currentParticipant)}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  const WinnerDisplay = ({ 
+    winner, 
+    isLast, 
+    onConfirm, 
+    onCancel, 
+    t, 
+    getParticipantName, 
+    getParticipantPhoto, 
+    isGuestParticipant,
+    isCreating
+  }: any) => (
+    <div className="space-y-4 animate-slide-in-down">
+      {isLast && (
+        <div className="text-center mb-2">
+          <span className="inline-block px-4 py-2 bg-yellow-500/20 border border-yellow-500/50 rounded-lg text-yellow-600 font-medium text-sm">
+            {t('tournoiPerformances.lastParticipant')}
+          </span>
+        </div>
+      )}
+      
+      <div className="rounded-lg overflow-hidden animate-pulse-glow">
+        <div className="relative">
+          <div className="w-full h-48">
+            {getParticipantPhoto(winner) ? (
+              <img
+                src={getParticipantPhoto(winner)}
+                alt={getParticipantName(winner)}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center">
+                <Mic className="text-white" size={64} />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+          </div>
+          
+          <div className="relative z-10 w-full p-4">
+            <p className="text-white text-2xl font-bold text-center drop-shadow-lg">
+              {getParticipantName(winner)}
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="text-center">
+        <p className="text-foreground font-medium text-lg">
+          {t('tournoiPerformances.winnerSelected')}
+        </p>
+      </div>
+      
+      <div className="flex gap-3 justify-center">
+        <button
+          onClick={onConfirm}
+          disabled={isCreating}
+          className="flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {isCreating ? (
+            <>
+              <Loader2 className="animate-spin" size={16} />
+              {t('common.creating')}
+            </>
+          ) : (
+            <>
+              <CheckCircle size={16} />
+              {t('tournoiPerformances.confirm')}
+            </>
+          )}
+        </button>
+        <button
+          onClick={onCancel}
+          className="px-6 py-3 border border-border rounded-lg hover:bg-accent transition-all"
+        >
+          {t('tournoiPerformances.redraw')}
+        </button>
+      </div>
     </div>
+  );
+
+  const DrawButton = ({ availableCount, maxPerfo, allEqual, onDraw, t }: any) => (
+    <button
+      onClick={onDraw}
+      className="w-full py-8 border-2 border-dashed border-primary/30 rounded-lg hover:border-primary hover:bg-primary/5 transition-all relative overflow-hidden group"
+    >
+      <div className="text-center">
+        <Shuffle className="mx-auto mb-4 text-primary group-hover:scale-110 transition-transform" size={48} />
+        <p className="text-primary font-medium text-lg">
+          {t('tournoiPerformances.spin')}
+        </p>
+        <div className="mt-4 space-y-1">
+          <p className="text-sm text-muted-foreground">
+            {t('tournoiPerformances.availableCount')}: {availableCount}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t('tournoiPerformances.currentMax')}: {maxPerfo}
+          </p>
+          {allEqual && (
+            <p className="text-xs text-yellow-600 font-medium">
+              {t('tournoiPerformances.nextRoundReady')}
+            </p>
+          )}
+        </div>
+      </div>
+    </button>
   );
 
   return (
@@ -853,6 +1203,9 @@ export default function TournoiPerformances() {
                   setShowAddDialog(false);
                   setSelectedParticipantId(null);
                   setModalActiveTab('participant');
+                  setShowDrawResult(false);
+                  setDrawnParticipant(null);
+                  setDrawInfo(null);
                 }}
                 className="text-muted-foreground hover:text-foreground"
               >
