@@ -11,8 +11,8 @@ export default function PrivacyPage() {
             fontFamily: "Anton, sans-serif",
             fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
             lineHeight: 0.95,
-            color: "#f2ede6",
           }}
+          className="text-foreground"
         >
           {t('privacy.title')}
         </h1>
