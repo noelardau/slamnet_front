@@ -165,6 +165,8 @@ const translations = {
     'dashboard.viewStatsDesc': 'Detailed collective analytics',
     'dashboard.activeTournaments': 'Active Tournaments',
     'dashboard.noActiveTournaments': 'No active tournaments',
+    'dashboard.lastTournament': 'Last Tournament Organized',
+    'dashboard.noTournaments': 'No tournaments yet',
     
     // Membres
     'membres.title': 'MEMBERS',
@@ -674,6 +676,8 @@ const translations = {
     'dashboard.viewStatsDesc': 'Analytiques détaillées du collectif',
     'dashboard.activeTournaments': 'Tournois en cours',
     'dashboard.noActiveTournaments': 'Aucun tournoi en cours',
+    'dashboard.lastTournament': 'Dernier Tournoi Organisé',
+    'dashboard.noTournaments': 'Aucun tournoi',
     
     // Membres
     'membres.title': 'MEMBRES',

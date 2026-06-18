@@ -1,6 +1,7 @@
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Loader2, Plus, User } from 'lucide-react';
+import { Loader2, Plus, User, ExternalLink, Calendar, MapPin, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useMembreStore } from '../stores/membreStore';
 import { useTournoiStore } from '../stores/tournoiStore';
@@ -9,9 +10,13 @@ import { useCollectifStore } from '../stores/collectifStore';
 function DashboardContent() {
   const { loading, isAuthenticated } = useAuth();
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { membres } = useMembreStore();
   const { tournois } = useTournoiStore();
   const { profile } = useCollectifStore();
+  
+  const lastTournament = tournois.length > 0 ? tournois[tournois.length - 1] : null;
+  
 
   if (!isAuthenticated || !profile) {
     return (
@@ -108,22 +113,46 @@ function DashboardContent() {
            </div>
          </div>
 
-         <div className="border border-border p-6 md:p-8 bg-card">
-           <h2 
-             className="mb-6 text-foreground"
-             style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}
-           >
-             {t('dashboard.activeTournaments')}
-           </h2>
-           <div className="space-y-3">
-             <div className="p-4 border border-border bg-background">
-               <div className="text-muted-foreground text-center py-8">
-                 <span className="hidden md:inline">{t('dashboard.noActiveTournaments')}</span>
-                 <span className="md:hidden">{t('dashboard.noActiveTournaments')}</span>
-               </div>
-             </div>
-           </div>
-         </div>
+          <div className="border border-border p-6 md:p-8 bg-card">
+            <h2 
+              className="mb-6 text-foreground"
+              style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}
+            >
+              {t('dashboard.lastTournament')}
+            </h2>
+            {lastTournament ? (
+              <button
+                onClick={() => navigate(`/tournoi-gestion/${lastTournament.idTournoi}`)}
+                className="w-full text-left p-4 border border-border bg-background hover:border-primary/60 transition-all duration-300 group"
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-lg mb-2 group-hover:text-primary transition-colors">
+                      {lastTournament.nomTournoi}
+                    </div>
+                    <div className="text-muted-foreground text-sm flex items-center gap-4">
+                      <span className="flex items-center gap-1">
+                        <Calendar size={14} />
+                        {new Date(lastTournament.dateTournoi).toLocaleDateString()}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin size={14} />
+                        {lastTournament.LieuTournoi}
+                      </span>
+                     
+                    </div>
+                  </div>
+                  <ExternalLink size={18} className="text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0 ml-4" />
+                </div>
+              </button>
+            ) : (
+              <div className="p-4 border border-border bg-background">
+                <div className="text-muted-foreground text-center py-8">
+                  {t('dashboard.noTournaments')}
+                </div>
+              </div>
+            )}
+          </div>
        </div>
     </div>
   );
