@@ -1,6 +1,6 @@
 import { MemberGlobalStats } from '../../../services/statisticsService';
 import {
-  AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
+  AreaChart, Area, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -24,21 +24,6 @@ export function GlobalStatsChart({ stats }: GlobalStatsChartProps) {
     nom: t.nomTournoi.substring(0, 12) + '...',
     score: t.moyennePoints
   }));
-
-  const scoreDistributionData = [
-    {
-      name: t('statistics.globalStats.excellent'),
-      value: stats.tournoisPerformances.filter(t => t.moyennePoints > 8).length
-    },
-    {
-      name: t('statistics.globalStats.good'),
-      value: stats.tournoisPerformances.filter(t => t.moyennePoints >= 6 && t.moyennePoints <= 8).length
-    },
-    {
-      name: t('statistics.globalStats.average'),
-      value: stats.tournoisPerformances.filter(t => t.moyennePoints < 6).length
-    }
-  ].filter(d => d.value > 0);
 
   return (
     <div className="space-y-6">
@@ -110,60 +95,6 @@ export function GlobalStatsChart({ stats }: GlobalStatsChartProps) {
             <Bar dataKey="score" fill="hsl(var(--primary))" name={t('statistics.globalStats.average')} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* Pie Chart - Répartition des scores */}
-      {scoreDistributionData.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">
-            {t('statistics.globalStats.scoreDistribution')}
-          </h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={scoreDistributionData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {scoreDistributionData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '0.5rem'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Stats de régularité */}
-      <div className="grid grid-cols-2 gap-4 p-4 bg-card border border-border rounded-lg">
-        <div>
-          <div className="text-sm text-muted-foreground mb-1">
-            {t('statistics.globalStats.standardDeviation')}
-          </div>
-          <div className="text-2xl font-bold text-foreground">
-            {stats.ecartTypePoints}
-          </div>
-        </div>
-        <div>
-          <div className="text-sm text-muted-foreground mb-1">
-            {t('statistics.globalStats.consistency')}
-          </div>
-          <div className="text-2xl font-bold text-primary">
-            {(stats.tauxConsistance * 100).toFixed(1)}%
-          </div>
-        </div>
       </div>
     </div>
   );
