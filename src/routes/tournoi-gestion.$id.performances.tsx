@@ -918,7 +918,7 @@ export default function TournoiPerformances() {
     const rouletteList = generateRouletteList(available, randomIndex);
     setRouletteState(prev => ({ ...prev, currentParticipants: rouletteList }));
     
-    const totalDuration = 2500;
+    const totalDuration = 5000;
     const frameRate = 60;
     const totalFrames = (totalDuration / 1000) * frameRate;
     
