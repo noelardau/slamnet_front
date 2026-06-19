@@ -5,16 +5,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { useCollectifStore } from '../stores/collectifStore';
 import { useLanguage } from '../contexts/LanguageContext';
-import { Edit2, Loader2, Mail, MapPin, Camera } from 'lucide-react';
+import { useTheme } from '../contexts/ThemeContext';
+import { Edit2, Loader2, Mail, MapPin, Camera, Moon, Sun, Languages } from 'lucide-react';
 
 function ProfileContent() {
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
-  const { profile, isLoading, isProfileLoading, updateProfile, hydrateProfile } = useCollectifStore();
-  const { t, language } = useLanguage();
+  const { profile, isLoading, isProfileLoading, updateProfile, hydrateProfile, updatePreferences } = useCollectifStore();
+  const { t, language, setLanguage } = useLanguage();
+  const { theme, setTheme } = useTheme();
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isPrefLoading, setIsPrefLoading] = useState<'theme' | 'lang' | null>(null);
   const [formData, setFormData] = useState({
     nomCollectif: '',
     ville: '',
@@ -86,7 +89,33 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
-  
+
+  const handleThemeChange = async (newTheme: 'dark' | 'light') => {
+    setTheme(newTheme);
+    setIsPrefLoading('theme');
+    try {
+      await updatePreferences({ prefTheme: newTheme });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du thème:', error);
+      showError(t('profile.preferences.updateError'));
+    } finally {
+      setIsPrefLoading(null);
+    }
+  };
+
+  const handleLanguageChange = async (newLang: 'en' | 'fr') => {
+    setLanguage(newLang);
+    setIsPrefLoading('lang');
+    try {
+      await updatePreferences({ prefLang: newLang });
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde de la langue:', error);
+      showError(t('profile.preferences.updateError'));
+    } finally {
+      setIsPrefLoading(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -333,7 +362,108 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
             )}
           </div>
 
-       
+          {/* Carte Préférences : Apparence & Langue */}
+          <div className="border border-border p-8 bg-card">
+            <h3
+              className="text-foreground mb-2"
+              style={{ fontFamily: "Anton, sans-serif", fontSize: "1.4rem" }}
+            >
+              {t('profile.preferences.title')}
+            </h3>
+            <p className="text-sm text-muted-foreground mb-6">
+              {t('profile.preferences.description')}
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Thème */}
+              <div>
+                <label className="block text-sm font-medium mb-3">
+                  {t('profile.preferences.theme')}
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleThemeChange('dark')}
+                    disabled={isPrefLoading === 'theme'}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border transition-all duration-200 disabled:opacity-50 ${
+                      theme === 'dark'
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {isPrefLoading === 'theme' ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Moon size={16} />
+                    )}
+                    <span className="text-sm font-medium">Dark</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleThemeChange('light')}
+                    disabled={isPrefLoading === 'theme'}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border transition-all duration-200 disabled:opacity-50 ${
+                      theme === 'light'
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {isPrefLoading === 'theme' ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Sun size={16} />
+                    )}
+                    <span className="text-sm font-medium">Light</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Langue */}
+              <div>
+                <label className="block text-sm font-medium mb-3">
+                  {t('profile.preferences.language')}
+                </label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleLanguageChange('en')}
+                    disabled={isPrefLoading === 'lang'}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border transition-all duration-200 disabled:opacity-50 ${
+                      language === 'en'
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {isPrefLoading === 'lang' ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Languages size={16} />
+                    )}
+                    <span className="text-sm font-medium">English</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleLanguageChange('fr')}
+                    disabled={isPrefLoading === 'lang'}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 border transition-all duration-200 disabled:opacity-50 ${
+                      language === 'fr'
+                        ? 'border-primary bg-primary/10 text-foreground'
+                        : 'border-border text-muted-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {isPrefLoading === 'lang' ? (
+                      <Loader2 className="animate-spin" size={16} />
+                    ) : (
+                      <Languages size={16} />
+                    )}
+                    <span className="text-sm font-medium">Français</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        
         </div>
       </div>
    

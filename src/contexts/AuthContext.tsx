@@ -3,6 +3,8 @@ import { authService, CollectifProfile, LoginData, RegisterData, UpdateProfileDa
 import { useMembreStore } from '../stores/membreStore';
 import { useTournoiStore } from '../stores/tournoiStore';
 import { useCollectifStore } from '../stores/collectifStore';
+import { useTheme } from './ThemeContext';
+import { useLanguage } from './LanguageContext';
 
 interface AuthContextType {
   user: CollectifProfile | null;
@@ -20,7 +22,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CollectifProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const { setTheme } = useTheme();
+  const { setLanguage } = useLanguage();
+
   const isAuthenticated = authService.isAuthenticated();
+
+  // Applique les préférences (thème + langue) depuis le profil collectif
+  const applyPreferences = (profile: CollectifProfile | null) => {
+    if (profile?.prefTheme) {
+      setTheme(profile.prefTheme);
+    } else {
+      setTheme('dark');
+    }
+    if (profile?.prefLang) {
+      setLanguage(profile.prefLang);
+    } else {
+      setLanguage('en');
+    }
+  };
 
   useEffect(() => {
     loadUser();
@@ -32,14 +51,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const currentUser = authService.getCurrentUser();
         if (currentUser) {
           setUser(currentUser);
+          // Appliquer immédiatement les prefs depuis le cache local (anti-flash)
+          applyPreferences(currentUser);
           try {
             const profile = await authService.getProfile();
             setUser(profile);
-            
+            applyPreferences(profile);
+
             const membreStore = useMembreStore.getState();
             const tournoiStore = useTournoiStore.getState();
             const collectifStore = useCollectifStore.getState();
-            
+
             await Promise.all([
               membreStore.hydrateMembres(),
               tournoiStore.hydrateTournois(),
@@ -52,11 +74,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             const profile = await authService.getProfile();
             setUser(profile);
-            
+            applyPreferences(profile);
+
             const membreStore = useMembreStore.getState();
             const tournoiStore = useTournoiStore.getState();
             const collectifStore = useCollectifStore.getState();
-            
+
             await Promise.all([
               membreStore.hydrateMembres(),
               tournoiStore.hydrateTournois(),
@@ -69,10 +92,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } else {
         setUser(null);
+        applyPreferences(null);
       }
     } catch (error) {
       console.error('Erreur lors du chargement de l\'utilisateur:', error);
       setUser(null);
+      applyPreferences(null);
     } finally {
       setLoading(false);
     }
@@ -83,11 +108,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await authService.login(email, password);
       setUser(response.collectif);
-      
+      applyPreferences(response.collectif);
+
       const membreStore = useMembreStore.getState();
       const tournoiStore = useTournoiStore.getState();
       const collectifStore = useCollectifStore.getState();
-      
+
       await Promise.all([
         membreStore.hydrateMembres(),
         tournoiStore.hydrateTournois(),
@@ -101,20 +127,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     await authService.logout();
     setUser(null);
-    
+
     useMembreStore.getState().membres = [];
     useTournoiStore.getState().tournois = [];
     useCollectifStore.getState().clearProfile();
+
+    // Reset aux valeurs par défaut (visiteur non connecté)
+    applyPreferences(null);
   };
 
   const refreshProfile = async () => {
     const profile = await authService.getProfile();
     setUser(profile);
+    applyPreferences(profile);
   };
 
   const updateProfile = async (data: UpdateProfileData) => {
     const profile = await authService.updateProfile(data);
     setUser(profile);
+    applyPreferences(profile);
   };
 
   return (

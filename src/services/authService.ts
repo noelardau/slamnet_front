@@ -1,5 +1,8 @@
 import { apiService } from './api';
 
+export type PrefLang = 'en' | 'fr';
+export type PrefTheme = 'dark' | 'light';
+
 export interface RegisterData {
   nomCollectif: string;
   ville: string;
@@ -24,6 +27,8 @@ export interface CollectifProfile {
   ville: string;
   email: string;
   photoCollectif?: string;
+  prefLang: PrefLang;
+  prefTheme: PrefTheme;
   createdAt?: string;
 }
 
@@ -32,6 +37,13 @@ export interface UpdateProfileData {
   ville?: string;
   email?: string;
   photoCollectif?: string;
+  prefLang?: PrefLang;
+  prefTheme?: PrefTheme;
+}
+
+export interface UpdatePreferencesData {
+  prefLang?: PrefLang;
+  prefTheme?: PrefTheme;
 }
 
 export interface UpdatePasswordData {
@@ -96,6 +108,17 @@ class AuthService {
       return profile;
     } catch (error) {
       console.error('Erreur lors de la mise à jour du profil:', error);
+      throw error;
+    }
+  }
+
+  async updatePreferences(data: UpdatePreferencesData): Promise<CollectifProfile> {
+    try {
+      const profile = await apiService.put<CollectifProfile>('/collectif/preferences', data);
+      localStorage.setItem('user', JSON.stringify(profile));
+      return profile;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des préférences:', error);
       throw error;
     }
   }

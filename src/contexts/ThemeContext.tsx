@@ -10,17 +10,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('theme') as Theme) || 'dark';
-    }
-    return 'dark';
-  });
+  // Par défaut: dark (visiteur non connecté)
+  const [theme, setThemeState] = useState<Theme>('dark');
 
-  // Appliquer le thème immédiatement quand il change
+  // Appliquer la classe .dark sur <html> à chaque changement de thème
   useEffect(() => {
     const root = window.document.documentElement;
-    
+
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {
@@ -28,17 +24,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme]);
 
-  // Initialiser avec le thème dark au premier rendu
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const root = window.document.documentElement;
-      root.classList.add('dark');
-    }
-  }, []);
-
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
-    localStorage.setItem('theme', newTheme);
   };
 
   return (

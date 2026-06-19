@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useCollectifStore } from '../stores/collectifStore';
 import { Moon, Sun } from 'lucide-react';
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { isAuthenticated } = useAuth();
+  const { updatePreferences } = useCollectifStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -19,7 +23,15 @@ export function ThemeToggle() {
   }
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+
+    // Persister côté serveur uniquement si l'utilisateur est connecté
+    if (isAuthenticated) {
+      updatePreferences({ prefTheme: newTheme }).catch((err) => {
+        console.error('Erreur lors de la sauvegarde du thème:', err);
+      });
+    }
   };
 
   return (

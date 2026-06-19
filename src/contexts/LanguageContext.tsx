@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 
 export type Language = 'en' | 'fr';
 
@@ -519,6 +519,13 @@ const translations = {
     'profile.updated': 'Profile updated successfully',
     'profile.updateError': 'Error updating profile',
     'profile.uploadError': 'Error during upload',
+
+    // Profile preferences
+    'profile.preferences.title': 'APPEARANCE & LANGUAGE',
+    'profile.preferences.description': 'Customize your experience. These preferences are saved and applied each time you log in.',
+    'profile.preferences.theme': 'Theme',
+    'profile.preferences.language': 'Language',
+    'profile.preferences.updateError': 'Error updating preferences',
   },
   fr: {
     // Navbar
@@ -1030,20 +1037,21 @@ const translations = {
       'profile.updated': 'Profil mis à jour avec succès',
       'profile.updateError': 'Erreur lors de la mise à jour du profil',
       'profile.uploadError': 'Erreur lors de l\'upload',
+
+      // Profile preferences
+      'profile.preferences.title': 'APPARENCE & LANGUE',
+      'profile.preferences.description': 'Personnalisez votre expérience. Ces préférences sont enregistrées et appliquées à chaque connexion.',
+      'profile.preferences.theme': 'Thème',
+      'profile.preferences.language': 'Langue',
+      'profile.preferences.updateError': 'Erreur lors de la mise à jour des préférences',
     },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('language');
-    return (saved === 'en' || saved === 'fr') ? saved : 'en';
-  });
-
-  useEffect(() => {
-    localStorage.setItem('language', language);
-  }, [language]);
+  // Par défaut: en (visiteur non connecté)
+  const [language, setLanguageState] = useState<Language>('en');
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
