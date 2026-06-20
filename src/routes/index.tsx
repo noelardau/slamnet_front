@@ -17,6 +17,7 @@ import PrivacyPage from './privacy';
 import TermsPage from './terms';
 import ContactPage from './contact';
 import SlamPoetryPage from './slam-poetry';
+import InvitationPage from './invitation.$token';
 
 export const routes: RouteObject[] = [
   {
@@ -46,6 +47,7 @@ export const routes: RouteObject[] = [
       { path: 'terms', element: <TermsPage /> },
       { path: 'contact', element: <ContactPage /> },
       { path: 'slam-poetry', element: <SlamPoetryPage /> },
+      { path: 'invitation/:token', element: <InvitationPage /> },
     ]
   }
 ];

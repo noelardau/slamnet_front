@@ -10,8 +10,10 @@ import { CreateMembreDialog } from '../components/CreateMembreDialog';
 import { UpdateMembreDialog } from '../components/UpdateMembreDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
-import { Plus, Search, Edit2, Trash2, User, Loader2, Calendar, MapPin, AtSign } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, User, Loader2, Calendar, MapPin, AtSign, UserPlus } from 'lucide-react';
 import { ImageWithFallback } from '../app/components/figma/ImageWithFallback';
+import { CreateInvitationDialog } from '../components/CreateInvitationDialog';
+import { InvitationsSection } from '../components/InvitationsSection';
 
 function MembresContent() {
   const { isAuthenticated } = useAuth();
@@ -23,6 +25,7 @@ function MembresContent() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showInvitationDialog, setShowInvitationDialog] = useState(false);
   const [selectedMembreId, setSelectedMembreId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -102,13 +105,22 @@ function MembresContent() {
               {t('membres.title')}
             </span>
           </div>
-          <button
-            onClick={() => setShowCreateDialog(true)}
-            className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
-          >
-            <Plus size={16} />
-            <span className="hidden md:inline">{t('membres.addMember')}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowInvitationDialog(true)}
+              className="border border-border px-4 py-2 hover:border-primary/60 hover:text-primary transition-all duration-200 text-sm flex items-center gap-2"
+            >
+              <UserPlus size={16} />
+              <span className="hidden md:inline">Inviter</span>
+            </button>
+            <button
+              onClick={() => setShowCreateDialog(true)}
+              className="bg-primary text-primary-foreground px-4 py-2 hover:bg-primary/90 transition-all duration-200 hover:scale-105 active:scale-95 text-sm flex items-center gap-2"
+            >
+              <Plus size={16} />
+              <span className="hidden md:inline">{t('membres.addMember')}</span>
+            </button>
+          </div>
         </div>
         <h1
           style={{
@@ -243,6 +255,13 @@ function MembresContent() {
            ))}
         </div>
       )}
+
+      <InvitationsSection />
+
+      <CreateInvitationDialog
+        isOpen={showInvitationDialog}
+        onClose={() => setShowInvitationDialog(false)}
+      />
 
       <CreateMembreDialog
         isOpen={showCreateDialog}
