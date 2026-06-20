@@ -1,6 +1,6 @@
 import { useOutletContext } from 'react-router-dom';
 import { Plus, User, Trash2, Loader2, Link as LinkIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -8,6 +8,7 @@ import { AddParticipantDialog } from '../components/AddParticipantDialog';
 import { CreateTournamentInvitationDialog } from '../components/CreateTournamentInvitationDialog';
 import { TournamentInvitationsSection } from '../components/TournamentInvitationsSection';
 import { useParticipantStore } from '../stores/participantStore';
+import { useVisiblePolling } from '../hooks/useVisiblePolling';
 import { Participant } from '../services/participantService';
 
 export default function TournoiParticipants() {
@@ -19,14 +20,54 @@ export default function TournoiParticipants() {
   const [showInvitationDialog, setShowInvitationDialog] = useState(false);
   const [participantToDelete, setParticipantToDelete] = useState<Participant | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  
+  const [highlightedIds, setHighlightedIds] = useState<Set<number>>(new Set());
+
   const { participants, hydrateParticipants, removeParticipant, removeGuest } = useParticipantStore();
+  const previousIdsRef = useRef<Set<number> | null>(null);
 
   useEffect(() => {
     if (tournoi?.idTournoi) {
       loadParticipants();
     }
   }, [tournoi?.idTournoi]);
+
+  useEffect(() => {
+    const currentIds = new Set(participants.map((p) => p.idParticipant));
+
+    if (previousIdsRef.current === null) {
+      previousIdsRef.current = currentIds;
+      return;
+    }
+
+    const newIds: number[] = [];
+    participants.forEach((p) => {
+      if (!previousIdsRef.current!.has(p.idParticipant)) {
+        newIds.push(p.idParticipant);
+      }
+    });
+
+    if (newIds.length > 0) {
+      const newParticipants = participants.filter((p) => newIds.includes(p.idParticipant));
+      newParticipants.forEach((p) => {
+        const pseudo = p.guest?.pseudo ?? p.membre?.pseudoMembre ?? 'Inconnu';
+        showSuccess(`Nouveau participant : @${pseudo}`);
+      });
+      setHighlightedIds(new Set(newIds));
+      setTimeout(() => setHighlightedIds(new Set()), 2500);
+    }
+
+    previousIdsRef.current = currentIds;
+  }, [participants, showSuccess]);
+
+  useVisiblePolling(
+    () => {
+      if (tournoi?.idTournoi) {
+        hydrateParticipants(tournoi.idTournoi);
+      }
+    },
+    15000,
+    !!tournoi?.idTournoi,
+  );
 
   const loadParticipants = async () => {
     setIsLoading(true);
@@ -116,8 +157,15 @@ export default function TournoiParticipants() {
               : participant.membre!.pseudoMembre;
             const photo = isGuest ? null : participant.membre!.photoMembre;
             
-             return (
-               <div key={participant.idParticipant} className="border border-border bg-card p-4 flex flex-col md:flex-row items-center md:items-center justify-between group gap-3 md:gap-0">
+              return (
+                <div
+                  key={participant.idParticipant}
+                  className={`border bg-card p-4 flex flex-col md:flex-row items-center md:items-center justify-between group gap-3 md:gap-0 transition-all duration-500 ${
+                    highlightedIds.has(participant.idParticipant)
+                      ? 'border-primary bg-primary/10 shadow-lg'
+                      : 'border-border'
+                  }`}
+                >
                  <div className="flex items-center gap-4 w-full md:w-auto">
                    <div className="w-12 h-12 md:w-14 md:h-14 rounded-full overflow-hidden bg-border flex items-center justify-center flex-shrink-0">
                      {photo ? (

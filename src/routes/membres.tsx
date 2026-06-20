@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,6 +9,7 @@ import { useCollectifStore } from '../stores/collectifStore';
 import { CreateMembreDialog } from '../components/CreateMembreDialog';
 import { UpdateMembreDialog } from '../components/UpdateMembreDialog';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useVisiblePolling } from '../hooks/useVisiblePolling';
 
 import { Plus, Search, Edit2, Trash2, User, Loader2, Calendar, MapPin, AtSign, UserPlus } from 'lucide-react';
 import { ImageWithFallback } from '../app/components/figma/ImageWithFallback';
@@ -28,6 +29,46 @@ function MembresContent() {
   const [showInvitationDialog, setShowInvitationDialog] = useState(false);
   const [selectedMembreId, setSelectedMembreId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [highlightedIds, setHighlightedIds] = useState<Set<number>>(new Set());
+
+  const previousIdsRef = useRef<Set<number> | null>(null);
+
+  useEffect(() => {
+    const currentIds = new Set(membres.map((m) => m.idMembre));
+
+    if (previousIdsRef.current === null) {
+      previousIdsRef.current = currentIds;
+      return;
+    }
+
+    const newIds: number[] = [];
+    membres.forEach((m) => {
+      if (!previousIdsRef.current!.has(m.idMembre)) {
+        newIds.push(m.idMembre);
+      }
+    });
+
+    if (newIds.length > 0) {
+      const newMembres = membres.filter((m) => newIds.includes(m.idMembre));
+      newMembres.forEach((m) => {
+        showSuccess(`Nouveau membre inscrit : @${m.pseudoMembre}`);
+      });
+      setHighlightedIds(new Set(newIds));
+      setTimeout(() => setHighlightedIds(new Set()), 2500);
+    }
+
+    previousIdsRef.current = currentIds;
+  }, [membres, showSuccess]);
+
+  useVisiblePolling(
+    () => {
+      if (isAuthenticated) {
+        refreshMembres();
+      }
+    },
+    15000,
+    isAuthenticated,
+  );
 
   const filteredMembres = membres.filter(
     (membre) =>
@@ -172,7 +213,14 @@ function MembresContent() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
            {filteredMembres.map((membre) => (
-             <div key={membre.idMembre} className="border border-border bg-card p-6 hover:border-primary/60 transition-all duration-300">
+             <div
+               key={membre.idMembre}
+               className={`border bg-card p-6 transition-all duration-500 ${
+                 highlightedIds.has(membre.idMembre)
+                   ? 'border-primary bg-primary/10 shadow-lg'
+                   : 'border-border hover:border-primary/60'
+               }`}
+             >
                <div className="flex items-start justify-between mb-4">
                  <div className="flex items-center gap-4">
                    <div className="w-16 h-16 rounded-full overflow-hidden bg-border flex items-center justify-center">
