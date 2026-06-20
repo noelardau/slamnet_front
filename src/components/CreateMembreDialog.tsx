@@ -30,8 +30,9 @@ export function CreateMembreDialog({ isOpen, onClose, onMembreCreated }: CreateM
     setIsSubmitting(true);
 
     try {
-      await createMembre(formData);
-      showSuccess(t('createMember.createdSuccess'));
+      const created = await createMembre(formData);
+      const code = created?.codeMembre ? ` — Code membre : ${created.codeMembre}` : '';
+      showSuccess(`${t('createMember.createdSuccess')}${code}`);
       setFormData({
         nomMembre: '',
         prenomMembre: '',

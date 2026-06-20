@@ -5,9 +5,9 @@ import { useStatisticsStore } from '../stores/statisticsStore';
 import { useMembreStore } from '../stores/membreStore';
 import { GlobalStatsChart } from '../app/components/charts/GlobalStatsChart';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  Trophy, BarChart3, TrendingUp, Award, Target, 
-  ArrowLeft, Calendar, User, Mail, Loader2
+import {
+  Trophy, BarChart3, TrendingUp, Award, Target,
+  ArrowLeft, Calendar, User, Mail, Loader2, KeyRound, Copy, Check
 } from 'lucide-react';
 import { Button } from '../app/components/ui/button';
 
@@ -19,11 +19,23 @@ export default function MembreDetailPage() {
   const { isAuthenticated } = useAuth();
   
   const { membre, hydrateMembre, isLoading: membreLoading } = useMembreStore();
-  const { 
-    memberGlobalStats, 
+  const {
+    memberGlobalStats,
     isLoading: statsLoading,
-    hydrateMemberGlobalStats 
+    hydrateMemberGlobalStats
   } = useStatisticsStore();
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  const handleCopyCode = async () => {
+    if (!membre?.codeMembre) return;
+    try {
+      await navigator.clipboard.writeText(membre.codeMembre);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch (error) {
+      console.error('Erreur copie:', error);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -94,6 +106,55 @@ export default function MembreDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Code membre */}
+      {membre.codeMembre && (
+        <div className="mb-8 border border-primary/40 bg-primary/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <KeyRound className="text-primary flex-shrink-0" size={22} />
+            <div>
+              <p
+                className="text-primary mb-1"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '0.65rem',
+                  letterSpacing: '0.2em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Code membre
+              </p>
+              <code
+                className="text-foreground"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '1.25rem',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                {membre.codeMembre}
+              </code>
+            </div>
+          </div>
+          <button
+            onClick={handleCopyCode}
+            className="flex items-center gap-1 px-3 py-2 border border-border bg-background hover:border-primary/60 transition-colors text-xs whitespace-nowrap"
+          >
+            {copiedCode ? (
+              <>
+                <Check size={14} className="text-primary" />
+                Copié
+              </>
+            ) : (
+              <>
+                <Copy size={14} />
+                Copier le code
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Section Statistiques Globales */}
       <div>

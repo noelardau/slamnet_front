@@ -6,6 +6,7 @@ export interface Membre {
   prenomMembre: string;
   pseudoMembre: string;
   emailMembre: string;
+  codeMembre: string;
   photoMembre?: string;
   dateNaissance: string;
   adresse: string;

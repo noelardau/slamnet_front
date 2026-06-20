@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { invitationService, InvitationPublicInfo } from '../services/invitationService';
-import { Loader2, AlertCircle, CheckCircle2, Upload, X } from 'lucide-react';
+import { Loader2, AlertCircle, CheckCircle2, Upload, X, Copy, Check } from 'lucide-react';
 
 type Status = 'loading' | 'error' | 'form' | 'submitting' | 'success';
 
@@ -11,6 +11,8 @@ export default function InvitationPage() {
   const [info, setInfo] = useState<InvitationPublicInfo | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [createdName, setCreatedName] = useState('');
+  const [codeMembre, setCodeMembre] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const [formData, setFormData] = useState({
     prenomMembre: '',
@@ -62,15 +64,28 @@ export default function InvitationPage() {
     if (!token) return;
     setStatus('submitting');
     try {
-      await invitationService.acceptInvitation(token, {
+      const created = await invitationService.acceptInvitation(token, {
         ...formData,
         photo,
       });
       setCreatedName(`${formData.prenomMembre} ${formData.nomMembre}`);
+      if (created?.codeMembre) {
+        setCodeMembre(created.codeMembre);
+      }
       setStatus('success');
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Erreur lors de l\'inscription');
       setStatus('form');
+    }
+  };
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(codeMembre);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Erreur copie:', error);
     }
   };
 
@@ -124,6 +139,57 @@ export default function InvitationPage() {
         <p className="text-muted-foreground text-sm mb-8">
           Vous faites désormais partie de l'aventure slam.
         </p>
+
+        {codeMembre && (
+          <div className="mb-8 border border-primary/40 bg-primary/5 p-6 text-left">
+            <p
+              className="text-primary mb-3"
+              style={{
+                fontFamily: 'JetBrains Mono, monospace',
+                fontSize: '0.7rem',
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Votre code membre
+            </p>
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <code
+                className="text-foreground"
+                style={{
+                  fontFamily: 'JetBrains Mono, monospace',
+                  fontSize: '1.75rem',
+                  fontWeight: 'bold',
+                  letterSpacing: '0.1em',
+                }}
+              >
+                {codeMembre}
+              </code>
+              <button
+                onClick={handleCopyCode}
+                className="flex items-center gap-1 px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-xs whitespace-nowrap"
+              >
+                {copied ? (
+                  <>
+                    <Check size={14} />
+                    Copié
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} />
+                    Copier
+                  </>
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              <strong className="text-foreground">Mémorisez ce code.</strong> Il vous permettra de
+              vous inscrire aux tournois organisés par votre collectif via les liens d'inscription
+              publics.
+            </p>
+          </div>
+        )}
+
         <Link
           to="/"
           className="inline-block px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors text-sm"

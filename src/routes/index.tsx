@@ -18,6 +18,7 @@ import TermsPage from './terms';
 import ContactPage from './contact';
 import SlamPoetryPage from './slam-poetry';
 import InvitationPage from './invitation.$token';
+import TournoiInvitationPage from './tournoi-invitation.$token';
 
 export const routes: RouteObject[] = [
   {
@@ -48,6 +49,7 @@ export const routes: RouteObject[] = [
       { path: 'contact', element: <ContactPage /> },
       { path: 'slam-poetry', element: <SlamPoetryPage /> },
       { path: 'invitation/:token', element: <InvitationPage /> },
+      { path: 'tournoi-invitation/:token', element: <TournoiInvitationPage /> },
     ]
   }
 ];

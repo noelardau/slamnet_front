@@ -1,10 +1,12 @@
 import { useOutletContext } from 'react-router-dom';
-import { Plus, User, Trash2, Loader2 } from 'lucide-react';
+import { Plus, User, Trash2, Loader2, Link as LinkIcon } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '../contexts/ToastContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { AddParticipantDialog } from '../components/AddParticipantDialog';
+import { CreateTournamentInvitationDialog } from '../components/CreateTournamentInvitationDialog';
+import { TournamentInvitationsSection } from '../components/TournamentInvitationsSection';
 import { useParticipantStore } from '../stores/participantStore';
 import { Participant } from '../services/participantService';
 
@@ -14,6 +16,7 @@ export default function TournoiParticipants() {
   const { t } = useLanguage();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showInvitationDialog, setShowInvitationDialog] = useState(false);
   const [participantToDelete, setParticipantToDelete] = useState<Participant | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -81,6 +84,16 @@ export default function TournoiParticipants() {
         >
           <Plus size={16} />
           <span className="hidden md:inline">{t('tournoiParticipants.addParticipant')}</span>
+        </button>
+      </div>
+
+      <div className="mb-6">
+        <button
+          onClick={() => setShowInvitationDialog(true)}
+          className="border border-border px-4 py-2 hover:border-primary/60 hover:text-primary transition-all duration-200 text-sm flex items-center gap-2 w-full sm:w-auto justify-center"
+        >
+          <LinkIcon size={16} />
+          <span>Générer un lien d'inscription public</span>
         </button>
       </div>
 
@@ -156,6 +169,14 @@ export default function TournoiParticipants() {
           setShowDeleteDialog(false);
           setParticipantToDelete(null);
         }}
+      />
+
+      <TournamentInvitationsSection tournamentId={tournoi.idTournoi} />
+
+      <CreateTournamentInvitationDialog
+        isOpen={showInvitationDialog}
+        onClose={() => setShowInvitationDialog(false)}
+        tournamentId={tournoi.idTournoi}
       />
 
       <AddParticipantDialog
