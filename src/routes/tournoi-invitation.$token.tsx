@@ -170,17 +170,17 @@ export default function TournoiInvitationPage() {
     });
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-16">
-      <div className="mb-10 text-center">
+    <div className="max-w-2xl mx-auto px-6 py-6">
+      <div className="mb-6 text-center">
         <p
-          className="text-primary mb-3"
+          className="text-primary mb-2"
           style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: '0.7rem', letterSpacing: '0.2em' }}
         >
           INSCRIPTION TOURNOI
         </p>
         <h1
-          className="text-foreground mb-4"
-          style={{ fontFamily: 'Anton, sans-serif', fontSize: 'clamp(2rem, 4vw, 3rem)', lineHeight: 1 }}
+          className="text-foreground mb-3"
+          style={{ fontFamily: 'Anton, sans-serif', fontSize: 'clamp(1.75rem, 3.5vw, 2.5rem)', lineHeight: 1 }}
         >
           <span style={{ color: '#ff4d00' }}>{info?.nomTournoi}</span>
         </h1>
@@ -200,22 +200,22 @@ export default function TournoiInvitationPage() {
             </span>
           </div>
         )}
-        <p className="text-muted-foreground mt-4 text-sm">
+        <p className="text-muted-foreground mt-2 text-sm">
           Organisé par <span className="text-primary font-medium">{info?.nomCollectif}</span> ({info?.ville})
         </p>
       </div>
 
       {errorMessage && status === 'form' && (
-        <div className="mb-6 p-4 border border-destructive/50 bg-destructive/10 text-destructive text-sm">
+        <div className="mb-4 p-3 border border-destructive/50 bg-destructive/10 text-destructive text-sm">
           {errorMessage}
         </div>
       )}
 
-      <div className="flex gap-2 p-1 bg-muted rounded-lg mb-6">
+      <div className="flex gap-2 p-1 bg-muted rounded-lg mb-4">
         <button
           onClick={() => setTab('membre')}
           disabled={isSubmitting}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
             tab === 'membre'
               ? 'bg-card text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
@@ -227,7 +227,7 @@ export default function TournoiInvitationPage() {
         <button
           onClick={() => setTab('guest')}
           disabled={isSubmitting}
-          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
+          className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
             tab === 'guest'
               ? 'bg-card text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
@@ -239,9 +239,9 @@ export default function TournoiInvitationPage() {
       </div>
 
       {tab === 'membre' ? (
-        <form onSubmit={handleSubmitMembre} className="space-y-5">
+        <form onSubmit={handleSubmitMembre} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium mb-2">Votre code membre</label>
+            <label className="block text-sm font-medium mb-1">Votre code membre</label>
             <input
               type="text"
               required
@@ -249,20 +249,20 @@ export default function TournoiInvitationPage() {
               onChange={handleCodeMembreChange}
               placeholder="SLM-XXXXXX"
               maxLength={10}
-              className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               style={{ fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.1em' }}
               disabled={isSubmitting}
               autoComplete="off"
             />
-            <p className="text-xs text-muted-foreground mt-2">
-              Votre code membre vous a été envoyé par email lors de votre inscription au collectif.
+            <p className="text-xs text-muted-foreground mt-1">
+              Votre code membre vous a été communiqué lors de votre inscription au collectif.
             </p>
           </div>
 
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full px-6 py-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{ letterSpacing: '0.06em' }}
           >
             {isSubmitting ? (
@@ -276,19 +276,19 @@ export default function TournoiInvitationPage() {
           </button>
         </form>
       ) : (
-        <form onSubmit={handleSubmitGuest} className="space-y-5">
+        <form onSubmit={handleSubmitGuest} className="space-y-3">
           <div>
-            <label className="block text-sm font-medium mb-2">Votre pseudo / nom d'artiste</label>
+            <label className="block text-sm font-medium mb-1">Votre pseudo / nom d'artiste</label>
             <input
               type="text"
               required
               value={pseudo}
               onChange={(e) => setPseudo(e.target.value)}
               placeholder="Votre nom de scène"
-              className="w-full px-4 py-3 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               disabled={isSubmitting}
             />
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="text-xs text-muted-foreground mt-1">
               Si ce pseudo n'existe pas encore, il sera créé automatiquement.
             </p>
           </div>
@@ -296,7 +296,7 @@ export default function TournoiInvitationPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full px-6 py-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full px-6 py-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 font-bold uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             style={{ letterSpacing: '0.06em' }}
           >
             {isSubmitting ? (
