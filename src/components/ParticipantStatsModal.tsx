@@ -42,14 +42,55 @@ export function ParticipantStatsModal({
           <DialogTitle className="text-xl">
             <div className="flex items-center gap-2">
               <BarChart3 size={24} />
-              {participantStats?.participantName}
+              {statsLoading ? (
+                <span className="text-muted-foreground">Chargement des statistiques...</span>
+              ) : (
+                participantStats?.participantName
+              )}
             </div>
           </DialogTitle>
         </DialogHeader>
-        
+
         {statsLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="animate-spin text-muted-foreground" size={32} />
+          <div className="space-y-6 animate-pulse">
+            {/* Skeleton header stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="p-4 bg-card border border-border rounded-lg">
+                  <div className="h-3 bg-muted rounded w-2/3 mb-2" />
+                  <div className="h-7 bg-muted rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+
+            {/* Skeleton chart */}
+            <div>
+              <div className="h-5 bg-muted rounded w-1/4 mb-4" />
+              <div className="h-48 bg-card border border-border rounded-lg flex items-center justify-center">
+                <Loader2 className="animate-spin text-muted-foreground" size={28} />
+              </div>
+            </div>
+
+            {/* Skeleton rounds */}
+            <div>
+              <div className="h-5 bg-muted rounded w-1/4 mb-4" />
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <div key={i} className="border border-border rounded-lg p-4 bg-card">
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="h-4 bg-muted rounded w-20" />
+                      <div className="h-5 bg-muted rounded w-10" />
+                    </div>
+                    <div className="h-3 bg-muted rounded w-1/3 mb-2" />
+                    <div className="flex gap-2">
+                      <div className="h-6 w-10 bg-muted rounded" />
+                      <div className="h-6 w-10 bg-muted rounded" />
+                      <div className="h-6 w-10 bg-muted rounded" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : participantStats && (
           <>
@@ -160,7 +201,14 @@ export function ParticipantStatsModal({
                  ))}
                </div>
              </div>
-          </>
+           </>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <AlertCircle className="text-muted-foreground mb-3" size={32} />
+            <p className="text-muted-foreground text-sm">
+              {t('statistics.participantStats.noData') || 'Aucune statistique disponible pour ce participant.'}
+            </p>
+          </div>
         )}
       </DialogContent>
     </Dialog>
