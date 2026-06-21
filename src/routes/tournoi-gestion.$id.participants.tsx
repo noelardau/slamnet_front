@@ -22,7 +22,7 @@ export default function TournoiParticipants() {
   const [isLoading, setIsLoading] = useState(false);
   const [highlightedIds, setHighlightedIds] = useState<Set<number>>(new Set());
 
-  const { participants, hydrateParticipants, removeParticipant, removeGuest } = useParticipantStore();
+  const { participants, hydrateParticipants, removeParticipant, removeGuest, refreshParticipantsSilent } = useParticipantStore();
   const previousIdsRef = useRef<Set<number> | null>(null);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ export default function TournoiParticipants() {
   useVisiblePolling(
     () => {
       if (tournoi?.idTournoi) {
-        hydrateParticipants(tournoi.idTournoi);
+        refreshParticipantsSilent(tournoi.idTournoi);
       }
     },
     15000,

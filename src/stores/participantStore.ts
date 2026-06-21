@@ -11,6 +11,7 @@ interface ParticipantStore {
   removeParticipant: (tournamentId: number) => Promise<void>;
   removeGuest: (tournamentId: number, guestId: number) => Promise<void>;
   refreshParticipants: (tournamentId: number) => Promise<void>;
+  refreshParticipantsSilent: (tournamentId: number) => Promise<void>;
 }
 
 export const useParticipantStore = create<ParticipantStore>((set, get) => ({
@@ -27,6 +28,16 @@ export const useParticipantStore = create<ParticipantStore>((set, get) => ({
       const errorMessage = error instanceof Error ? error.message : 'Erreur lors du chargement des participants';
       set({ error: errorMessage, isLoading: false });
       throw error;
+    }
+  },
+
+  refreshParticipantsSilent: async (tournamentId: number) => {
+    try {
+      const participants = await participantService.getTournamentParticipants(tournamentId);
+      set({ participants });
+    } catch (error) {
+      // Silencieux : ne pas impacter l'UI en cas d'échec du polling
+      console.error('[participantStore] refreshParticipantsSilent error:', error);
     }
   },
 

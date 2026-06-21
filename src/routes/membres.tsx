@@ -20,7 +20,7 @@ function MembresContent() {
   const { isAuthenticated } = useAuth();
   const { showSuccess, showError } = useToast();
   const { t } = useLanguage();
-  const { membres, isLoading, error, createMembre, updateMembre, deleteMembre, refreshMembres } = useMembreStore();
+  const { membres, isLoading, error, createMembre, updateMembre, deleteMembre, refreshMembresSilent } = useMembreStore();
   const { profile, isLoading: isProfileLoading } = useCollectifStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -63,7 +63,7 @@ function MembresContent() {
   useVisiblePolling(
     () => {
       if (isAuthenticated) {
-        refreshMembres();
+        refreshMembresSilent();
       }
     },
     15000,

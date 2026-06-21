@@ -5,6 +5,10 @@ import { useEffect, useRef } from 'react';
  * la page est visible. Réexécute immédiatement le callback quand la page
  * redevient visible (pour rattraper les changements survenus pendant
  * que l'onglet était caché). Clean propre à l'unmount.
+ *
+ * N'appelle PAS le callback au mount : on suppose que les données sont
+ * déjà chargées en amont (ex: AuthContext au login). Démarrer uniquement
+ * l'intervalle pour les mises à jour ultérieures.
  */
 export function useVisiblePolling(
   callback: () => void | Promise<void>,
@@ -42,6 +46,7 @@ export function useVisiblePolling(
 
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        // Rattrape les changements survenus pendant que l'onglet était caché
         run();
         start();
       } else {
@@ -49,9 +54,8 @@ export function useVisiblePolling(
       }
     };
 
-    // Appel initial au mount
-    run();
-
+    // Démarre l'intervalle (pas d'appel initial au mount : les données
+    // sont censées être déjà hydratées par le AuthContext).
     if (document.visibilityState === 'visible') {
       start();
     }
@@ -64,3 +68,4 @@ export function useVisiblePolling(
     };
   }, [intervalMs, enabled]);
 }
+

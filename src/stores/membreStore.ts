@@ -14,6 +14,7 @@ interface MembreStore {
   updateMembre: (id: number, data: UpdateMembreData) => Promise<Membre>;
   deleteMembre: (id: number) => Promise<void>;
   refreshMembres: () => Promise<void>;
+  refreshMembresSilent: () => Promise<void>;
 }
 
 export const useMembreStore = create<MembreStore>((set, get) => ({
@@ -32,6 +33,16 @@ export const useMembreStore = create<MembreStore>((set, get) => ({
       const errorMessage = error instanceof Error ? error.message : 'Erreur lors du chargement des membres';
       set({ error: errorMessage, isLoading: false });
       throw error;
+    }
+  },
+
+  refreshMembresSilent: async () => {
+    try {
+      const membres = await membreService.getMembres();
+      set({ membres });
+    } catch (error) {
+      // Silencieux : ne pas impacter l'UI en cas d'échec du polling
+      console.error('[membreStore] refreshMembresSilent error:', error);
     }
   },
 
