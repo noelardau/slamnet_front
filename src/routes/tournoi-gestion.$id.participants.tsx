@@ -24,14 +24,23 @@ export default function TournoiParticipants() {
 
   const { participants, hydrateParticipants, removeParticipant, removeGuest, refreshParticipantsSilent } = useParticipantStore();
   const previousIdsRef = useRef<Set<number> | null>(null);
+  const isInitialLoadDoneRef = useRef(false);
 
   useEffect(() => {
+    // Reset propre à chaque changement de tournoi : on repart d'une baseline vierge
+    previousIdsRef.current = null;
+    isInitialLoadDoneRef.current = false;
+
     if (tournoi?.idTournoi) {
       loadParticipants();
     }
   }, [tournoi?.idTournoi]);
 
   useEffect(() => {
+    // Ignore les mises à jour tant que le chargement initial n'est pas terminé :
+    // évite de poser une baseline vide et de traiter tous les participants comme nouveaux
+    if (!isInitialLoadDoneRef.current) return;
+
     const currentIds = new Set(participants.map((p) => p.idParticipant));
 
     if (previousIdsRef.current === null) {
@@ -57,7 +66,7 @@ export default function TournoiParticipants() {
     }
 
     previousIdsRef.current = currentIds;
-  }, [participants, showSuccess]);
+  }, [participants]);
 
   useVisiblePolling(
     () => {
@@ -73,6 +82,9 @@ export default function TournoiParticipants() {
     setIsLoading(true);
     try {
       await hydrateParticipants(tournoi.idTournoi);
+      // Le premier chargement réussi pose la baseline : on autorise ensuite
+      // la détection de nouveaux participants par le polling
+      isInitialLoadDoneRef.current = true;
     } catch (error) {
       showError(t('tournoiParticipants.loadingError'));
     } finally {
