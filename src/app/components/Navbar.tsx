@@ -19,7 +19,7 @@ export function Navbar() {
   const [isTournoiMode, setIsTournoiMode] = useState(false);
   const { openLoginModal, openSignupModal } = useAuthModal();
   const { t } = useLanguage();
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout, isAdmin } = useAuth();
   const { profile } = useCollectifStore();
   const navigate = useNavigate();
   const { showSuccess, showError } = useToast();
@@ -99,41 +99,49 @@ export function Navbar() {
           style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
         >
            {isAuthenticated ? (
-            <>
-              {[
-                { label: t('nav.dashboard'), to: "/dashboard" },
-                { label: t('nav.members'), to: "/membres" },
-                { label: t('nav.tournaments'), to: "/tournois" }
-              ].map((link) => {
-                const isActive = location.pathname === link.to;
-                return (
-                  <Link
-                    key={link.label}
-                    to={link.to}
-                    className={`relative text-muted-foreground hover:text-foreground transition-colors duration-200 ${
-                      isActive ? 'text-foreground' : ''
-                    }`}
-                  >
-                    {link.label}
-                    {isActive && (
-                      <motion.div
-                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
-                        layoutId="activeLink"
-                        initial={false}
-                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      />
-                    )}
-                  </Link>
-                );
-               })}
-              <Link
-                to="/slam-poetry"
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer relative"
-              >
-                {t('nav.slamPoetry')}
-              </Link>
-            </>
-          ) : (
+             <>
+               {(isAdmin
+                 ? [
+                     { label: t('admin.nav.stats'), to: "/admin" },
+                     { label: t('admin.nav.collectifs'), to: "/admin/collectifs" },
+                   ]
+                 : [
+                     { label: t('nav.dashboard'), to: "/dashboard" },
+                     { label: t('nav.members'), to: "/membres" },
+                     { label: t('nav.tournaments'), to: "/tournois" },
+                   ]
+               ).map((link) => {
+                 const isActive = link.to === '/admin' ? location.pathname === '/admin' : location.pathname.startsWith(link.to);
+                 return (
+                   <Link
+                     key={link.label}
+                     to={link.to}
+                     className={`relative text-muted-foreground hover:text-foreground transition-colors duration-200 ${
+                       isActive ? 'text-foreground' : ''
+                     }`}
+                   >
+                     {link.label}
+                     {isActive && (
+                       <motion.div
+                         className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                         layoutId="activeLink"
+                         initial={false}
+                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                       />
+                     )}
+                   </Link>
+                 );
+                })}
+               {!isAdmin && (
+                 <Link
+                   to="/slam-poetry"
+                   className="text-muted-foreground hover:text-foreground transition-colors duration-200 cursor-pointer relative"
+                 >
+                   {t('nav.slamPoetry')}
+                 </Link>
+               )}
+             </>
+           ) : (
               [
                 { label: t('nav.features'), to: "features" },
                 { label: t('nav.howItWorks'), to: "how-it-works" },
@@ -281,38 +289,43 @@ export function Navbar() {
                  exit={{ opacity: 0, height: 0 }}
                  className="md:hidden border-t border-border bg-background px-6 pb-6 flex flex-col gap-4 pt-4"
                >
-               {isAuthenticated ? (
-                 <>
-                     {[
-                       { label: t('nav.dashboard'), to: "/dashboard" },
-                       { label: t('nav.members'), to: "/membres" },
-                       { label: t('nav.tournaments'), to: "/tournois" },
-                       { label: t('nav.slamPoetry'), to: "/slam-poetry" },
-                     
-                    ].map((link) => {
-                     const isActive = location.pathname === link.to;
-                     return (
-                       <Link 
-                         key={link.label} 
-                         to={link.to} 
-                         className={`relative py-1 ${
-                           isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-                         }`}
-                         style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
-                         onClick={() => setOpen(false)}
-                       >
-                         {link.label}
-                         {isActive && (
-                           <motion.div
-                             className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
-                             layoutId="activeLinkMobile"
-                             initial={false}
-                             transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                           />
-                         )}
-                       </Link>
-                     );
-                   })}
+                {isAuthenticated ? (
+                  <>
+                      {(isAdmin
+                        ? [
+                            { label: t('admin.nav.stats'), to: "/admin" },
+                            { label: t('admin.nav.collectifs'), to: "/admin/collectifs" },
+                          ]
+                        : [
+                            { label: t('nav.dashboard'), to: "/dashboard" },
+                            { label: t('nav.members'), to: "/membres" },
+                            { label: t('nav.tournaments'), to: "/tournois" },
+                            { label: t('nav.slamPoetry'), to: "/slam-poetry" },
+                          ]
+                      ).map((link) => {
+                      const isActive = link.to === '/admin' ? location.pathname === '/admin' : location.pathname.startsWith(link.to);
+                      return (
+                        <Link 
+                          key={link.label} 
+                          to={link.to} 
+                          className={`relative py-1 ${
+                            isActive ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                          }`}
+                          style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.875rem", letterSpacing: "0.05em" }}
+                          onClick={() => setOpen(false)}
+                        >
+                          {link.label}
+                          {isActive && (
+                            <motion.div
+                              className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary"
+                              layoutId="activeLinkMobile"
+                              initial={false}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            />
+                          )}
+                        </Link>
+                      );
+                    })}
                     <div className="pt-4 border-t border-border">
                        <div className="flex items-center justify-between mb-4 py-1">
                          <div className="flex items-center gap-3 text-muted-foreground"
@@ -322,15 +335,15 @@ export function Navbar() {
                          </div>
                          <ThemeToggle />
                        </div>
-                       <Link
-                         to="/profile"
-                         className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
-                         onClick={() => setOpen(false)}
-                       >
-                         <User size={16} />
-                         <span className="text-sm">{t('nav.myProfile')}</span>
-                       </Link>
-                        <button
+                        <Link
+                          to="/profile"
+                          className="flex items-center gap-3 px-4 py-3 text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+                          onClick={() => setOpen(false)}
+                        >
+                          <User size={16} />
+                          <span className="text-sm">{t('nav.myProfile')}</span>
+                        </Link>
+                         <button
                           onClick={() => {
                             setOpen(false);
                             handleLogoutClick();

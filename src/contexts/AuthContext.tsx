@@ -10,6 +10,7 @@ interface AuthContextType {
   user: CollectifProfile | null;
   loading: boolean;
   isAuthenticated: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { setLanguage } = useLanguage();
 
   const isAuthenticated = authService.isAuthenticated();
+  const isAdmin = user?.role === 'ADMIN';
 
   // Applique les préférences (thème + langue) depuis le profil collectif
   const applyPreferences = (profile: CollectifProfile | null) => {
@@ -154,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         loading,
         isAuthenticated,
+        isAdmin,
         login,
         logout,
         refreshProfile,

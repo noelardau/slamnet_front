@@ -19,6 +19,9 @@ import ContactPage from './contact';
 import SlamPoetryPage from './slam-poetry';
 import InvitationPage from './invitation.$token';
 import TournoiInvitationPage from './tournoi-invitation.$token';
+import { AdminRoute } from '../components/AdminRoute';
+import AdminDashboardPage from './admin/_index';
+import AdminCollectifsPage from './admin/collectifs';
 
 export const routes: RouteObject[] = [
   {
@@ -43,6 +46,14 @@ export const routes: RouteObject[] = [
           { path: 'classement', element: <TournoiClassementPage /> },
           { path: 'parametres', element: <TournoiParametresPage /> },
         ]
+      },
+      {
+        path: 'admin',
+        element: <AdminRoute />,
+        children: [
+          { index: true, element: <AdminDashboardPage /> },
+          { path: 'collectifs', element: <AdminCollectifsPage /> },
+        ],
       },
       { path: 'privacy', element: <PrivacyPage /> },
       { path: 'terms', element: <TermsPage /> },

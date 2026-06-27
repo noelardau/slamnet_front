@@ -2,6 +2,7 @@ import { apiService } from './api';
 
 export type PrefLang = 'en' | 'fr';
 export type PrefTheme = 'dark' | 'light';
+export type UserRole = 'COLLECTIF' | 'ADMIN';
 
 export interface RegisterData {
   nomCollectif: string;
@@ -29,6 +30,8 @@ export interface CollectifProfile {
   photoCollectif?: string;
   prefLang: PrefLang;
   prefTheme: PrefTheme;
+  role: UserRole;
+  active: boolean;
   createdAt?: string;
 }
 
