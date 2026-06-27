@@ -11,7 +11,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<CollectifProfile>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
@@ -105,7 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<CollectifProfile> => {
     setLoading(true);
     try {
       const response = await authService.login(email, password);
@@ -121,6 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         tournoiStore.hydrateTournois(),
         collectifStore.hydrateProfile(),
       ]);
+
+      return response.collectif;
     } finally {
       setLoading(false);
     }

@@ -44,7 +44,11 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.error || 'Erreur lors de la requête');
+      const err = new Error(error.error || 'Erreur lors de la requête') as Error & { code?: string };
+      if (error.code) {
+        err.code = error.code;
+      }
+      throw err;
     }
 
     return response.json();

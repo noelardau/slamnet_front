@@ -48,12 +48,14 @@ export function LoginModal({ open, onOpenChange, onSwitchToSignup }: LoginModalP
 
     setLoading(true);
     try {
-      await login(email, password);
+      const profile = await login(email, password);
       showSuccess(t('auth.loginSuccess'));
       onOpenChange(false);
-      navigate(from, { replace: true });
+      const target = profile.role === 'ADMIN' ? '/admin' : from;
+      navigate(target, { replace: true });
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : t('auth.loginError');
+      const e = err as Error & { code?: string };
+      const errorMessage = e.code ? t(`auth.errors.${e.code}`) : (e.message || t('auth.loginError'));
       setError(errorMessage);
       showError(errorMessage);
     } finally {
