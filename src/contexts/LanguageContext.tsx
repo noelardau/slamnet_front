@@ -563,6 +563,11 @@ const translations = {
     'admin.collectifs.approved': 'Collective approved',
     'admin.collectifs.suspended': 'Collective suspended',
     'admin.collectifs.updateError': 'Error updating collective',
+    'admin.collectifs.delete': 'Delete',
+    'admin.collectifs.deleteTitle': 'Delete collective',
+    'admin.collectifs.deleteMessage': 'Are you sure you want to delete this collective? All related members, tournaments and invitations will be permanently removed. This action is irreversible.',
+    'admin.collectifs.deleted': 'Collective deleted',
+    'admin.collectifs.deleteError': 'Error deleting collective',
   },
   fr: {
     // Navbar
@@ -1119,6 +1124,11 @@ const translations = {
       'admin.collectifs.approved': 'Collectif approuvé',
       'admin.collectifs.suspended': 'Collectif suspendu',
       'admin.collectifs.updateError': 'Erreur lors de la mise à jour du collectif',
+      'admin.collectifs.delete': 'Supprimer',
+      'admin.collectifs.deleteTitle': 'Supprimer le collectif',
+      'admin.collectifs.deleteMessage': 'Êtes-vous sûr de vouloir supprimer ce collectif ? Tous les membres, tournois et invitations associés seront définitivement supprimés. Cette action est irréversible.',
+      'admin.collectifs.deleted': 'Collectif supprimé',
+      'admin.collectifs.deleteError': 'Erreur lors de la suppression du collectif',
     },
 };
 

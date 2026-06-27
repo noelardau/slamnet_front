@@ -2,7 +2,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { adminService, AdminCollectif } from '../../services/adminService';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Loader2, Search, ShieldOff, ShieldCheck, Check } from 'lucide-react';
+import { ConfirmDialog } from '../../components/ConfirmDialog';
+import { Loader2, Search, ShieldOff, ShieldCheck, Check, Trash2 } from 'lucide-react';
 
 type TabKey = 'all' | 'pending' | 'active';
 
@@ -14,6 +15,8 @@ export default function AdminCollectifsPage() {
   const [query, setQuery] = useState('');
   const [pendingId, setPendingId] = useState<number | null>(null);
   const [tab, setTab] = useState<TabKey>('pending');
+  const [deleteTarget, setDeleteTarget] = useState<AdminCollectif | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { showSuccess, showError } = useToast();
 
   const load = async () => {
@@ -47,6 +50,21 @@ export default function AdminCollectifsPage() {
       showError(e instanceof Error ? e.message : t('admin.collectifs.updateError'));
     } finally {
       setPendingId(null);
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await adminService.deleteCollectif(deleteTarget.idCollectif);
+      setCollectifs((prev) => prev.filter((x) => x.idCollectif !== deleteTarget.idCollectif));
+      showSuccess(t('admin.collectifs.deleted'));
+      setDeleteTarget(null);
+    } catch (e) {
+      showError(e instanceof Error ? e.message : t('admin.collectifs.deleteError'));
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -194,24 +212,33 @@ export default function AdminCollectifsPage() {
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => handleToggle(c)}
-                      disabled={pendingId === c.idCollectif}
-                      className={`inline-flex items-center gap-1 px-3 py-1 text-xs border transition-colors disabled:opacity-50 ${
-                        c.active
-                          ? 'border-red-500/40 text-red-500 hover:bg-red-500/10'
-                          : 'border-green-500/40 text-green-500 hover:bg-green-500/10'
-                      }`}
-                    >
-                      {pendingId === c.idCollectif ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : c.active ? (
-                        <ShieldOff size={12} />
-                      ) : (
-                        <Check size={12} />
-                      )}
-                      {c.active ? t('admin.collectifs.suspend') : t('admin.collectifs.approve')}
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleToggle(c)}
+                        disabled={pendingId === c.idCollectif}
+                        className={`inline-flex items-center gap-1 px-3 py-1 text-xs border transition-colors disabled:opacity-50 ${
+                          c.active
+                            ? 'border-red-500/40 text-red-500 hover:bg-red-500/10'
+                            : 'border-green-500/40 text-green-500 hover:bg-green-500/10'
+                        }`}
+                      >
+                        {pendingId === c.idCollectif ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : c.active ? (
+                          <ShieldOff size={12} />
+                        ) : (
+                          <Check size={12} />
+                        )}
+                        {c.active ? t('admin.collectifs.suspend') : t('admin.collectifs.approve')}
+                      </button>
+                      <button
+                        onClick={() => setDeleteTarget(c)}
+                        title={t('admin.collectifs.delete')}
+                        className="inline-flex items-center justify-center w-7 h-7 text-xs border border-red-500/40 text-red-500 hover:bg-red-500/10 transition-colors"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -219,6 +246,19 @@ export default function AdminCollectifsPage() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDialog
+        isOpen={deleteTarget !== null}
+        title={t('admin.collectifs.deleteTitle')}
+        message={t('admin.collectifs.deleteMessage')}
+        confirmText={t('common.delete')}
+        cancelText={t('common.cancel')}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => {
+          if (!isDeleting) setDeleteTarget(null);
+        }}
+        loading={isDeleting}
+      />
     </div>
   );
 }

@@ -35,6 +35,10 @@ class AdminService {
   async toggleCollectifActive(id: number, active: boolean): Promise<AdminCollectif> {
     return apiService.patch<AdminCollectif>(`/api/admin/collectifs/${id}/active`, { active });
   }
+
+  async deleteCollectif(id: number): Promise<AdminCollectif> {
+    return apiService.delete<AdminCollectif>(`/api/admin/collectifs/${id}`);
+  }
 }
 
 export const adminService = new AdminService();
