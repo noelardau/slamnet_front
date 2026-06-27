@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { adminService, AdminCollectif } from '../../services/adminService';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useToast } from '../../contexts/ToastContext';
-import { Loader2, Search, ShieldOff, ShieldCheck } from 'lucide-react';
+import { Loader2, Search, ShieldOff, ShieldCheck, Check } from 'lucide-react';
+
+type TabKey = 'all' | 'pending' | 'active';
 
 export default function AdminCollectifsPage() {
   const { t } = useLanguage();
@@ -11,6 +13,7 @@ export default function AdminCollectifsPage() {
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [pendingId, setPendingId] = useState<number | null>(null);
+  const [tab, setTab] = useState<TabKey>('pending');
   const { showSuccess, showError } = useToast();
 
   const load = async () => {
@@ -35,7 +38,11 @@ export default function AdminCollectifsPage() {
     try {
       const updated = await adminService.toggleCollectifActive(c.idCollectif, !c.active);
       setCollectifs((prev) => prev.map((x) => (x.idCollectif === updated.idCollectif ? updated : x)));
-      showSuccess(updated.active ? t('admin.collectifs.reactivated') : t('admin.collectifs.suspended'));
+      if (!c.active) {
+        showSuccess(t('admin.collectifs.approved'));
+      } else {
+        showSuccess(t('admin.collectifs.suspended'));
+      }
     } catch (e) {
       showError(e instanceof Error ? e.message : t('admin.collectifs.updateError'));
     } finally {
@@ -43,7 +50,15 @@ export default function AdminCollectifsPage() {
     }
   };
 
+  const counts = useMemo(() => {
+    const pending = collectifs.filter((c) => !c.active).length;
+    const active = collectifs.filter((c) => c.active).length;
+    return { all: collectifs.length, pending, active };
+  }, [collectifs]);
+
   const filtered = collectifs.filter((c) => {
+    if (tab === 'pending' && c.active) return false;
+    if (tab === 'active' && !c.active) return false;
     const q = query.trim().toLowerCase();
     if (!q) return true;
     return (
@@ -52,6 +67,12 @@ export default function AdminCollectifsPage() {
       c.ville.toLowerCase().includes(q)
     );
   });
+
+  const tabs: { key: TabKey; label: string; count: number; badge?: boolean }[] = [
+    { key: 'pending', label: t('admin.collectifs.tabPending'), count: counts.pending, badge: counts.pending > 0 },
+    { key: 'active', label: t('admin.collectifs.tabActive'), count: counts.active },
+    { key: 'all', label: t('admin.collectifs.tabAll'), count: counts.all },
+  ];
 
   if (loading) {
     return (
@@ -71,7 +92,7 @@ export default function AdminCollectifsPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
           <span
             className="text-primary"
@@ -98,6 +119,37 @@ export default function AdminCollectifsPage() {
         </div>
       </div>
 
+      <div className="mb-6 flex gap-1 border-b border-border">
+        {tabs.map((tb) => {
+          const isActive = tab === tb.key;
+          return (
+            <button
+              key={tb.key}
+              onClick={() => setTab(tb.key)}
+              className={`relative pb-3 px-4 text-sm transition-colors ${
+                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                {tb.label}
+                <span
+                  className={`inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full text-xs ${
+                    tb.badge
+                      ? 'bg-primary text-primary-foreground'
+                      : isActive
+                        ? 'bg-primary/15 text-primary'
+                        : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  {tb.count}
+                </span>
+              </span>
+              {isActive && <span className="absolute left-0 right-0 bottom-0 h-0.5 bg-primary" />}
+            </button>
+          );
+        })}
+      </div>
+
       <div className="border border-border bg-card overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -115,7 +167,11 @@ export default function AdminCollectifsPage() {
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
-                  {t('admin.collectifs.empty')}
+                  {tab === 'pending'
+                    ? t('admin.collectifs.emptyPending')
+                    : tab === 'active'
+                      ? t('admin.collectifs.emptyActive')
+                      : t('admin.collectifs.empty')}
                 </td>
               </tr>
             ) : (
@@ -132,8 +188,8 @@ export default function AdminCollectifsPage() {
                         {t('admin.collectifs.statusActive')}
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs border border-red-500/40 text-red-500 bg-red-500/10">
-                        {t('admin.collectifs.statusSuspended')}
+                      <span className="inline-flex items-center gap-1 px-2 py-1 text-xs border border-amber-500/40 text-amber-500 bg-amber-500/10">
+                        {t('admin.collectifs.statusPending')}
                       </span>
                     )}
                   </td>
@@ -152,9 +208,9 @@ export default function AdminCollectifsPage() {
                       ) : c.active ? (
                         <ShieldOff size={12} />
                       ) : (
-                        <ShieldCheck size={12} />
+                        <Check size={12} />
                       )}
-                      {c.active ? t('admin.collectifs.suspend') : t('admin.collectifs.reactivate')}
+                      {c.active ? t('admin.collectifs.suspend') : t('admin.collectifs.approve')}
                     </button>
                   </td>
                 </tr>

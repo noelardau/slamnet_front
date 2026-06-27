@@ -22,6 +22,10 @@ export interface AuthResponse {
   collectif: CollectifProfile;
 }
 
+export interface RegisterResponse {
+  collectif: CollectifProfile;
+}
+
 export interface CollectifProfile {
   id: number;
   nomCollectif: string;
@@ -55,11 +59,9 @@ export interface UpdatePasswordData {
 }
 
 class AuthService {
-  async register(data: RegisterData): Promise<AuthResponse> {
+  async register(data: RegisterData): Promise<RegisterResponse> {
     try {
-      const response = await apiService.post<AuthResponse>('/collectif/register', data);
-      apiService.setToken(response.token);
-      localStorage.setItem('user', JSON.stringify(response.collectif));
+      const response = await apiService.post<RegisterResponse>('/collectif/register', data);
       return response;
     } catch (error) {
       console.error('Erreur lors de l\'inscription:', error);
