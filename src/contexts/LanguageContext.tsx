@@ -39,6 +39,13 @@ const translations = {
     'hero.liveRanking': 'LIVE RANKING',
     'hero.tournamentInProgress': 'TOURNAMENT IN PROGRESS',
     'hero.explore': 'EXPLORE',
+    'hero.demoBadge': 'DEMO ACCOUNT',
+    'hero.demoTitle': 'Explore the platform instantly',
+    'hero.demoHint': 'No registration needed — use these credentials to log in.',
+    'hero.demoEmail': 'Email',
+    'hero.demoPassword': 'Password',
+    'hero.demoCta': 'LOGIN TO DEMO',
+    'hero.demoCopied': 'Copied to clipboard',
     
     // Features
     'features': 'FEATURES',
@@ -599,6 +606,13 @@ const translations = {
     'hero.liveRanking': 'CLASSEMENT LIVE',
     'hero.tournamentInProgress': 'TOURNOI EN COURS',
     'hero.explore': 'EXPLORER',
+    'hero.demoBadge': 'COMPTE DÉMO',
+    'hero.demoTitle': 'Explorez la plateforme instantanément',
+    'hero.demoHint': 'Aucune inscription nécessaire — utilisez ces identifiants pour vous connecter.',
+    'hero.demoEmail': 'Email',
+    'hero.demoPassword': 'Mot de passe',
+    'hero.demoCta': 'SE CONNECTER À LA DÉMO',
+    'hero.demoCopied': 'Copié dans le presse-papiers',
     
     // Features
     'features': 'FONCTIONNALITÉS',

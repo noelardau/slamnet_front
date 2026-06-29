@@ -1,18 +1,24 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Mic } from "lucide-react";
+import { ArrowRight, Mic, Sparkles, Copy, Check, Mail, KeyRound, LogIn } from "lucide-react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { useEffect, useState } from "react";
 import { useAuthModal } from "../../contexts/AuthModalContext";
 import { useLanguage } from "../../contexts/LanguageContext";
+import { useToast } from "../../contexts/ToastContext";
 import demoVideo from "../../assets/demo.mp4";
 import demoMobileVideo from "../../assets/demoMobile.mp4";
+
+const DEMO_EMAIL = "test@gmail.com";
+const DEMO_PASSWORD = "testtest";
 
 export function Hero() {
   const [isDemoOpen, setIsDemoOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const { openSignupModal } = useAuthModal();
+  const [copiedField, setCopiedField] = useState<"email" | "password" | null>(null);
+  const { openSignupModal, openLoginModal } = useAuthModal();
   const { t } = useLanguage();
+  const { showSuccess } = useToast();
 
   useEffect(() => {
     const checkDevice = () => {
@@ -31,6 +37,14 @@ export function Hero() {
       window.removeEventListener('resize', checkDevice);
     };
   }, []);
+
+  const copyToClipboard = (value: string, field: "email" | "password") => {
+    navigator.clipboard?.writeText(value).then(() => {
+      setCopiedField(field);
+      showSuccess(t('hero.demoCopied'));
+      setTimeout(() => setCopiedField(null), 1500);
+    });
+  };
 
   return (
     <section className="relative min-h-screen flex flex-col justify-center overflow-hidden pt-16">
@@ -152,6 +166,118 @@ export function Hero() {
                  </video>
                </DialogContent>
             </Dialog>
+          </motion.div>
+
+          {/* Demo account banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.55 }}
+            className="mt-8 max-w-lg"
+          >
+            <div className="relative group">
+              {/* Gradient border glow */}
+              <div
+                className="absolute -inset-px rounded-lg opacity-60 group-hover:opacity-100 blur-sm transition-opacity duration-300"
+                style={{ background: "linear-gradient(90deg, #ff4d00, #ffe033)" }}
+              />
+              <div className="relative border border-border/60 bg-card/90 backdrop-blur-sm rounded-lg overflow-hidden">
+                {/* Pulsing accent line */}
+                <motion.div
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
+                  className="h-[2px] w-full"
+                  style={{ background: "linear-gradient(90deg, transparent, #ff4d00, transparent)" }}
+                />
+                <div className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles size={14} className="text-primary" />
+                    <span
+                      className="text-primary uppercase tracking-[0.18em]"
+                      style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.65rem", fontWeight: 700 }}
+                    >
+                      {t('hero.demoBadge')}
+                    </span>
+                  </div>
+                  <p
+                    className="text-foreground mb-1"
+                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.95rem", fontWeight: 600 }}
+                  >
+                    {t('hero.demoTitle')}
+                  </p>
+                  <p
+                    className="text-muted-foreground mb-4"
+                    style={{ fontFamily: "DM Sans, sans-serif", fontSize: "0.8rem" }}
+                  >
+                    {t('hero.demoHint')}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                    {/* Email */}
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(DEMO_EMAIL, "email")}
+                      className="flex items-center gap-2 px-3 py-2 border border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 text-left group/cell"
+                    >
+                      <Mail size={14} className="text-muted-foreground shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <div
+                          className="text-muted-foreground"
+                          style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.12em" }}
+                        >
+                          {t('hero.demoEmail').toUpperCase()}
+                        </div>
+                        <div
+                          className="text-foreground truncate"
+                          style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.75rem" }}
+                        >
+                          {DEMO_EMAIL}
+                        </div>
+                      </div>
+                      {copiedField === "email"
+                        ? <Check size={14} className="text-primary shrink-0" />
+                        : <Copy size={14} className="text-muted-foreground group-hover/cell:text-foreground shrink-0 transition-colors" />
+                      }
+                    </button>
+                    {/* Password */}
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(DEMO_PASSWORD, "password")}
+                      className="flex items-center gap-2 px-3 py-2 border border-border/60 hover:border-primary/50 hover:bg-primary/5 transition-all duration-200 text-left group/cell"
+                    >
+                      <KeyRound size={14} className="text-muted-foreground shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <div
+                          className="text-muted-foreground"
+                          style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.55rem", letterSpacing: "0.12em" }}
+                        >
+                          {t('hero.demoPassword').toUpperCase()}
+                        </div>
+                        <div
+                          className="text-foreground truncate"
+                          style={{ fontFamily: "JetBrains Mono, monospace", fontSize: "0.75rem" }}
+                        >
+                          {DEMO_PASSWORD}
+                        </div>
+                      </div>
+                      {copiedField === "password"
+                        ? <Check size={14} className="text-primary shrink-0" />
+                        : <Copy size={14} className="text-muted-foreground group-hover/cell:text-foreground shrink-0 transition-colors" />
+                      }
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={openLoginModal}
+                    className="group/demo w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground px-4 py-2.5 hover:bg-primary/90 transition-all duration-200"
+                    style={{ fontFamily: "DM Sans, sans-serif", fontWeight: 700, letterSpacing: "0.06em", fontSize: "0.75rem" }}
+                  >
+                    {t('hero.demoCta')}
+                    <LogIn size={14} className="group-hover/demo:translate-x-0.5 transition-transform" />
+                  </button>
+                </div>
+              </div>
+            </div>
           </motion.div>
 
           <motion.div
