@@ -143,12 +143,11 @@ export function Navbar() {
              </>
            ) : (
                [
-                 { label: t('nav.features'), to: "features" },
-                 { label: t('nav.howItWorks'), to: "how-it-works" },
-                 { label: t('nav.plans'), to: "plans" },
-                 { label: t('nav.slamPoetry'), to: "/slam-poetry" },
-                
-               ].map((link) => {
+                  { label: t('nav.features'), to: "features" },
+                  { label: t('nav.howItWorks'), to: "how-it-works" },
+                  { label: t('nav.slamPoetry'), to: "/slam-poetry" },
+                 
+                ].map((link) => {
                 if (link.to.startsWith('/')) {
                   return (
                     <Link
@@ -365,11 +364,10 @@ export function Navbar() {
                  ) : (
                     <>
                         {[
-                           { label: t('nav.features'), to: "features" },
-                           { label: t('nav.howItWorks'), to: "how-it-works" },
-                           { label: t('nav.plans'), to: "plans" },
-                           { label: t('nav.slamPoetry'), to: "/slam-poetry" },
-                         ].map((link) => (
+                            { label: t('nav.features'), to: "features" },
+                            { label: t('nav.howItWorks'), to: "how-it-works" },
+                            { label: t('nav.slamPoetry'), to: "/slam-poetry" },
+                          ].map((link) => (
                         link.to.startsWith('/') ? (
                           <Link 
                             key={link.label} 

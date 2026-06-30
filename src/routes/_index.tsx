@@ -1,7 +1,6 @@
 import { Hero } from '../app/components/Hero';
 import { Features } from '../app/components/Features';
 import { HowItWorks } from '../app/components/HowItWorks';
-import { Plans } from '../app/components/Plans';
 import { Partners } from '../app/components/Partners';
 import { DemoAccount } from '../app/components/DemoAccount';
 import { Testimonials } from '../app/components/Testimonials';
@@ -13,7 +12,6 @@ export default function HomePage() {
       <Hero />
       <Features />
       <HowItWorks />
-      <Plans />
       <Partners />
       <DemoAccount />
       {/* <Testimonials /> */}
